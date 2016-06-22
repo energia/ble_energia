@@ -59,6 +59,7 @@ class BLE : public Stream
 
   public:
     BLE(void);
+    BLE(byte portType);
 
     int begin(void);
     int end(void);
@@ -88,18 +89,15 @@ class BLE : public Stream
     void terminateConn(void);
     void terminateConn(byte abruptly);
 
-    int writeValue(int handle, boolean value);
     int writeValue(int handle, char value);
     int writeValue(int handle, unsigned char value);
-    int writeValue(int handle, byte value);
     int writeValue(int handle, int value);
     int writeValue(int handle, unsigned int value);
-    int writeValue(int handle, word value);
     int writeValue(int handle, long value);
     int writeValue(int handle, unsigned long value);
     int writeValue(int handle, float value);
     int writeValue(int handle, double value);
-    int writeValue(int handle, string str); // Char array
+    int writeValue(int handle, char *str); // Char array
     int writeValue(int handle, String str); // Object, calls fxn for char array
     boolean readValue_boolean(int handle);
     char readValue_char(int handle);
@@ -112,7 +110,7 @@ class BLE : public Stream
     unsigned long readValue_ulong(int handle);
     float readValue_float(int handle);
     double readValue_double(int handle);
-    string readValue_string(int handle);
+    char* readValue_string(int handle);
     String readValue_String(int handle);
 
     int serial(void);
