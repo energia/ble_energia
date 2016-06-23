@@ -31,7 +31,7 @@ int BLE::addService(BLE_Service *service)
 
 }
 
-int BLE::addCharacteristic(BLE_Char *characteristic, int serviceHandle)
+int BLE::addCharacteristic(BLE_Char *characteristic, BLE_Service *service)
 {
 
 }
@@ -42,11 +42,6 @@ int BLE::addCharacteristic(BLE_Char *characteristic)
 }
 
 int BLE::registerService(BLE_Service *service)
-{
-
-}
-
-int BLE::registerService(int handle)
 {
 
 }

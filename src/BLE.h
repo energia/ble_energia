@@ -66,10 +66,9 @@ class BLE : public Stream
 
     int useProfile(BLE_Profile *profile); // For predefined profiles
     int addService(BLE_Service *service);
-    int addCharacteristic(BLE_Char *characteristic, int serviceHandle);
+    int addCharacteristic(BLE_Char *characteristic, BLE_Service *service);
     int addCharacteristic(BLE_Char *characteristic); // Adds to last service
     int registerService(BLE_Service *service);
-    int registerService(int handle);
     int registerService(void); // Registers last service
 
     int startAdvert(void); // Default settings
