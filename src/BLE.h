@@ -3,6 +3,7 @@
 #define BLE_h
 
 #include <sap/source/ti/sap/sap.h>
+#include <sap/source/ti/npi/npi_task.h>
 #include <Energia.h>
 #include "Stream.h"
 #include "BLETypes.h"

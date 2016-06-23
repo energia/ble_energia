@@ -158,7 +158,8 @@ endif
 $(eval $(call compute_dependencies, $(MAINSKETCH) $(EXTRA_SOURCES)))
 $(eval $(call compute_srcs))
 
-LD_FLAGS += -L$(COMMON_CORE_DIR)/ti/runtime/wiring/$(PLAT) -L$(COMMON_CORE_DIR)/ti/runtime/wiring/$(PLAT)/variants/$(BOARD) -L$(COMMON_CORE_DIR) $(MCU_FLAG) -L$(APPLICATION_PATH)/hardware/$(PLATFORM)/variants/$(BOARD) -L$(APPLICATION_PATH)/hardware/common/libs 
+LD_FLAGS += -L$(COMMON_CORE_DIR)/ti/runtime/wiring/$(PLAT) -L$(COMMON_CORE_DIR)/ti/runtime/wiring/$(PLAT)/variants/$(BOARD) -L$(COMMON_CORE_DIR) $(MCU_FLAG) -L$(APPLICATION_PATH)/hardware/$(PLATFORM)/variants/$(BOARD) -L$(APPLICATION_PATH)/hardware/common/libs
+
 # build rules
 all: $(MAINSKETCH).bin
 
@@ -169,7 +170,7 @@ else
 	$(OBJCOPY) $(OBJCOPY_FLAGS) $< $@
 endif
 ifeq ($(OS),Windows_NT)
-	xcopy $(ARCH_EMT_DIR)\configPkg\package\cfg\energia_*.rov.xs . /Y 
+	xcopy $(ARCH_EMT_DIR)\configPkg\package\cfg\energia_*.rov.xs . /Y
 else
 	cp $(ARCH_EMT_DIR)/configPkg/package/cfg/energia_*.rov.xs .
 endif
@@ -183,11 +184,11 @@ ifeq ($(BUILD_DRVLIB),true)
 endif
 
 $(MAINSKETCH).elf: driverlib $(OBJ)
-	@echo armlinkHERE $(OBJ)
-	$(LINK) $(OBJ) -Lsap_uart.aem3 -Wl,-T"$(COMMON_CORE_DIR)/ti/runtime/wiring/$(PLAT)/linker.cmd" $(LD_FLAGS) $(DRV_LIB) $(SDK_LIBS) -lstdc++ -lgcc -lc -lm -lnosys -Wl,-Map=$(MAINSKETCH).map -o $@
+	@echo armlink $(OBJ)
+	$(LINK) $(OBJ) -Wl,-T"$(COMMON_CORE_DIR)/ti/runtime/wiring/$(PLAT)/linker.cmd" $(LD_FLAGS) $(DRV_LIB) $(SDK_LIBS) -lstdc++ -lgcc -lc -lm -lnosys -Wl,-Map=$(MAINSKETCH).map -o $@
 
 %.obj: %.cpp
-	@echo armclTHISONE $*.cpp
+	@echo armcl $*.cpp
 	$(CC) $(CCOPTS) $(CFLAGS) $(CPPFLAGS) -I $(ARCH_LIB_PATH)/BLE/sap/source -I "$(CCROOT)/include" $(CFG_INCS) $(SDK_INCS) $< -o $@
 
 #Core libraries and core sources
@@ -197,7 +198,7 @@ ifeq ($(OS),Windows_NT)
 else
 	@mkdir -p $(dir $@)
 endif
-	$(info Compiling1 $@)
+	$(info Compiling $@)
 	$(CC) $(CCOPTS) $(CFLAGS) -D NPI_USE_UART -D NPI_MASTER -I C:\ti\energia-0101E0017\hardware\msp432\cores\msp432\driverlib -I $(ARCH_LIB_PATH)/BLE/sap/source -I "$(CCROOT)/include" $(CFG_INCS) $(SDK_INCS) $< -o $@
 
 build/%.o: $(APPLICATION_PATH)/%.S
@@ -206,7 +207,7 @@ ifeq ($(OS),Windows_NT)
 else
 	@mkdir -p $(dir $@)
 endif
-	$(info Compiling2 $@)
+	$(info Compiling $@)
 	$(CC) $(CCOPTS) $(CFLAGS) -I "$(CCROOT)/include" $(CFG_INCS) $(SDK_INCS) $< -o $@
 
 build/%.o: $(APPLICATION_PATH)/%.cpp
@@ -215,8 +216,8 @@ ifeq ($(OS),Windows_NT)
 else
 	@mkdir -p $(dir $@)
 endif
-	$(info Compiling3 $@)
-	$(CC) $(CCOPTS) $(CFLAGS) $(CPPFLAGS) -I "$(CCROOT)/include" $(CFG_INCS) $(SDK_INCS) $< -o $@
+	$(info Compiling $@)
+	$(CC) $(CCOPTS) $(CFLAGS) $(CPPFLAGS) -D NPI_USE_UART -D NPI_MASTER -I C:\ti\energia-0101E0017\hardware\msp432\cores\msp432\driverlib -I $(ARCH_LIB_PATH)/BLE/sap/source/ -I "$(CCROOT)/include" $(CFG_INCS) $(SDK_INCS) $< -o $@
 
 # User libraries
 build/user_libs/%.o: $(USER_LIB_PATH)/%.c
@@ -225,7 +226,7 @@ ifeq ($(OS),Windows_NT)
 else
 	@mkdir -p $(dir $@)
 endif
-	$(info Compiling4 $@)
+	$(info Compiling $@)
 	$(CC) $(CCOPTS) $(CFLAGS) -I "$(CCROOT)/include" $(CFG_INCS) $(SDK_INCS) $< -o $@
 
 build/user_libs/%.o: $(USER_LIB_PATH)/%.S
@@ -234,7 +235,7 @@ ifeq ($(OS),Windows_NT)
 else
 	@mkdir -p $(dir $@)
 endif
-	$(info Compiling5 $@)
+	$(info Compiling $@)
 	$(CC) $(CCOPTS) $(ASFLAGS) -I "$(CCROOT)/include" $(CFG_INCS) $(SDK_INCS) $< -o $@
 
 build/user_libs/%.o: $(USER_LIB_PATH)/%.cpp
@@ -243,7 +244,7 @@ ifeq ($(OS),Windows_NT)
 else
 	@mkdir -p $(dir $@)
 endif
-	$(info Compiling6 $@)
+	$(info Compiling $@)
 	$(CC) $(CCOPTS) $(CFLAGS) $(CPPFLAGS) -I "$(CCROOT)/include" $(CFG_INCS) $(SDK_INCS) $< -o $@
 
 clean:
