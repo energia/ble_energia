@@ -1,14 +1,11 @@
 
 #include <BLE.h>
 
-BLE::BLE(void)
-{
 
-}
 
 BLE::BLE(byte portType)
 {
-
+  _portType = portType;
 }
 
 int BLE::begin(void)

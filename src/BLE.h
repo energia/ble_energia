@@ -10,10 +10,10 @@
 class BLE : public Stream
 {
   private:
+    uint8_t _portType; // UART or SPI connection with network processor
 
   public:
-    BLE(void);
-    BLE(byte portType);
+    BLE(byte portType=BLE_PORT_UART);
 
     int begin(void);
     int end(void);
