@@ -1,7 +1,13 @@
 
 #include <BLE.h>
+#include <ti/sysbios/BIOS.h>
+#include <ti/sysbios/knl/Event.h>
 
+// Application Events
+#define AP_NONE                              Event_Id_NONE   // No Event
+#define AP_EVT_PUI                           Event_Id_00     // Power-Up Indication
 
+Event_Handle apEvent;
 
 BLE::BLE(byte portType)
 {
@@ -10,7 +16,44 @@ BLE::BLE(byte portType)
 
 int BLE::begin(void)
 {
+  /* AP_init() in simple_ap.c */
+  apEvent = Event_create(NULL, NULL);
+  /*
+   * Use this to do something at the applicaiton level on a write or
+   * config change. In each SAP service struct, we set read, write, and
+   * config change callbacks. In simple_ap, the function below
+   * registers its parameters as functions called by the callbacks.
+   * In other words, this isn't actually necessary for SAPlib or BLE.
+   * It's just included for now for completeless with simple_ap.
+   */
+  // SimpleProfile_RegisterAppCB(AP_SPWriteCB, AP_SPcccdCB);
+  /* End AP_init() */
 
+  SAP_Params sapParams;
+  SAP_initParams(_portType, &sapParams);
+  SAP_open(&sapParams);
+
+  /*
+   * Register callback to receive asynchronous requests from the NP.
+   * This must be called before using any other calls to SAP, except
+   * those above. This function may be called multiple times to
+   * register multiple callbacks. Runs in NPI task.
+   */
+  // SAP_setAsyncCB(AP_asyncCB); // TODO
+
+  //Give the NP time to send a PUIND, if we receive one then
+  //we can assume the NP has just started and we don't need to send a reset
+  //otherwise, we can assume the NP was running previously and needs to be
+  //reset to a known state
+  if (0 == Event_pend(apEvent, AP_NONE, AP_EVT_PUI, 100000)) {
+    // Assuming that at SAP start up that SNP is already running
+    SAP_reset();
+    Event_pend(apEvent, AP_NONE, AP_EVT_PUI, BIOS_WAIT_FOREVER);
+  }
+
+  /* Requires async event handling callback to actually read response. */
+  // Gets device MAC address from network processor
+  // SAP_setParam(SAP_PARAM_HCI, SNP_HCI_OPCODE_READ_BDADDR, 0, NULL);
 }
 
 int BLE::end(void)
