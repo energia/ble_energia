@@ -159,7 +159,6 @@ $(eval $(call compute_dependencies, $(MAINSKETCH) $(EXTRA_SOURCES)))
 $(eval $(call compute_srcs))
 
 LD_FLAGS += -L$(COMMON_CORE_DIR)/ti/runtime/wiring/$(PLAT) -L$(COMMON_CORE_DIR)/ti/runtime/wiring/$(PLAT)/variants/$(BOARD) -L$(COMMON_CORE_DIR) $(MCU_FLAG) -L$(APPLICATION_PATH)/hardware/$(PLATFORM)/variants/$(BOARD) -L$(APPLICATION_PATH)/hardware/common/libs
-
 # build rules
 all: $(MAINSKETCH).bin
 

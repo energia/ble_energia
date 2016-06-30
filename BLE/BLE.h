@@ -1,9 +1,7 @@
 
-#ifndef BLE_h
-#define BLE_h
+#ifndef BLE_H
+#define BLE_H
 
-#include <sap/source/ti/sap/sap.h>
-#include <sap/source/ti/npi/npi_task.h>
 #include <Energia.h>
 #include "Stream.h"
 #include "BLETypes.h"
@@ -20,11 +18,7 @@ class BLE : public Stream
     int end(void);
 
     int useProfile(BLE_Profile *profile); // For predefined profiles
-    int addService(BLE_Service *service);
-    int addCharacteristic(BLE_Char *characteristic, BLE_Service *service);
-    int addCharacteristic(BLE_Char *characteristic); // Adds to last service
-    int registerService(BLE_Service *service);
-    int registerService(void); // Registers last service
+    int addService(BLE_Service *bleService);
 
     int startAdvert(void); // Default settings
     int startAdvert(BLE_Advert_Settings advertSettings);
