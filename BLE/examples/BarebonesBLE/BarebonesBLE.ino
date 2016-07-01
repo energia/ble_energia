@@ -2,14 +2,16 @@
 #include <BLE.h>
 #define LED RED_LED
 
+int heartRateMeasurement = 0;
+
 BLE_Char heartRateChar =
 {
   2, {0x37, 0x2A}, // UUID for heart rate measurement, 16 bits
   BLE_READABLE,
-  "Heart rate measurement",
+  "Heart rate measurement"
 };
 
-BLE_Char allChars[] = {heartRateChar}; // Alternative to this would be to fix the nu
+BLE_Char allChars[] = {heartRateChar};
 
 BLE_Service heartRateService =
 {
@@ -38,25 +40,6 @@ static uint8_t scanRspData[] = {
   0       // 0dBm
 };
 
-static uint8_t advertData[] =
-{
-  // Flags; this sets the device to use limited discoverable
-  // mode (advertises for 30 seconds at a time) instead of general
-  // discoverable mode (advertises indefinitely)
-  0x02,   // length of this data
-  SAP_GAP_ADTYPE_FLAGS,
-  SAP_GAP_ADTYPE_FLAGS_GENERAL | SAP_GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED,
-
-  // Manufacturer specific advertising data
-  0x06,
-  0xFF, //GAP_ADTYPE_MANUFACTURER_SPECIFIC,
-  LO_UINT16(TI_COMPANY_ID),
-  HI_UINT16(TI_COMPANY_ID),
-  TI_ST_DEVICE_ID,
-  TI_ST_KEY_DATA_ID,
-  0x00                                    // Key state
-};
-
 BLE ble;
 int numBlinks;
 int cnt = 0;
@@ -64,19 +47,14 @@ int cnt = 0;
 void setup() {
   Serial.begin(115200);
   ble = BLE();
-  Serial.println("begin");
+  Serial.print("begin ");
   Serial.println(ble.begin());
-  Serial.println("done");
-  Serial.println("add service");
+  Serial.print("add service ");
   Serial.println(ble.addService(&heartRateService));
-  Serial.println("done");
-  Serial.println("set adv data");
+  Serial.print("set adv data ");
   Serial.println(ble.setAdvertData(BLE_ADV_DATA_SCANRSP, sizeof(scanRspData), scanRspData));
-  Serial.println(ble.setAdvertData(BLE_ADV_DATA_NOTCONN, sizeof(advertData), advertData));
-  Serial.println("done");
-  Serial.println("start adv");
+  Serial.print("start adv ");
   Serial.println(ble.startAdvert());
-  Serial.println("done");
   pinMode(LED, OUTPUT);
 }
 
@@ -86,4 +64,14 @@ void loop() {
   delay(1000);               // wait for 100 ms
   digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
   delay(1000);               // wait for 100 ms
+  heartRateMeasurement += 1;
+  Serial.print("Writing new val. Local: ");
+  Serial.print(heartRateMeasurement);
+  Serial.print(" BLE: ");
+  *(int *)heartRateChar._value = -1;
+  Serial.print(*(int *)heartRateChar._value);
+  Serial.print(" BLE: ");
+  Serial.print(*(int *)heartRateChar._value);
+  Serial.print(". Status=");
+  Serial.println(ble.writeValue(heartRateChar.handle, heartRateMeasurement));
 }

@@ -67,6 +67,9 @@ typedef struct
   char              *charDesc;
   byte              valueFormat;
   byte              valueExponent; // only used with integer formats, e.g. value = storedValue*10^valueExponent
+  int               handle;
+  void              *_value;
+  int               _valueLen;
 } BLE_Char;
 
 typedef struct
@@ -75,6 +78,7 @@ typedef struct
   byte              UUID[16]; // array of UUID bytes
   int               numChars;
   BLE_Char          *chars;
+  int               handle;
 } BLE_Service;
 
 typedef struct

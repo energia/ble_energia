@@ -1,8 +1,6 @@
 
 #include <string.h>
 
-#include <BLE.h>
-
 #include <ti/drivers/gpio.h>
 #include <ti/drivers/gpio/GPIOMSP432.h>
 #include <ti/sysbios/BIOS.h>
@@ -10,28 +8,41 @@
 #include <ti/sysbios/knl/Event.h>
 
 #include <sap.h>
+#include <snp.h>
 /*
  * This is strictly to force the build system to compile npi into
  * its own object files for the linker to link. It isn't used here.
  */
 #include <npi_task.h>
 
+#include <BLE.h>
+#include "BLEServiceList.h"
+
 #define AP_NONE                              Event_Id_NONE   // No Event
 #define AP_EVT_PUI                           Event_Id_00     // Power-Up Indication
+#define AP_EVT_ADV_ENB                       Event_Id_01     // Advertisement Enable
 
 #define PIN6_7 35
 
-Event_Handle apEvent;
+// From bcomdef.h in the BLE SDK
+#define B_ADDR_LEN 6
 
-void AP_asyncCB(uint8_t cmd1, void *pParams);
+Event_Handle apEvent = NULL;
+char ownAddressString[16] = { 0 };
+
+static void AP_asyncCB(uint8_t cmd1, void *pParams);
+static void AP_convertBdAddr2Str(char *str, uint8_t *pAddr);
 static void constructService(SAP_Service_t *service, BLE_Service *bleService);
 static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar);
+static uint8_t serviceReadAttrCB(void *context,
+                                 uint16_t connectionHandle,
+                                 uint16_t charHdl, uint16_t offset,
+                                 uint16_t size, uint16_t * len,
+                                 uint8_t *pData);
 
 BLE::BLE(byte portType)
 {
   _portType = portType;
-  nonConnAdvertData = NULL;
-  scanRspData = NULL;
 }
 
 int BLE::begin(void)
@@ -81,9 +92,8 @@ int BLE::begin(void)
     Event_pend(apEvent, AP_NONE, AP_EVT_PUI, BIOS_WAIT_FOREVER);
   }
 
-  /* Requires async event handling callback to actually read response. */
   // Gets device MAC address from network processor
-  // SAP_setParam(SAP_PARAM_HCI, SNP_HCI_OPCODE_READ_BDADDR, 0, NULL);
+  SAP_setParam(SAP_PARAM_HCI, SNP_HCI_OPCODE_READ_BDADDR, 0, NULL);
   return 0;
 }
 
@@ -102,14 +112,21 @@ int BLE::addService(BLE_Service *bleService)
   SAP_Service_t *service = (SAP_Service_t *) malloc(sizeof(SAP_Service_t));
   constructService(service, bleService);
   int status = SAP_registerService(service);
-  if (status == SNP_FAILURE || service->serviceHandle == NULL) {
-    return status;
+  if (status != SNP_FAILURE && service->serviceHandle != NULL) {
+    bleService->handle = service->serviceHandle;
+    uint8_t i;
+    for (i = 0; i < bleService->numChars; i++)
+    {
+      bleService->chars[i].handle = service->charAttrHandles[i].valueHandle;
+    }
+    addServiceNode(bleService);
   }
-  return service->serviceHandle;
+  return status;
 }
 
 static void constructService(SAP_Service_t *service, BLE_Service *bleService)
 {
+  bleService->handle = NULL;
   service->serviceUUID.len    = bleService->UUIDlen;
   service->serviceUUID.pUUID  = bleService->UUID;
   service->serviceType        = SNP_PRIMARY_SERVICE;
@@ -117,7 +134,7 @@ static void constructService(SAP_Service_t *service, BLE_Service *bleService)
   service->charTable          = (SAP_Char_t *) malloc(service->charTableLen *
                                                     sizeof(SAP_Char_t));
   service->context            = NULL;
-  service->charReadCallback   = NULL; // TO DO
+  service->charReadCallback   = serviceReadAttrCB;
   service->charWriteCallback  = NULL; // TO DO
   service->cccdIndCallback    = NULL; // TO DO
   service->charAttrHandles    = (SAP_CharHandle_t *) malloc(service->charTableLen *
@@ -131,6 +148,9 @@ static void constructService(SAP_Service_t *service, BLE_Service *bleService)
 
 static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
 {
+  bleChar->valueFormat = 0; // TO DO REMOVE THIS
+  bleChar->_value = NULL;
+  bleChar->_valueLen = 0;
   sapChar->UUID.len    = bleChar->UUIDlen;
   sapChar->UUID.pUUID  = bleChar->UUID;
   sapChar->properties  = bleChar->properties;
@@ -150,11 +170,11 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
   {
     sapChar->pUserDesc = NULL;
   }
-  sapChar->pCccd       = (SAP_UserCCCDAttr_t *) malloc(sizeof(SAP_UserCCCDAttr_t));
+  sapChar->pCccd = (SAP_UserCCCDAttr_t *) malloc(sizeof(SAP_UserCCCDAttr_t));
   sapChar->pCccd->perms          = SNP_GATT_PERMIT_READ | SNP_GATT_PERMIT_WRITE;
   if (bleChar->valueFormat)
   {
-    sapChar->pFormat   = (SAP_FormatAttr_t *) malloc(sizeof(SAP_FormatAttr_t));
+    sapChar->pFormat = (SAP_FormatAttr_t *) malloc(sizeof(SAP_FormatAttr_t));
     sapChar->pFormat->format     = bleChar->valueFormat;
     sapChar->pFormat->exponent   = bleChar->valueExponent;
     sapChar->pFormat->unit       = NULL;
@@ -183,6 +203,7 @@ int BLE::startAdvert(void)
   }
   uint8_t enableAdv = SAP_ADV_STATE_ENABLE;
   uint8_t status = SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE, 1, &enableAdv);
+  Event_pend(apEvent, AP_NONE, AP_EVT_ADV_ENB, BIOS_WAIT_FOREVER);
   return status;
 }
 
@@ -283,6 +304,7 @@ void BLE::terminateConn(byte abruptly)
 
 int BLE::writeValue(int handle, char value)
 {
+
   return 0;
 }
 
@@ -293,6 +315,13 @@ int BLE::writeValue(int handle, unsigned char)
 
 int BLE::writeValue(int handle, int value)
 {
+  BLE_Char *bleChar = getChar(handle);
+  if (bleChar->_value == NULL)
+  {
+    bleChar->_value = (void *) malloc(sizeof(int));
+  }
+  *(int *) bleChar->_value = value;
+  bleChar->_valueLen = sizeof(int);
   return 0;
 }
 
@@ -448,7 +477,7 @@ size_t BLE::write(uint8_t c)
   return 0;
 }
 
-void AP_asyncCB(uint8_t cmd1, void *pParams) {
+static void AP_asyncCB(uint8_t cmd1, void *pParams) {
   switch (SNP_GET_OPCODE_HDR_CMD1(cmd1)) {
     case SNP_DEVICE_GRP: {
       switch (cmd1) {
@@ -457,24 +486,24 @@ void AP_asyncCB(uint8_t cmd1, void *pParams) {
           // Log_info0("Got PowerUp indication from NP");
           Event_post(apEvent, AP_EVT_PUI);
           break;
-        // case SNP_HCI_CMD_RSP: {
-        //   snpHciCmdRsp_t *hciRsp = (snpHciCmdRsp_t *) pParams;
-        //   switch (hciRsp->opcode) {
-        //     case SNP_HCI_OPCODE_READ_BDADDR:
-        //       // Update NWP Addr String
-        //       AP_convertBdAddr2Str(ownAddressString, hciRsp->pData);
-        //       // Log_info1("Got own address: 0x%s", (uintptr_t)ownAddressString);
-        //       break;
-        //     default:
-        //       break;
-        //   }
-        // }
+        case SNP_HCI_CMD_RSP: {
+          snpHciCmdRsp_t *hciRsp = (snpHciCmdRsp_t *) pParams;
+          switch (hciRsp->opcode) {
+            case SNP_HCI_OPCODE_READ_BDADDR:
+              // Update NWP Addr String
+              AP_convertBdAddr2Str(ownAddressString, hciRsp->pData);
+              // Log_info1("Got own address: 0x%s", (uintptr_t)ownAddressString);
+              break;
+            default:
+              break;
+          }
+        }
         //   break;
-        // case SNP_EVENT_IND:
+        case SNP_EVENT_IND:
           // Log_info0("Got Event indication from NP");
           // Notify state machine of Advertisement Enabled
-          // Event_post(apEvent, AP_EVT_ADV_ENB);
-          // break;
+          Event_post(apEvent, AP_EVT_ADV_ENB);
+          break;
         default:
           break;
       }
@@ -483,4 +512,35 @@ void AP_asyncCB(uint8_t cmd1, void *pParams) {
     default:
       break;
   }
+}
+
+static void AP_convertBdAddr2Str(char *str, uint8_t *pAddr) {
+  uint8_t charCnt;
+  char hex[] = "0123456789ABCDEF";
+
+  // Start from end of addr
+  pAddr += B_ADDR_LEN;
+
+  for (charCnt = B_ADDR_LEN; charCnt > 0; charCnt--) {
+    *str++ = hex[*--pAddr >> 4];
+    *str++ = hex[*pAddr & 0x0F];
+  }
+  return;
+}
+
+static uint8_t serviceReadAttrCB(void *context,
+                                 uint16_t connectionHandle,
+                                 uint16_t charHdl, uint16_t offset,
+                                 uint16_t size, uint16_t * len,
+                                 uint8_t *pData)
+{
+  BLE_Char *bleChar = getChar(charHdl);
+  if (bleChar == NULL)
+  {
+    *len = 0;
+    return SNP_UNKNOWN_ATTRIBUTE;
+  }
+  *len = bleChar->_valueLen;
+  memcpy(pData, (uint8_t *) bleChar->_value, *len);
+  return SNP_SUCCESS;
 }

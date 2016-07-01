@@ -9,9 +9,9 @@
 class BLE : public Stream
 {
   private:
-    uint8_t _portType; // UART or SPI connection with network processor
-    uint8_t *nonConnAdvertData;
-    uint8_t *scanRspData;
+    uint8_t _portType = NULL; // UART or SPI connection with network processor
+    uint8_t *nonConnAdvertData = NULL;
+    uint8_t *scanRspData = NULL;
 
   public:
     BLE(byte portType=BLE_PORT_UART);
