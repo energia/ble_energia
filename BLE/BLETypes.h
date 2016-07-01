@@ -3,6 +3,7 @@
 #define BLE_TYPES_H
 
 #include <sap.h>
+#include <hal_defs.h>
 
 #include <Energia.h>
 
@@ -12,10 +13,25 @@
 #define BLE_PORT_UART           SAP_PORT_REMOTE_UART
 #define BLE_PORT_SPI            SAP_PORT_REMOTE_SPI // unsupported
 
-/* Advertising types */
+/*
+ * For setAdvertData.
+ * Data to advertise when not connected, connected, and when scanned.
+ * The first two are passively seen by a client, while scanning is an
+ * active action to request more data.
+ */
 #define BLE_ADV_DATA_NOTCONN    SAP_ADV_DATA_NOTCONN
 #define BLE_ADV_DATA_CONN       SAP_ADV_DATA_CONN
 #define BLE_ADV_DATA_SCANRSP    SAP_ADV_DATA_SCANRSP
+
+/*
+ * For startAdvert.
+ * Connectable undirected adverisement.
+ * Scannable undirected advertisement.
+ * Non-connectable undirected advertisement.
+ */
+#define BLE_ADV_MODE_CONN       SNP_ADV_TYPE_CONN
+#define BLE_ADV_MODE_SCANABLE   SNP_ADV_TYPE_SCANABLE
+#define BLE_ADV_MODE_NONCONN    SNP_ADV_TYPE_NONCONN
 
 /* Characteristic value properties */
 #define BLE_READABLE            SNP_GATT_PROP_READ
@@ -23,6 +39,19 @@
 #define BLE_WRITABLE            SNP_GATT_PROP_WRITE
 #define BLE_NOTIFIABLE          SNP_GATT_PROP_NOTIFICATION
 #define BLE_INDICATABLE         SNP_GATT_PROP_INDICATION
+
+// Minimum connection interval (units of 1.25ms, 6=7.5ms) if automatic
+// parameter update request is enabled
+#define BLE_DEF_DESIRED_MIN_CONN_INT     6
+
+// Maximum connection interval (units of 1.25ms, 80=100ms) if automatic
+// parameter update request is enabled
+#define BLE_DEF_DESIRED_MAX_CONN_INT     80
+
+ // Company Identifier: Texas Instruments Inc. (13)
+#define TI_COMPANY_ID                         0x000D
+#define TI_ST_DEVICE_ID                       0x03
+#define TI_ST_KEY_DATA_ID                     0x00
 
 /*
  * Characteristic value formatting, Bluetooth spec Vol 3: Part G: 3.3.3.5.2
@@ -56,7 +85,7 @@ typedef struct
 
 typedef struct
 {
-  byte advertType;
+  byte advertMode;
   int timeout; // How long to advertise for (in ms), 0 for indefinitely
   int interval; // Advertising Interval (n * 0.625 ms), 0 for 100ms default
   /* 0x00   Advertising is disabled during connection and will not start after.
@@ -74,5 +103,47 @@ typedef struct
   int respLatency;
   int bleTimeout;
 } BLE_Conn_Params;
+
+static uint8_t defScanRspData[] = {
+  // complete name
+  0xc,// length of this data
+  SAP_GAP_ADTYPE_LOCAL_NAME_COMPLETE,
+  'E', 'n', 'e', 'r', 'g', 'i', 'a', ' ',
+  'B', 'L', 'E',
+
+  // connection interval range
+  0x05,   // length of this data
+  0x12, //GAP_ADTYPE_SLAVE_CONN_INTERVAL_RANGE,
+  LO_UINT16( BLE_DEF_DESIRED_MIN_CONN_INT ),
+  HI_UINT16( BLE_DEF_DESIRED_MIN_CONN_INT ),
+  LO_UINT16( BLE_DEF_DESIRED_MAX_CONN_INT ),
+  HI_UINT16( BLE_DEF_DESIRED_MAX_CONN_INT ),
+
+  // Tx power level
+  0x02,   // length of this data
+  0x0A, //GAP_ADTYPE_POWER_LEVEL,
+  0       // 0dBm
+};
+
+// GAP - Advertisement data (max size = 31 bytes, though this is
+// best kept short to conserve power while advertisting)
+static uint8_t defAdvertData[] =
+{
+  // Flags; this sets the device to use limited discoverable
+  // mode (advertises for 30 seconds at a time) instead of general
+  // discoverable mode (advertises indefinitely)
+  0x02,   // length of this data
+  SAP_GAP_ADTYPE_FLAGS,
+  SAP_GAP_ADTYPE_FLAGS_GENERAL | SAP_GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED,
+
+  // Manufacturer specific advertising data
+  0x06,
+  0xFF, //GAP_ADTYPE_MANUFACTURER_SPECIFIC,
+  LO_UINT16(TI_COMPANY_ID),
+  HI_UINT16(TI_COMPANY_ID),
+  TI_ST_DEVICE_ID,
+  TI_ST_KEY_DATA_ID,
+  0x00                                    // Key state
+};
 
 #endif

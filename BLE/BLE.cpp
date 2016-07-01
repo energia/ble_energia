@@ -10,7 +10,6 @@
 #include <ti/sysbios/knl/Event.h>
 
 #include <sap.h>
-#include <snp.h>
 /*
  * This is strictly to force the build system to compile npi into
  * its own object files for the linker to link. It isn't used here.
@@ -31,6 +30,8 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar);
 BLE::BLE(byte portType)
 {
   _portType = portType;
+  nonConnAdvertData = NULL;
+  scanRspData = NULL;
 }
 
 int BLE::begin(void)
@@ -170,7 +171,19 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
 
 int BLE::startAdvert(void)
 {
-  return 0;
+  if (nonConnAdvertData == NULL)
+  {
+    nonConnAdvertData = defAdvertData;
+    setAdvertData(BLE_ADV_DATA_NOTCONN, sizeof(defAdvertData), defAdvertData);
+  }
+  if (scanRspData == NULL)
+  {
+    scanRspData = defScanRspData;
+    setAdvertData(BLE_ADV_DATA_SCANRSP, sizeof(defScanRspData), defScanRspData);
+  }
+  uint8_t enableAdv = SAP_ADV_STATE_ENABLE;
+  uint8_t status = SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE, 1, &enableAdv);
+  return status;
 }
 
 int BLE::startAdvert(BLE_Advert_Settings advertSettings)
@@ -183,19 +196,49 @@ int BLE::stopAdvert(void)
   return 0;
 }
 
-int BLE::setAdvertData(byte advertType, uint8_t *advertData)
+int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
 {
+  uint8_t status = SAP_setParam(SAP_PARAM_ADV, advertType, len, advertData);
+  if (status == SNP_SUCCESS)
+  {
+    if (advertType == BLE_ADV_DATA_NOTCONN)
+    {
+      nonConnAdvertData = advertData;
+    }
+    else if (advertType == BLE_ADV_DATA_SCANRSP)
+    {
+      scanRspData = advertData;
+    }
+  }
+  return status;
+}
+
+int BLE::setAdvertName(int advertStringLen, char *advertString)
+{
+  // if (scanRspData == NULL)
+  // {
+  //   scanRspData = &defScanRspData;
+  // }
+
+
+  // // length + data  +  length + data
+  // uint8_t totalSize = (1 + 2) + (1 + advertStringLen);
+  // memcpy((void *) &advertData[4], (void *) advertString, advertStringLen);
+  // return setAdvertData(BLE_ADV_DATA_SCANRSP, totalSize, scanRspData);
   return 0;
 }
 
-int BLE::setAdvertData(byte advertType, char *advertData)
+int BLE::setAdvertName(char *advertString)
 {
-  return 0;
+  return setAdvertName(strlen(advertString), advertString);
 }
 
-int BLE::setAdvertData(byte advertType, String *advertData)
+int BLE::setAdvertName(String *advertString)
 {
-  return 0;
+  int len = (*advertString).length();
+  char *buf = (char *) malloc(len);
+  (*advertString).toCharArray(buf, len);
+  return setAdvertName(len, buf);
 }
 
 int BLE::setConnParams(BLE_Conn_Params *connParams)

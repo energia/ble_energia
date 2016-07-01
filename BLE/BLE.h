@@ -10,6 +10,8 @@ class BLE : public Stream
 {
   private:
     uint8_t _portType; // UART or SPI connection with network processor
+    uint8_t *nonConnAdvertData;
+    uint8_t *scanRspData;
 
   public:
     BLE(byte portType=BLE_PORT_UART);
@@ -23,9 +25,10 @@ class BLE : public Stream
     int startAdvert(void); // Default settings
     int startAdvert(BLE_Advert_Settings advertSettings);
     int stopAdvert(void);
-    int setAdvertData(byte advertType, uint8_t *advertData);
-    int setAdvertData(byte advertType, char *advertData);
-    int setAdvertData(byte advertType, String *advertData);
+    int setAdvertData(int advertType, uint8_t len, uint8_t *advertData);
+    int setAdvertName(int advertStringLen, char *advertString);
+    int setAdvertName(char *advertString);
+    int setAdvertName(String *advertString);
 
     int setConnParams(BLE_Conn_Params *connParams);
     int setGapParam(int paramId, int Value); // Will probably just copy the network processor docs
