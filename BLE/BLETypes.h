@@ -9,7 +9,9 @@
 
 /* Energia BLE status codes */
 #define BLE_SUCCESS             0
-#define BLE_INVALID_HANDLE      1
+#define BLE_ERROR               1
+#define BLE_INVALID_HANDLE      2
+#define BLE_UNDEFINED_VALUE     3
 
 /* Type of connection between the user application's
    processor and the bluetooth chip */
