@@ -98,17 +98,17 @@ int BLE::begin(void)
 
   // Gets device MAC address from network processor
   SAP_setParam(SAP_PARAM_HCI, SNP_HCI_OPCODE_READ_BDADDR, 0, NULL);
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::end(void)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::useProfile(BLE_Profile *profile)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::addService(BLE_Service *bleService)
@@ -213,12 +213,12 @@ int BLE::startAdvert(void)
 
 int BLE::startAdvert(BLE_Advert_Settings advertSettings)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::stopAdvert(void)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
@@ -250,7 +250,7 @@ int BLE::setAdvertName(int advertStringLen, char *advertString)
   // uint8_t totalSize = (1 + 2) + (1 + advertStringLen);
   // memcpy((void *) &advertData[4], (void *) advertString, advertStringLen);
   // return setAdvertData(BLE_ADV_DATA_SCANRSP, totalSize, scanRspData);
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::setAdvertName(char *advertString)
@@ -268,32 +268,32 @@ int BLE::setAdvertName(String *advertString)
 
 int BLE::setConnParams(BLE_Conn_Params *connParams)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::setGapParam(int paramId, int Value)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::setMinConnInt(int minConnInt)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::setMaxConnInt(int maxConnInt)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::setRespLatency(int respLatency)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::setBleTimeout(int timeout)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 void BLE::terminateConn(void)
@@ -308,12 +308,12 @@ void BLE::terminateConn(byte abruptly)
 
 int BLE::writeValue(int handle, char value)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::writeValue(int handle, unsigned char value)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::writeValue(int handle, int value)
@@ -321,7 +321,7 @@ int BLE::writeValue(int handle, int value)
   BLE_Char *bleChar = getChar(handle);
   if (bleChar == NULL)
   {
-    return 1;
+    return BLE_INVALID_HANDLE;
   }
   if (bleChar->_value == NULL)
   {
@@ -329,103 +329,103 @@ int BLE::writeValue(int handle, int value)
     bleChar->_valueLen = sizeof(int);
   }
   *(int *) bleChar->_value = value;
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::writeValue(int handle, unsigned int value)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 
 int BLE::writeValue(int handle, long value)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::writeValue(int handle, unsigned long value)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::writeValue(int handle, float value)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::writeValue(int handle, double value)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::writeValue(int handle, char *str)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::writeValue(int handle, String str)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 boolean BLE::readValue_boolean(int handle)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 char BLE::readValue_char(int handle)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 unsigned char BLE::readValue_uchar(int handle)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 byte BLE::readValue_byte(int handle)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::readValue_int(int handle)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 unsigned int BLE::readValue_uint(int handle)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 word BLE::readValue_word(int handle)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 long BLE::readValue_long(int handle)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 unsigned long BLE::readValue_ulong(int handle)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 float BLE::readValue_float(int handle)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 double BLE::readValue_double(int handle)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 char* BLE::readValue_string(int handle)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 String BLE::readValue_String(int handle)
@@ -436,42 +436,42 @@ String BLE::readValue_String(int handle)
 
 int BLE::serial(void)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::iBeacon(void)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::nordicBeacon(void)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::uriBeacon(void)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::eddystone(void)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::available(void)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::read(void)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 int BLE::peek(void)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 void BLE::flush(void)
@@ -481,7 +481,7 @@ void BLE::flush(void)
 
 size_t BLE::write(uint8_t c)
 {
-  return 0;
+  return BLE_SUCCESS;
 }
 
 static void AP_asyncCB(uint8_t cmd1, void *pParams) {

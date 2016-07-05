@@ -7,6 +7,10 @@
 
 #include <Energia.h>
 
+/* Energia BLE status codes */
+#define BLE_SUCCESS             0
+#define BLE_INVALID_HANDLE      1
+
 /* Type of connection between the user application's
    processor and the bluetooth chip */
 #define BLE_PORT_LOCAL          SAP_PORT_LOCAL // unsupported
