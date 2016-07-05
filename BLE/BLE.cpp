@@ -158,10 +158,10 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
   sapChar->UUID.len    = bleChar->UUIDlen;
   sapChar->UUID.pUUID  = bleChar->UUID;
   sapChar->properties  = bleChar->properties;
-  sapChar->permissions = (sapChar->properties & BLE_READABLE)
-                        ? SNP_GATT_PERMIT_READ : 0
-                   || (sapChar->properties & (BLE_WRITABLE_NORSP || BLE_WRITABLE))
-                        ? SNP_GATT_PERMIT_WRITE : 0;
+  sapChar->permissions = ((sapChar->properties & BLE_READABLE)
+                            ? SNP_GATT_PERMIT_READ : 0)
+                       | ((sapChar->properties & (BLE_WRITABLE_NORSP | BLE_WRITABLE))
+                            ? SNP_GATT_PERMIT_WRITE : 0);
   if (bleChar->charDesc)
   {
     sapChar->pUserDesc = (SAP_UserDescAttr_t *) malloc(sizeof(SAP_UserDescAttr_t));
