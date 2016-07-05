@@ -139,7 +139,7 @@ static void constructService(SAP_Service_t *service, BLE_Service *bleService)
                                                     sizeof(SAP_Char_t));
   service->context            = NULL;
   service->charReadCallback   = serviceReadAttrCB;
-  service->charWriteCallback  = serviceWriteAttrCB; // TO DO
+  service->charWriteCallback  = serviceWriteAttrCB;
   service->cccdIndCallback    = NULL; // TO DO
   service->charAttrHandles    = (SAP_CharHandle_t *) malloc(service->charTableLen *
                                                             sizeof(SAP_CharHandle_t));
@@ -435,7 +435,6 @@ String BLE::readValue_String(int handle)
 {
   return String();
 }
-
 
 int BLE::serial(void)
 {
