@@ -121,7 +121,7 @@ int BLE::addService(BLE_Service *bleService)
     uint8_t i;
     for (i = 0; i < bleService->numChars; i++)
     {
-      bleService->chars[i].handle = service->charAttrHandles[i].valueHandle;
+      bleService->chars[i]->handle = service->charAttrHandles[i].valueHandle;
     }
     addServiceNode(bleService);
   }
@@ -146,7 +146,7 @@ static void constructService(SAP_Service_t *service, BLE_Service *bleService)
   uint8_t i;
   for (i = 0; i < bleService->numChars; i++)
   {
-    constructChar(&service->charTable[i], &bleService->chars[i]);
+    constructChar(&service->charTable[i], bleService->chars[i]);
   }
 }
 

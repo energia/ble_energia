@@ -28,9 +28,9 @@ BLE_Char* getChar(int handle)
   uint8_t i;
   for (i = 0; i < service->numChars; i++)
   {
-    if (service->chars[i].handle == handle)
+    if (service->chars[i]->handle == handle)
     {
-      return &service->chars[i];
+      return service->chars[i];
     }
   }
   return NULL;

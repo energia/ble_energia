@@ -81,7 +81,7 @@ typedef struct
   byte              UUIDlen; // in bytes
   byte              UUID[16]; // array of UUID bytes
   int               numChars;
-  BLE_Char          *chars;
+  BLE_Char          **chars;
   int               handle;
 } BLE_Service;
 

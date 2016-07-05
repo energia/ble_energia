@@ -11,12 +11,12 @@ BLE_Char heartRateChar =
   "Heart rate measurement"
 };
 
-BLE_Char *allChars = {&heartRateChar};
+BLE_Char *heartRateChars[] = {&heartRateChar};
 
 BLE_Service heartRateService =
 {
   2, {0x0D, 0x18}, // UUID for heart rate service. 16 bits
-  1, allChars
+  1, heartRateChars
 };
 
 static uint8_t scanRspData[] = {
