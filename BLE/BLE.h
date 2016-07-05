@@ -14,6 +14,8 @@ class BLE : public Stream
     uint8_t *scanRspData = NULL;
 
   public:
+    int error = BLE_SUCCESS;
+
     BLE(byte portType=BLE_PORT_UART);
 
     int begin(void);
