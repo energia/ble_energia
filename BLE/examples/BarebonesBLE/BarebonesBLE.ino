@@ -24,21 +24,21 @@ BLE_Service heartRateService =
 
 BLE_Char char1 =
 {
-  2, {0xFF, 0xF1},
+  2, {0xF1, 0xFF},
   BLE_READABLE | BLE_WRITABLE,
   "Characteristic 1"
 };
 
 BLE_Char char2 =
 {
-  2, {0xFF, 0xF2},
+  2, {0xF2, 0xFF},
   BLE_READABLE,
   "Characteristic 2"
 };
 
 BLE_Char char3 =
 {
-  2, {0xFF, 0xF3},
+  2, {0xF3, 0xFF},
   BLE_WRITABLE,
   "Characteristic 3"
 };
@@ -47,7 +47,7 @@ BLE_Char *simpleServiceChars[] = {&char1, &char2, &char3};
 
 BLE_Service simpleService =
 {
-  2, {0xFF, 0xF0},
+  2, {0xF0, 0xFF},
   3, simpleServiceChars
 };
 
