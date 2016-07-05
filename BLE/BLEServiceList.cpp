@@ -49,7 +49,7 @@ BLE_Service* getService(int handle)
 BLE_Service* getServiceWithChar(int handle)
 {
   BLE_Service_Node *curr = bleServiceListHead;
-  while (curr->next && handle < curr->next->service->handle)
+  while (curr->next && curr->next->service->handle <= handle)
   {
     curr = curr->next;
   } // At end of loop, curr->service->handle <= handle < curr-next->service->handle
