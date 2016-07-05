@@ -3,6 +3,9 @@
 #define LED RED_LED
 
 int heartRateMeasurement = 0;
+int char1Value = 0;
+int char2Value = 0;
+int char3Value = 0;
 
 BLE_Char heartRateChar =
 {
@@ -18,6 +21,36 @@ BLE_Service heartRateService =
   2, {0x0D, 0x18}, // UUID for heart rate service. 16 bits
   1, heartRateChars
 };
+
+BLE_Char char1 =
+{
+  2, {0xFF, 0xF1},
+  BLE_READABLE | BLE_WRITABLE,
+  "Characteristic 1"
+};
+
+BLE_Char char2 =
+{
+  2, {0xFF, 0xF2},
+  BLE_READABLE,
+  "Characteristic 2"
+};
+
+BLE_Char char3 =
+{
+  2, {0xFF, 0xF3},
+  BLE_WRITABLE,
+  "Characteristic 3"
+};
+
+BLE_Char *simpleServiceChars[] = {&char1, &char2, &char3};
+
+BLE_Service simpleService =
+{
+  2, {0xFF, 0xF0},
+  3, simpleServiceChars
+};
+
 
 static uint8_t scanRspData[] = {
   // complete name
@@ -47,14 +80,21 @@ int cnt = 0;
 void setup() {
   Serial.begin(115200);
   ble = BLE();
-  Serial.print("begin ");
-  Serial.println(ble.begin());
-  Serial.print("add service ");
-  Serial.println(ble.addService(&heartRateService));
-  Serial.print("set adv data ");
-  Serial.println(ble.setAdvertData(BLE_ADV_DATA_SCANRSP, sizeof(scanRspData), scanRspData));
-  Serial.print("start adv ");
-  Serial.println(ble.startAdvert());
+  Serial.println("begin ");
+  ble.begin();
+  Serial.println("add services:");
+  ble.addService(&heartRateService);
+  ble.addService(&simpleService);
+  Serial.println("Initializing values.");
+  ble.writeValue(heartRateChar.handle, heartRateMeasurement);
+  ble.writeValue(char1.handle, char1Value);
+  ble.writeValue(char2.handle, char2Value);
+  ble.writeValue(char3.handle, char3Value);
+  Serial.println("set adv data ");
+  ble.setAdvertData(BLE_ADV_DATA_SCANRSP, sizeof(scanRspData), scanRspData);
+  Serial.println("start adv ");
+  ble.startAdvert();
+  Serial.println("Done");
   pinMode(LED, OUTPUT);
 }
 
@@ -65,10 +105,5 @@ void loop() {
   digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
   delay(1000);               // wait for 100 ms
   heartRateMeasurement += 1;
-  Serial.print("Local: ");
-  Serial.print(heartRateMeasurement);
-  Serial.print(" Status=");
-  Serial.print(ble.writeValue(heartRateChar.handle, heartRateMeasurement));
-  Serial.print(" ");
-  Serial.println(*(int *)heartRateChar._value);
+  Serial.println(ble.writeValue(heartRateChar.handle, heartRateMeasurement));
 }
