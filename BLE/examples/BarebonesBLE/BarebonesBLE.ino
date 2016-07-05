@@ -105,5 +105,7 @@ void loop() {
   digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
   delay(1000);               // wait for 100 ms
   heartRateMeasurement += 1;
-  Serial.println(ble.writeValue(heartRateChar.handle, heartRateMeasurement));
+  ble.writeValue(heartRateChar.handle, heartRateMeasurement);
+  char3Value = ble.readValue_int(char3.handle);
+  Serial.print("char3 read err status=");Serial.print(ble.error);Serial.print("; char3Value=");Serial.println(char3Value);
 }

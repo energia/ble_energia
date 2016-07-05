@@ -393,7 +393,21 @@ byte BLE::readValue_byte(int handle)
 
 int BLE::readValue_int(int handle)
 {
-  return BLE_SUCCESS;
+  error = BLE_SUCCESS;
+  BLE_Char *bleChar = getChar(handle);
+  if (bleChar == NULL)
+  {
+    error = BLE_INVALID_HANDLE;
+  }
+  else if (bleChar->_value == NULL || bleChar->_valueLen != sizeof(int))
+  {
+    error = BLE_UNDEFINED_VALUE;
+  }
+  else
+  {
+    return *(int *) bleChar->_value;
+  }
+  return BLE_ERROR;
 }
 
 unsigned int BLE::readValue_uint(int handle)
