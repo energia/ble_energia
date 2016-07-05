@@ -304,11 +304,10 @@ void BLE::terminateConn(byte abruptly)
 
 int BLE::writeValue(int handle, char value)
 {
-
   return 0;
 }
 
-int BLE::writeValue(int handle, unsigned char)
+int BLE::writeValue(int handle, unsigned char value)
 {
   return 0;
 }
@@ -316,16 +315,20 @@ int BLE::writeValue(int handle, unsigned char)
 int BLE::writeValue(int handle, int value)
 {
   BLE_Char *bleChar = getChar(handle);
+  if (bleChar == NULL)
+  {
+    return 1;
+  }
   if (bleChar->_value == NULL)
   {
     bleChar->_value = (void *) malloc(sizeof(int));
+    bleChar->_valueLen = sizeof(int);
   }
   *(int *) bleChar->_value = value;
-  bleChar->_valueLen = sizeof(int);
   return 0;
 }
 
-int BLE::writeValue(int handle, unsigned int)
+int BLE::writeValue(int handle, unsigned int value)
 {
   return 0;
 }
@@ -336,7 +339,7 @@ int BLE::writeValue(int handle, long value)
   return 0;
 }
 
-int BLE::writeValue(int handle, unsigned long)
+int BLE::writeValue(int handle, unsigned long value)
 {
   return 0;
 }

@@ -11,7 +11,7 @@ BLE_Char heartRateChar =
   "Heart rate measurement"
 };
 
-BLE_Char allChars[] = {heartRateChar};
+BLE_Char *allChars = {&heartRateChar};
 
 BLE_Service heartRateService =
 {
@@ -65,13 +65,10 @@ void loop() {
   digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
   delay(1000);               // wait for 100 ms
   heartRateMeasurement += 1;
-  Serial.print("Writing new val. Local: ");
+  Serial.print("Local: ");
   Serial.print(heartRateMeasurement);
-  Serial.print(" BLE: ");
-  *(int *)heartRateChar._value = -1;
-  Serial.print(*(int *)heartRateChar._value);
-  Serial.print(" BLE: ");
-  Serial.print(*(int *)heartRateChar._value);
-  Serial.print(". Status=");
-  Serial.println(ble.writeValue(heartRateChar.handle, heartRateMeasurement));
+  Serial.print(" Status=");
+  Serial.print(ble.writeValue(heartRateChar.handle, heartRateMeasurement));
+  Serial.print(" ");
+  Serial.println(*(int *)heartRateChar._value);
 }
