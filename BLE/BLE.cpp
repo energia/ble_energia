@@ -39,6 +39,10 @@ static uint8_t serviceReadAttrCB(void *context,
                                  uint16_t charHdl, uint16_t offset,
                                  uint16_t size, uint16_t * len,
                                  uint8_t *pData);
+static uint8_t serviceWriteAttrCB(void *context,
+                                  uint16_t connectionHandle,
+                                  uint16_t charHdl, uint16_t len,
+                                  uint8_t *pData);
 
 BLE::BLE(byte portType)
 {
@@ -135,7 +139,7 @@ static void constructService(SAP_Service_t *service, BLE_Service *bleService)
                                                     sizeof(SAP_Char_t));
   service->context            = NULL;
   service->charReadCallback   = serviceReadAttrCB;
-  service->charWriteCallback  = NULL; // TO DO
+  service->charWriteCallback  = serviceWriteAttrCB; // TO DO
   service->cccdIndCallback    = NULL; // TO DO
   service->charAttrHandles    = (SAP_CharHandle_t *) malloc(service->charTableLen *
                                                             sizeof(SAP_CharHandle_t));
@@ -545,5 +549,23 @@ static uint8_t serviceReadAttrCB(void *context,
   }
   *len = bleChar->_valueLen;
   memcpy(pData, (uint8_t *) bleChar->_value, *len);
+  return SNP_SUCCESS;
+}
+
+static uint8_t serviceWriteAttrCB(void *context,
+                                  uint16_t connectionHandle,
+                                  uint16_t charHdl, uint16_t len,
+                                  uint8_t *pData)
+{
+  BLE_Char *bleChar = getChar(charHdl);
+  if (bleChar == NULL)
+  {
+    return SNP_UNKNOWN_ATTRIBUTE;
+  }
+  if (len != bleChar->_valueLen)
+  {
+    return SNP_INVALID_PARAMS;
+  }
+  memcpy((uint8_t *) bleChar->_value, pData, len);
   return SNP_SUCCESS;
 }
