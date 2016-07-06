@@ -138,12 +138,12 @@ void loop() {
   Serial.print(ble.error);Serial.print(" char4Value=");Serial.println(char4Value);
   char6Value = ble.readValue_int(char6.handle);
   Serial.print(ble.error);Serial.print(" char6Value=");Serial.println(char6Value);
-  Serial.print("Flag 0:");Serial.println(flag0);
-  Serial.print("Flag 1:");Serial.println(flag1);
-  Serial.print("Flag 2:");Serial.println(flag2);
-  Serial.print("Flag 3:");Serial.println(flag3);
-  Serial.print("Flag 4:");Serial.println(flag4);
-  Serial.print("Flag 5:");Serial.println(flag5);
+//  Serial.print("Flag 0:");Serial.println(flag0);
+//  Serial.print("Flag 1:");Serial.println(flag1);
+//  Serial.print("Flag 2:");Serial.println(flag2);
+//  Serial.print("Flag 3:");Serial.println(flag3);
+//  Serial.print("Flag 4:");Serial.println(flag4);
+//  Serial.print("Flag 5:");Serial.println(flag5);
   flag0 = 0;
   flag1 = 0;
   flag2 = 0;

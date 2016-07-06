@@ -335,20 +335,17 @@ void BLE::writeNotifInd(BLE_Char *bleChar)
 {
   if (bleChar->_CCCD)
   {
-    flag4 = bleChar->_CCCD;
     snpNotifIndReq_t localReq;
     localReq.connHandle = connHandle;
     localReq.attrHandle = bleChar->handle;
     localReq.authenticate = 0;
     localReq.pData = (uint8_t *) bleChar->_value;
-    flag5 = 201;
     if (bleChar->_CCCD & SNP_GATT_CLIENT_CFG_NOTIFY)
     {
       localReq.type = SNP_SEND_NOTIFICATION;
     }
     else if (bleChar->_CCCD & SNP_GATT_CLIENT_CFG_INDICATE)
     {
-      flag5 = 202;
       localReq.type = SNP_SEND_INDICATION;
     }
     SNP_RPC_sendNotifInd(&localReq, bleChar->_valueLen);
@@ -749,7 +746,6 @@ static uint8_t serviceCCCDIndCB(void *context,
                                 uint16_t cccdHdl, uint8_t type,
                                 uint16_t value)
 {
-  flag0 = 100;
   uint8_t status = SNP_SUCCESS;
   connHandle = connectionHandle;
   bool notify = (value == SNP_GATT_CLIENT_CFG_NOTIFY);
@@ -761,19 +757,16 @@ static uint8_t serviceCCCDIndCB(void *context,
   }
   else if (!(value == 0 || notify || indicate))
   {
-    flag1 = 101;
     status = SNP_INVALID_PARAMS;
   }
   // Attempting to set to mode not allowed by char properties
   else if ((notify && bleChar->properties != BLE_NOTIFIABLE)
         || (indicate && bleChar->properties != BLE_INDICATABLE))
   {
-    flag2 = 102;
     status = SNP_NOTIF_IND_NOT_ALLOWED;
   }
   else
   {
-    flag3 = 103;
     bleChar->_CCCD = (byte) value;
   }
   return status;
