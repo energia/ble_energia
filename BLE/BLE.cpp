@@ -36,6 +36,8 @@ int flag0 = 0;
 int flag1 = 0;
 int flag2 = 0;
 int flag3 = 0;
+int flag4 = 0;
+int flag5 = 0;
 
 static void AP_asyncCB(uint8_t cmd1, void *pParams);
 static void AP_convertBdAddr2Str(char *str, uint8_t *pAddr);
