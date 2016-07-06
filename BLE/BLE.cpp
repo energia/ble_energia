@@ -9,6 +9,7 @@
 
 #include <sap.h>
 #include <snp.h>
+#include <snp_rpc.h>
 /*
  * This is strictly to force the build system to compile npi into
  * its own object files for the linker to link. It isn't used here.
@@ -29,6 +30,7 @@
 
 Event_Handle apEvent = NULL;
 char ownAddressString[16] = { 0 };
+uint16_t connHandle = 0;
 
 int flag0 = 0;
 int flag1 = 0;
@@ -329,7 +331,7 @@ void BLE::writeNotifInd(BLE_Char *bleChar)
     localReq.connHandle = connHandle;
     localReq.attrHandle = bleChar->handle;
     localReq.authenticate = 0;
-    loalReq.pData = (uint8_t *) bleChar->_value;
+    localReq.pData = (uint8_t *) bleChar->_value;
     if (bleChar->_CCCD & SNP_GATT_CLIENT_CFG_NOTIFY)
     {
       localReq.type = SNP_SEND_NOTIFICATION;

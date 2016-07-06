@@ -17,7 +17,6 @@ class BLE : public Stream
     uint8_t _portType = NULL; // UART or SPI connection with network processor
     uint8_t *nonConnAdvertData = NULL;
     uint8_t *scanRspData = NULL;
-    uint16_t connHandle = 0;
 
     void writeValueHelper(BLE_Char *bleChar, size_t size);
     void writeNotifInd(BLE_Char *bleChar);
