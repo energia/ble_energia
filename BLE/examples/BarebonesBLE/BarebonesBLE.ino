@@ -7,6 +7,7 @@ byte char1Value = 0;
 int char2Value = 0;
 long char3Value = 0;
 int char4Value = 0;
+int char6Value = 0;
 
 BLE_Char heartRateChar =
 {
@@ -51,12 +52,19 @@ BLE_Char char4 =
   "Characteristic 4"
 };
 
-BLE_Char *simpleServiceChars[] = {&char1, &char2, &char3, &char4};
+BLE_Char char6 =
+{
+  2, {0xF6, 0xFF},
+  BLE_INDICATABLE,
+  "Characteristic 6"
+};
+
+BLE_Char *simpleServiceChars[] = {&char1, &char2, &char3, &char4, &char6};
 
 BLE_Service simpleService =
 {
   2, {0xF0, 0xFF},
-  4, simpleServiceChars
+  5, simpleServiceChars
 };
 
 
@@ -116,6 +124,10 @@ void loop() {
   heartRateMeasurement += 1;
   ble.writeValue(heartRateChar.handle, heartRateMeasurement);
   ble.writeValue(char4.handle, heartRateMeasurement*2);
+  if (heartRateMeasurement % 20 == 0)
+  {
+    ble.writeValue(char6.handle, char6Value + 1);
+  }
   char1Value = ble.readValue_byte(char1.handle);
   Serial.print(ble.error);Serial.print(" char1Value=");Serial.println(char1Value);
   char2Value = ble.readValue_int(char2.handle);
