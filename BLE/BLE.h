@@ -6,12 +6,20 @@
 #include "Stream.h"
 #include "BLETypes.h"
 
+extern int flag0;
+extern int flag1;
+extern int flag2;
+extern int flag3;
+
 class BLE : public Stream
 {
   private:
     uint8_t _portType = NULL; // UART or SPI connection with network processor
     uint8_t *nonConnAdvertData = NULL;
     uint8_t *scanRspData = NULL;
+
+    void writeValueHelper(BLE_Char *bleChar, size_t size);
+    BLE_Char* readValueHelper(int handle, size_t size);
 
   public:
     int error = BLE_SUCCESS;

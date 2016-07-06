@@ -3,9 +3,9 @@
 #define LED RED_LED
 
 int heartRateMeasurement = 0;
-int char1Value = 0;
+byte char1Value = 0;
 int char2Value = 0;
-int char3Value = 0;
+long char3Value = 0;
 
 BLE_Char heartRateChar =
 {
@@ -101,11 +101,19 @@ void setup() {
 // the loop routine runs over and over again forever as a task.
 void loop() {
   digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(1000);               // wait for 100 ms
+  delay(500);               // wait for 100 ms
   digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
-  delay(1000);               // wait for 100 ms
+  delay(500);               // wait for 100 ms
   heartRateMeasurement += 1;
   ble.writeValue(heartRateChar.handle, heartRateMeasurement);
-  char3Value = ble.readValue_int(char3.handle);
-  Serial.print("char3 read err status=");Serial.print(ble.error);Serial.print("; char3Value=");Serial.println(char3Value);
+  char1Value = ble.readValue_byte(char1.handle);
+  Serial.print(ble.error);Serial.print(" char1Value=");Serial.println(char1Value);
+  char2Value = ble.readValue_int(char2.handle);
+  Serial.print(ble.error);Serial.print(" char2Value=");Serial.println(char2Value);
+  char3Value = ble.readValue_long(char3.handle);
+  Serial.print(ble.error);Serial.print(" char3Value=");Serial.println(char3Value);
+  Serial.print("Flag 0:");Serial.println(flag0);
+  Serial.print("Flag 1:");Serial.println(flag1);
+  Serial.print("Flag 2:");Serial.println(flag2);
+  Serial.print("Flag 3:");Serial.println(flag3);
 }
