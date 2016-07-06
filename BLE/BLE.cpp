@@ -160,6 +160,7 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
   bleChar->valueFormat = 0; // TO DO REMOVE THIS
   bleChar->_value = NULL;
   bleChar->_valueLen = 0;
+  bleChar->_CCCD = 0;
   sapChar->UUID.len    = bleChar->UUIDlen;
   sapChar->UUID.pUUID  = bleChar->UUID;
   sapChar->properties  = bleChar->properties;
@@ -315,6 +316,33 @@ void BLE::terminateConn(byte abruptly)
 }
 
 void BLE::writeValueHelper(BLE_Char *bleChar, size_t size)
+{
+  writeNotifInd(bleChar);
+  charValueInit(bleChar, size);
+}
+
+void BLE::writeNotifInd(BLE_Char *bleChar)
+{
+  if (bleChar->_CCCD)
+  {
+    snpNotifIndReq_t localReq;
+    localReq.connHandle = connHandle;
+    localReq.attrHandle = bleChar->handle;
+    localReq.authenticate = 0;
+    loalReq.pData = (uint8_t *) bleChar->_value;
+    if (bleChar->_CCCD & SNP_GATT_CLIENT_CFG_NOTIFY)
+    {
+      localReq.type = SNP_SEND_NOTIFICATION;
+    }
+    else if (bleChar->_CCCD * SNP_GATT_CLIENT_CFG_INDICATE)
+    {
+      localReq.type = SNP_SEND_INDICATION;
+    }
+    SNP_RPC_sendNotifInd(&localReq, bleChar->_valueLen);
+  }
+}
+
+void BLE::charValueInit(BLE_Char *bleChar, size_t, size)
 {
   if (bleChar->_value == NULL)
   {
@@ -672,6 +700,7 @@ static uint8_t serviceReadAttrCB(void *context,
                                  uint16_t size, uint16_t * len,
                                  uint8_t *pData)
 {
+  connHandle = connectionHandle;
   BLE_Char *bleChar = getChar(charHdl);
   if (bleChar == NULL)
   {
@@ -688,6 +717,7 @@ static uint8_t serviceWriteAttrCB(void *context,
                                   uint16_t charHdl, uint16_t len,
                                   uint8_t *pData)
 {
+  connHandle = connectionHandle;
   BLE_Char *bleChar = getChar(charHdl);
   if (bleChar == NULL)
   {
