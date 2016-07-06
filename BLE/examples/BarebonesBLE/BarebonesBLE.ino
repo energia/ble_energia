@@ -6,6 +6,7 @@ int heartRateMeasurement = 0;
 byte char1Value = 0;
 int char2Value = 0;
 long char3Value = 0;
+int char4Value = 0;
 
 BLE_Char heartRateChar =
 {
@@ -43,12 +44,19 @@ BLE_Char char3 =
   "Characteristic 3"
 };
 
-BLE_Char *simpleServiceChars[] = {&char1, &char2, &char3};
+BLE_Char char4 =
+{
+  2, {0xF4, 0xFF},
+  BLE_NOTIFIABLE,
+  "Characteristic 4"
+};
+
+BLE_Char *simpleServiceChars[] = {&char1, &char2, &char3, &char4};
 
 BLE_Service simpleService =
 {
   2, {0xF0, 0xFF},
-  3, simpleServiceChars
+  4, simpleServiceChars
 };
 
 
@@ -90,6 +98,7 @@ void setup() {
   ble.writeValue(char1.handle, char1Value);
   ble.writeValue(char2.handle, char2Value);
   ble.writeValue(char3.handle, char3Value);
+  ble.writeValue(char4.handle, char4Value);
   Serial.println("set adv data ");
   ble.setAdvertData(BLE_ADV_DATA_SCANRSP, sizeof(scanRspData), scanRspData);
   Serial.println("start adv ");
@@ -106,12 +115,15 @@ void loop() {
   delay(500);               // wait for 100 ms
   heartRateMeasurement += 1;
   ble.writeValue(heartRateChar.handle, heartRateMeasurement);
+  ble.writeValue(char4.handle, heartRateMeasurement*2);
   char1Value = ble.readValue_byte(char1.handle);
   Serial.print(ble.error);Serial.print(" char1Value=");Serial.println(char1Value);
   char2Value = ble.readValue_int(char2.handle);
   Serial.print(ble.error);Serial.print(" char2Value=");Serial.println(char2Value);
   char3Value = ble.readValue_long(char3.handle);
   Serial.print(ble.error);Serial.print(" char3Value=");Serial.println(char3Value);
+  char4Value = ble.readValue_int(char4.handle);
+  Serial.print(ble.error);Serial.print(" char4Value=");Serial.println(char4Value);
   Serial.print("Flag 0:");Serial.println(flag0);
   Serial.print("Flag 1:");Serial.println(flag1);
   Serial.print("Flag 2:");Serial.println(flag2);
