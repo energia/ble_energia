@@ -77,6 +77,8 @@ typedef struct
   void              *_value;
   int               _valueLen;
   byte              _CCCD;
+  unsigned int      _CCCDHandle;
+
 } BLE_Char;
 
 typedef struct

@@ -1,4 +1,5 @@
 
+#include <stdbool.h>
 #include <string.h>
 
 #include <ti/drivers/gpio.h>
@@ -52,6 +53,10 @@ static uint8_t serviceWriteAttrCB(void *context,
                                   uint16_t connectionHandle,
                                   uint16_t charHdl, uint16_t len,
                                   uint8_t *pData);
+static uint8_t serviceCCCDIndCB(void *context,
+                                uint16_t connectionHandle,
+                                uint16_t cccdHdl, uint8_t type,
+                                uint16_t value);
 
 BLE::BLE(byte portType)
 {
@@ -131,6 +136,7 @@ int BLE::addService(BLE_Service *bleService)
     for (i = 0; i < bleService->numChars; i++)
     {
       bleService->chars[i]->handle = service->charAttrHandles[i].valueHandle;
+      bleService->chars[i]->_CCCDHandle = service->charAttrHandles[i].cccdHandle;
     }
     addServiceNode(bleService);
   }
@@ -149,7 +155,7 @@ static void constructService(SAP_Service_t *service, BLE_Service *bleService)
   service->context            = NULL;
   service->charReadCallback   = serviceReadAttrCB;
   service->charWriteCallback  = serviceWriteAttrCB;
-  service->cccdIndCallback    = NULL; // TO DO
+  service->cccdIndCallback    = serviceCCCDIndCB;
   service->charAttrHandles    = (SAP_CharHandle_t *) malloc(service->charTableLen *
                                                             sizeof(SAP_CharHandle_t));
   uint8_t i;
@@ -329,17 +335,20 @@ void BLE::writeNotifInd(BLE_Char *bleChar)
 {
   if (bleChar->_CCCD)
   {
+    flag4 = bleChar->_CCCD;
     snpNotifIndReq_t localReq;
     localReq.connHandle = connHandle;
     localReq.attrHandle = bleChar->handle;
     localReq.authenticate = 0;
     localReq.pData = (uint8_t *) bleChar->_value;
+    flag5 = 201;
     if (bleChar->_CCCD & SNP_GATT_CLIENT_CFG_NOTIFY)
     {
       localReq.type = SNP_SEND_NOTIFICATION;
     }
-    else if (bleChar->_CCCD * SNP_GATT_CLIENT_CFG_INDICATE)
+    else if (bleChar->_CCCD & SNP_GATT_CLIENT_CFG_INDICATE)
     {
+      flag5 = 202;
       localReq.type = SNP_SEND_INDICATION;
     }
     SNP_RPC_sendNotifInd(&localReq, bleChar->_valueLen);
@@ -733,4 +742,39 @@ static uint8_t serviceWriteAttrCB(void *context,
   }
   memcpy((uint8_t *) bleChar->_value, pData, len);
   return SNP_SUCCESS;
+}
+
+static uint8_t serviceCCCDIndCB(void *context,
+                                uint16_t connectionHandle,
+                                uint16_t cccdHdl, uint8_t type,
+                                uint16_t value)
+{
+  flag0 = 100;
+  uint8_t status = SNP_SUCCESS;
+  connHandle = connectionHandle;
+  bool notify = (value == SNP_GATT_CLIENT_CFG_NOTIFY);
+  bool indicate = (value == SNP_GATT_CLIENT_CFG_INDICATE);
+  BLE_Char *bleChar = getCCCD(cccdHdl);
+  if (bleChar == NULL)
+  {
+    status = SNP_UNKNOWN_ATTRIBUTE;
+  }
+  else if (!(value == 0 || notify || indicate))
+  {
+    flag1 = 101;
+    status = SNP_INVALID_PARAMS;
+  }
+  // Attempting to set to mode not allowed by char properties
+  else if ((notify && bleChar->properties != BLE_NOTIFIABLE)
+        || (indicate && bleChar->properties != BLE_INDICATABLE))
+  {
+    flag2 = 102;
+    status = SNP_NOTIF_IND_NOT_ALLOWED;
+  }
+  else
+  {
+    flag3 = 103;
+    bleChar->_CCCD = (byte) value;
+  }
+  return status;
 }

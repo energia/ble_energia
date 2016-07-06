@@ -36,6 +36,20 @@ BLE_Char* getChar(int handle)
   return NULL;
 }
 
+BLE_Char* getCCCD(int handle)
+{
+  BLE_Service *service = getServiceWithChar(handle);
+  uint8_t i;
+  for (i = 0; i < service->numChars; i++)
+  {
+    if (service->chars[i]->_CCCDHandle == handle)
+    {
+      return service->chars[i];
+    }
+  }
+  return NULL;
+}
+
 BLE_Service* getService(int handle)
 {
   BLE_Service *service = getServiceWithChar(handle);
