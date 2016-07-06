@@ -42,6 +42,7 @@ int flag5 = 0;
 
 static void AP_asyncCB(uint8_t cmd1, void *pParams);
 static void AP_convertBdAddr2Str(char *str, uint8_t *pAddr);
+static uint8_t getUUIDLen(uint8_t *UUID);
 static void constructService(SAP_Service_t *service, BLE_Service *bleService);
 static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar);
 static uint8_t serviceReadAttrCB(void *context,
@@ -143,10 +144,23 @@ int BLE::addService(BLE_Service *bleService)
   return status;
 }
 
+static uint8_t getUUIDLen(uint8_t *UUID)
+{
+  uint8_t i;
+  for (i = SNP_16BIT_UUID_SIZE; i < SNP_128BIT_UUID_SIZE; i++)
+  {
+    if (UUID[i] != 0)
+    {
+      return SNP_128BIT_UUID_SIZE;
+    }
+  }
+  return SNP_16BIT_UUID_SIZE;
+}
+
 static void constructService(SAP_Service_t *service, BLE_Service *bleService)
 {
   bleService->handle = NULL;
-  service->serviceUUID.len    = bleService->UUIDlen;
+  service->serviceUUID.len    = getUUIDLen(bleService->UUID);
   service->serviceUUID.pUUID  = bleService->UUID;
   service->serviceType        = SNP_PRIMARY_SERVICE;
   service->charTableLen       = bleService->numChars; // sizeof with static array?
@@ -171,7 +185,7 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
   bleChar->_value = NULL;
   bleChar->_valueLen = 0;
   bleChar->_CCCD = 0;
-  sapChar->UUID.len    = bleChar->UUIDlen;
+  sapChar->UUID.len    = getUUIDLen(bleChar->UUID);
   sapChar->UUID.pUUID  = bleChar->UUID;
   sapChar->properties  = bleChar->properties;
   sapChar->permissions = ((sapChar->properties & BLE_READABLE)

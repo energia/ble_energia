@@ -66,7 +66,6 @@
 
 typedef struct
 {
-  byte              UUIDlen; // in bytes, either 2 (16 bit) or 16 (128 bit)
   byte              UUID[16]; // array of UUID bytes, little-endian
   byte              properties; // bitwise OR of macros: e.g. BLE_READABLE | BLE_WRITABLE
   // Null terminated; internally set permissions to read only so we don't have to worry about the length changing
@@ -83,7 +82,6 @@ typedef struct
 
 typedef struct
 {
-  byte              UUIDlen; // in bytes
   byte              UUID[16]; // array of UUID bytes
   int               numChars;
   BLE_Char          **chars;

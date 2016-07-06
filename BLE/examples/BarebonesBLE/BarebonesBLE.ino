@@ -11,7 +11,7 @@ int char6Value = 0;
 
 BLE_Char heartRateChar =
 {
-  2, {0x37, 0x2A}, // UUID for heart rate measurement, 16 bits
+  {0x37, 0x2A}, // UUID for heart rate measurement, 16 bits
   BLE_READABLE,
   "Heart rate measurement"
 };
@@ -20,41 +20,41 @@ BLE_Char *heartRateChars[] = {&heartRateChar};
 
 BLE_Service heartRateService =
 {
-  2, {0x0D, 0x18}, // UUID for heart rate service. 16 bits
+  {0x0D, 0x18}, // UUID for heart rate service. 16 bits
   1, heartRateChars
 };
 
 BLE_Char char1 =
 {
-  2, {0xF1, 0xFF},
+  {0xF1, 0xFF},
   BLE_READABLE | BLE_WRITABLE,
   "Characteristic 1"
 };
 
 BLE_Char char2 =
 {
-  2, {0xF2, 0xFF},
+  {0xF2, 0xFF},
   BLE_READABLE,
   "Characteristic 2"
 };
 
 BLE_Char char3 =
 {
-  2, {0xF3, 0xFF},
+  {0xF3, 0xFF},
   BLE_WRITABLE,
   "Characteristic 3"
 };
 
 BLE_Char char4 =
 {
-  2, {0xF4, 0xFF},
+  {0xF4, 0xFF},
   BLE_NOTIFIABLE,
   "Characteristic 4"
 };
 
 BLE_Char char6 =
 {
-  2, {0xF6, 0xFF},
+  {0xF6, 0xFF},
   BLE_INDICATABLE,
   "Characteristic 6"
 };
@@ -63,7 +63,7 @@ BLE_Char *simpleServiceChars[] = {&char1, &char2, &char3, &char4, &char6};
 
 BLE_Service simpleService =
 {
-  2, {0xF0, 0xFF},
+  {0xF0, 0xFF},
   5, simpleServiceChars
 };
 
