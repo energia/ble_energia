@@ -342,7 +342,7 @@ void BLE::writeNotifInd(BLE_Char *bleChar)
   }
 }
 
-void BLE::charValueInit(BLE_Char *bleChar, size_t, size)
+void BLE::charValueInit(BLE_Char *bleChar, size_t size)
 {
   if (bleChar->_value == NULL)
   {
