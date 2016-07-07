@@ -15,5 +15,6 @@ BLE_Char* getChar(int handle);
 BLE_Char* getCCCD(int handle);
 BLE_Service* getService(int handle);
 BLE_Service* getServiceWithChar(int handle);
+void resetCCCD(void);
 
 #endif

@@ -69,3 +69,17 @@ BLE_Service* getServiceWithChar(int handle)
   } // At end of loop, curr->service->handle <= handle < curr-next->service->handle
   return curr->service;
 }
+
+void resetCCCD(void)
+{
+  BLE_Service_Node *curr = bleServiceListHead;
+  while (curr)
+  {
+    uint8_t i;
+    for (i = 0; i < curr->service->numChars; i++)
+    {
+      curr->service->chars[i]->_CCCD = 0;
+    }
+    curr = curr->next;
+  }
+}

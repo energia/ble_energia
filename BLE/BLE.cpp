@@ -23,6 +23,10 @@
 #define AP_NONE                              Event_Id_NONE   // No Event
 #define AP_EVT_PUI                           Event_Id_00     // Power-Up Indication
 #define AP_EVT_ADV_ENB                       Event_Id_01     // Advertisement Enable
+#define AP_EVT_ADV_END                       Event_Id_02     // Advertisement Ended
+#define AP_EVT_CONN_EST                      Event_Id_03     // Connection Established Event
+#define AP_EVT_CONN_TERM                     Event_Id_04     // Connection Terminated Event
+#define AP_ERROR                             Event_Id_31     // Error
 
 #define PIN6_7 35
 
@@ -58,6 +62,7 @@ static uint8_t serviceCCCDIndCB(void *context,
                                 uint16_t connectionHandle,
                                 uint16_t cccdHdl, uint8_t type,
                                 uint16_t value);
+static void processSNPEventCB(uint16_t event, snpEventParam_t *param);
 
 BLE::BLE(byte portType)
 {
@@ -101,6 +106,12 @@ int BLE::begin(void)
    */
   SAP_setAsyncCB(AP_asyncCB);
 
+  /*
+   * Register async SNP event handler. Includes connection establisment,
+   * termination, advertisement enabling, security events.
+   */
+  SAP_registerEventCB(processSNPEventCB, 0xFFFF);
+
   //Give the NP time to send a PUIND, if we receive one then
   //we can assume the NP has just started and we don't need to send a reset
   //otherwise, we can assume the NP was running previously and needs to be
@@ -113,6 +124,7 @@ int BLE::begin(void)
 
   // Gets device MAC address from network processor
   SAP_setParam(SAP_PARAM_HCI, SNP_HCI_OPCODE_READ_BDADDR, 0, NULL);
+
   return BLE_SUCCESS;
 }
 
@@ -687,18 +699,11 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams) {
             default:
               break;
           }
-        }
-        //   break;
-        case SNP_EVENT_IND:
-          // Log_info0("Got Event indication from NP");
-          // Notify state machine of Advertisement Enabled
-          Event_post(apEvent, AP_EVT_ADV_ENB);
-          break;
+        } break;
         default:
           break;
       }
-    }
-      break;
+    } break;
     default:
       break;
   }
@@ -784,4 +789,49 @@ static uint8_t serviceCCCDIndCB(void *context,
     bleChar->_CCCD = (byte) value;
   }
   return status;
+}
+
+static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
+{
+  switch (event)
+  {
+    case SNP_CONN_EST_EVT: {
+      Event_post(apEvent, AP_EVT_CONN_EST);
+    } break;
+    case SNP_CONN_TERM_EVT: {
+      Event_post(apEvent, AP_EVT_CONN_TERM);
+      resetCCCD();
+    } break;
+    // case SNP_CONN_PARAM_UPDATED_EVT: {
+    // } break;
+    case SNP_ADV_STARTED_EVT: {
+      snpAdvStatusEvt_t *advEvt = (snpAdvStatusEvt_t *) param;
+      if (advEvt->status == SNP_SUCCESS)
+      {
+        Event_post(apEvent, AP_EVT_ADV_ENB);
+      }
+      else
+      {
+        Event_post(apEvent, AP_ERROR);
+      }
+    } break;
+    case SNP_ADV_ENDED_EVT: {
+      snpAdvStatusEvt_t *advEvt = (snpAdvStatusEvt_t *) param;
+      if (advEvt->status == SNP_SUCCESS) {
+        Event_post(apEvent, AP_EVT_ADV_END);
+      }
+      else
+      {
+        Event_post(apEvent, AP_ERROR);
+      }
+    } break;
+    // case SNP_ATT_MTU_EVT: {
+    // } break;
+    // case SNP_SECURITY_EVT: {
+    // } break;
+    // case SNP_AUTHENTICATION_EVT: {
+    // } break;
+    // case SNP_ERROR_EVT: {
+    // } break;
+  }
 }
