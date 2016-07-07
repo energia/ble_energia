@@ -19,6 +19,7 @@
 
 #include <BLE.h>
 #include "BLEServiceList.h"
+#include "Flags.h"
 
 #define AP_NONE                              Event_Id_NONE   // No Event
 #define AP_EVT_PUI                           Event_Id_00     // Power-Up Indication

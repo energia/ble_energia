@@ -1,5 +1,6 @@
 
 #include <BLE.h>
+#include "Flags.h"
 #define LED RED_LED
 
 int heartRateMeasurement = 0;
