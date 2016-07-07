@@ -264,6 +264,9 @@ int BLE::startAdvert(BLE_Advert_Settings advertSettings)
 
 int BLE::stopAdvert(void)
 {
+  uint8_t disableAdv = SAP_ADV_STATE_DISABLE;
+  SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE, 1, &disableAdv);
+  Event_pend(apEvent, AP_NONE, AP_EVT_ADV_END, BIOS_WAIT_FOREVER);
   return BLE_SUCCESS;
 }
 
@@ -807,12 +810,16 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
     // } break;
     case SNP_ADV_STARTED_EVT: {
       snpAdvStatusEvt_t *advEvt = (snpAdvStatusEvt_t *) param;
+      advEvt->status = SNP_SUCCESS;
+      flag1 = advEvt->status;
       if (advEvt->status == SNP_SUCCESS)
       {
+        flag0 = 100;
         Event_post(apEvent, AP_EVT_ADV_ENB);
       }
       else
       {
+        flag0 = 101;
         Event_post(apEvent, AP_ERROR);
       }
     } break;
