@@ -287,19 +287,29 @@ int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
   return status;
 }
 
+/*
+ * Uses the default scan response data defScanRspData in BLETypes.h. The first
+ * byte is one plus the length of the name. The second should be
+ * SAP_GAP_ADTYPE_LOCAL_NAME_COMPLETE, and the third and so on are the
+ * characters of the name.
+ */
 int BLE::setAdvertName(int advertStringLen, char *advertString)
 {
-  // if (scanRspData == NULL)
-  // {
-  //   scanRspData = &defScanRspData;
-  // }
-
-
-  // // length + data  +  length + data
-  // uint8_t totalSize = (1 + 2) + (1 + advertStringLen);
-  // memcpy((void *) &advertData[4], (void *) advertString, advertStringLen);
-  // return setAdvertData(BLE_ADV_DATA_SCANRSP, totalSize, scanRspData);
-  return BLE_SUCCESS;
+  if (scanRspData && scanRspData != defScanRspData)
+  {
+    free(scanRspData);
+  }
+  uint8_t newSize = sizeof(defScanRspData) - defScanRspData[0]
+                  + 1 + advertStringLen;
+  uint8_t *newData = (uint8_t *) malloc(newSize);
+  newData[0] = 1 + advertStringLen;
+  newData[1] = defScanRspData[1];
+  memcpy(&newData[2], advertString, advertStringLen);
+  uint8_t *destAfterStr = newData + 2 + advertStringLen;
+  uint8_t *srcAfterStr = defScanRspData + 1 + defScanRspData[0];
+  uint8_t afterStrLen = sizeof(defScanRspData) - 1 - defScanRspData[0];
+  memcpy(destAfterStr, srcAfterStr, afterStrLen);
+  return setAdvertData(BLE_ADV_DATA_SCANRSP, newSize, newData);
 }
 
 int BLE::setAdvertName(char *advertString)

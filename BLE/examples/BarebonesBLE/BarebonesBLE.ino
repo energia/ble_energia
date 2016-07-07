@@ -68,31 +68,7 @@ BLE_Service simpleService =
   5, simpleServiceChars
 };
 
-
-static uint8_t scanRspData[] = {
-  // complete name
-  0xc,// length of this data
-  SAP_GAP_ADTYPE_LOCAL_NAME_COMPLETE,
-  'E', 'n', 'e', 'r', 'g', 'i', 'a', ' ',
-  'B', 'L', 'E',
-
-  // connection interval range
-  0x05,   // length of this data
-  0x12, //GAP_ADTYPE_SLAVE_CONN_INTERVAL_RANGE,
-  LO_UINT16( BLE_DEF_DESIRED_MIN_CONN_INT ),
-  HI_UINT16( BLE_DEF_DESIRED_MIN_CONN_INT ),
-  LO_UINT16( BLE_DEF_DESIRED_MAX_CONN_INT ),
-  HI_UINT16( BLE_DEF_DESIRED_MAX_CONN_INT ),
-
-  // Tx power level
-  0x02,   // length of this data
-  0x0A, //GAP_ADTYPE_POWER_LEVEL,
-  0       // 0dBm
-};
-
 BLE ble;
-int numBlinks;
-int cnt = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -108,9 +84,9 @@ void setup() {
   ble.writeValue(char2.handle, char2Value);
   ble.writeValue(char3.handle, char3Value);
   ble.writeValue(char4.handle, char4Value);
-  ble.writeValue(char4.handle, char6Value);
+  ble.writeValue(char6.handle, char6Value);
   Serial.println("set adv data ");
-  ble.setAdvertData(BLE_ADV_DATA_SCANRSP, sizeof(scanRspData), scanRspData);
+  ble.setAdvertName("Energia BLE");
   Serial.println("start adv ");
   ble.startAdvert();
   Serial.println("Done");
