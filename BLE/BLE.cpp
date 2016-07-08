@@ -400,6 +400,11 @@ static void writeNotifInd(BLE_Char *bleChar)
 
 static void charValueInit(BLE_Char *bleChar, size_t size)
 {
+  if (bleChar->_value && bleChar->_valueLen != size)
+  {
+    free(bleChar->_value);
+    bleChar->_value == NULL;
+  }
   if (bleChar->_value == NULL)
   {
     bleChar->_value = (void *) malloc(size);
@@ -771,10 +776,7 @@ static uint8_t serviceWriteAttrCB(void *context,
   {
     return SNP_UNKNOWN_ATTRIBUTE;
   }
-  if (len != bleChar->_valueLen)
-  {
-    return SNP_INVALID_PARAMS;
-  }
+  charValueInit(bleChar, len);
   memcpy((uint8_t *) bleChar->_value, pData, len);
   return SNP_SUCCESS;
 }
