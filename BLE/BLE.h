@@ -14,6 +14,7 @@ class BLE : public Stream
     uint8_t *scanRspData = NULL;
 
     int setAdvertName(int advertStringLen, char *advertString);
+    int writeValue(int handle, int len, char *str);
 
   public:
     int error = BLE_SUCCESS;

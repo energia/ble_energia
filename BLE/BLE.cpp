@@ -508,14 +508,33 @@ int BLE::writeValue(int handle, double value)
   return BLE_SUCCESS;
 }
 
+/*
+ * Use buffer of size len+1 so the null-termination is stored. This way the
+ * stored strings match the functionality of strcpy, which copies it.
+ */
+int BLE::writeValue(int handle, int len, char *str)
+{
+  BLE_Char *bleChar = getChar(handle);
+  if (bleChar == NULL)
+  {
+    return BLE_INVALID_HANDLE;
+  }
+  writeValueHelper(bleChar, (len+1)*sizeof(char));
+  strcpy((char *) bleChar->_value, str);
+  return BLE_SUCCESS;
+}
+
 int BLE::writeValue(int handle, char *str)
 {
-  return BLE_SUCCESS;
+  return writeValue(handle, strlen(str), str);
 }
 
 int BLE::writeValue(int handle, String str)
 {
-  return BLE_SUCCESS;
+  int len = str.length();
+  char *buf = (char *) malloc((len+1)*sizeof(char));
+  str.toCharArray(buf, len+1);
+  return writeValue(handle, len, buf);
 }
 
 static BLE_Char* readValueHelper(int handle, size_t size)
@@ -645,12 +664,34 @@ double BLE::readValue_double(int handle)
 
 char* BLE::readValue_string(int handle)
 {
-  return BLE_SUCCESS;
+  // readValueHelper but with different length handling
+  error = BLE_SUCCESS;
+  BLE_Char *bleChar = getChar(handle);
+  if (bleChar == NULL)
+  {
+    error = BLE_INVALID_HANDLE;
+  }
+  else if (bleChar->_value == NULL)
+  {
+    error = BLE_UNDEFINED_VALUE;
+  }
+  // End readValueHelper
+  if (error == BLE_SUCCESS)
+  {
+    char *buf = (char *) malloc((bleChar->_valueLen)*sizeof(char));
+    strcpy(buf, (char *) bleChar->_value);
+    return buf;
+  }
+  return (char *) BLE_ERROR;
 }
 
+// TO-DO: Return pointer instead? Not sure if ok for Energia.
 String BLE::readValue_String(int handle)
 {
-  return String();
+  char *buf = readValue_string(handle);
+  String str = String(buf);
+  free(buf);
+  return str;
 }
 
 int BLE::serial(void)
