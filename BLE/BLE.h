@@ -13,6 +13,7 @@ class BLE : public Stream
     uint8_t *nonConnAdvertData = NULL;
     uint8_t *scanRspData = NULL;
 
+    int setAdvertName(int advertStringLen, char *advertString);
 
   public:
     int error = BLE_SUCCESS;
@@ -29,7 +30,6 @@ class BLE : public Stream
     int startAdvert(BLE_Advert_Settings advertSettings);
     int stopAdvert(void);
     int setAdvertData(int advertType, uint8_t len, uint8_t *advertData);
-    int setAdvertName(int advertStringLen, char *advertString);
     int setAdvertName(char *advertString);
     int setAdvertName(String *advertString);
 
