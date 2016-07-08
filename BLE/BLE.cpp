@@ -34,6 +34,7 @@
 // From bcomdef.h in the BLE SDK
 #define B_ADDR_LEN 6
 
+BLE *_ble;
 Event_Handle apEvent = NULL;
 char ownAddressString[16] = { 0 };
 uint16_t connHandle = 0;
@@ -67,6 +68,7 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param);
 
 BLE::BLE(byte portType)
 {
+  _ble = this;
   _portType = portType;
 }
 
@@ -449,7 +451,6 @@ int BLE::writeValue(int handle, unsigned int value)
   return BLE_SUCCESS;
 }
 
-
 int BLE::writeValue(int handle, long value)
 {
   BLE_Char *bleChar = getChar(handle);
@@ -510,15 +511,15 @@ int BLE::writeValue(int handle, String str)
 
 BLE_Char* BLE::readValueHelper(int handle, size_t size)
 {
-  error = BLE_SUCCESS;
+  _ble->error = BLE_SUCCESS;
   BLE_Char *bleChar = getChar(handle);
   if (bleChar == NULL)
   {
-    error = BLE_INVALID_HANDLE;
+    _ble->error = BLE_INVALID_HANDLE;
   }
   else if (bleChar->_value == NULL || bleChar->_valueLen != size)
   {
-    error = BLE_UNDEFINED_VALUE;
+    _ble->error = BLE_UNDEFINED_VALUE;
   }
   return bleChar;
 }
