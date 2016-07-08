@@ -10,7 +10,7 @@ long char3Value = 0;
 int char4Value = 0;
 int char6Value = 0;
 char *char7Value = "Hello, World!";
-String char8Value = String("Hello, World!");
+String char8Value = String("The quick brown fox jumped over the lazy dog.");
 
 BLE_Char heartRateChar =
 {

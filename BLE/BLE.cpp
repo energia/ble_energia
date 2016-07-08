@@ -11,6 +11,7 @@
 #include <sap.h>
 #include <snp.h>
 #include <snp_rpc.h>
+#include <hal_defs.h>
 /*
  * This is strictly to force the build system to compile npi into
  * its own object files for the linker to link. It isn't used here.
@@ -58,7 +59,7 @@ static BLE_Char* readValueHelper(int handle, size_t size);
 static uint8_t serviceReadAttrCB(void *context,
                                  uint16_t connectionHandle,
                                  uint16_t charHdl, uint16_t offset,
-                                 uint16_t size, uint16_t *len,
+                                 uint16_t maxSize, uint16_t *len,
                                  uint8_t *pData);
 static uint8_t serviceWriteAttrCB(void *context,
                                   uint16_t connectionHandle,
@@ -791,19 +792,29 @@ static void AP_convertBdAddr2Str(char *str, uint8_t *pAddr) {
 static uint8_t serviceReadAttrCB(void *context,
                                  uint16_t connectionHandle,
                                  uint16_t charHdl, uint16_t offset,
-                                 uint16_t size, uint16_t *len,
+                                 uint16_t maxSize, uint16_t *len,
                                  uint8_t *pData)
 {
+  uint8_t status = SNP_SUCCESS;
   connHandle = connectionHandle;
   BLE_Char *bleChar = getChar(charHdl);
   if (bleChar == NULL)
   {
     *len = 0;
-    return SNP_UNKNOWN_ATTRIBUTE;
+    status = SNP_UNKNOWN_ATTRIBUTE;
   }
-  *len = bleChar->_valueLen;
-  memcpy(pData, (uint8_t *) bleChar->_value, *len);
-  return SNP_SUCCESS;
+  else if (bleChar->_valueLen <= offset)
+  {
+    *len = 0;
+  }
+  else
+  {
+    uint8_t *src = (uint8_t *) bleChar->_value + offset;
+    uint16_t remaining = bleChar->_valueLen - offset;
+    *len = MIN(remaining, maxSize);
+    memcpy(pData, src, *len);
+  }
+  return status;
 }
 
 static uint8_t serviceWriteAttrCB(void *context,
