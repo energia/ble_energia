@@ -51,10 +51,14 @@ static void AP_convertBdAddr2Str(char *str, uint8_t *pAddr);
 static uint8_t getUUIDLen(uint8_t *UUID);
 static void constructService(SAP_Service_t *service, BLE_Service *bleService);
 static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar);
+static void writeValueHelper(BLE_Char *bleChar, size_t size);
+static void writeNotifInd(BLE_Char *bleChar);
+static void charValueInit(BLE_Char *bleChar, size_t size);
+static BLE_Char* readValueHelper(int handle, size_t size);
 static uint8_t serviceReadAttrCB(void *context,
                                  uint16_t connectionHandle,
                                  uint16_t charHdl, uint16_t offset,
-                                 uint16_t size, uint16_t * len,
+                                 uint16_t size, uint16_t *len,
                                  uint8_t *pData);
 static uint8_t serviceWriteAttrCB(void *context,
                                   uint16_t connectionHandle,
@@ -367,13 +371,13 @@ void BLE::terminateConn(byte abruptly)
   return;
 }
 
-void BLE::writeValueHelper(BLE_Char *bleChar, size_t size)
+static void writeValueHelper(BLE_Char *bleChar, size_t size)
 {
   writeNotifInd(bleChar);
   charValueInit(bleChar, size);
 }
 
-void BLE::writeNotifInd(BLE_Char *bleChar)
+static void writeNotifInd(BLE_Char *bleChar)
 {
   if (bleChar->_CCCD)
   {
@@ -394,7 +398,7 @@ void BLE::writeNotifInd(BLE_Char *bleChar)
   }
 }
 
-void BLE::charValueInit(BLE_Char *bleChar, size_t size)
+static void charValueInit(BLE_Char *bleChar, size_t size)
 {
   if (bleChar->_value == NULL)
   {
@@ -509,7 +513,7 @@ int BLE::writeValue(int handle, String str)
   return BLE_SUCCESS;
 }
 
-BLE_Char* BLE::readValueHelper(int handle, size_t size)
+static BLE_Char* readValueHelper(int handle, size_t size)
 {
   _ble->error = BLE_SUCCESS;
   BLE_Char *bleChar = getChar(handle);
@@ -741,7 +745,7 @@ static void AP_convertBdAddr2Str(char *str, uint8_t *pAddr) {
 static uint8_t serviceReadAttrCB(void *context,
                                  uint16_t connectionHandle,
                                  uint16_t charHdl, uint16_t offset,
-                                 uint16_t size, uint16_t * len,
+                                 uint16_t size, uint16_t *len,
                                  uint8_t *pData)
 {
   connHandle = connectionHandle;

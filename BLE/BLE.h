@@ -13,10 +13,6 @@ class BLE : public Stream
     uint8_t *nonConnAdvertData = NULL;
     uint8_t *scanRspData = NULL;
 
-    void writeValueHelper(BLE_Char *bleChar, size_t size);
-    void writeNotifInd(BLE_Char *bleChar);
-    void charValueInit(BLE_Char *bleChar, size_t size);
-    BLE_Char* readValueHelper(int handle, size_t size);
 
   public:
     int error = BLE_SUCCESS;
