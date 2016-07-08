@@ -8,10 +8,10 @@
 #include <Energia.h>
 
 /* Energia BLE status codes */
-#define BLE_SUCCESS             0
-#define BLE_ERROR               1
-#define BLE_INVALID_HANDLE      2
-#define BLE_UNDEFINED_VALUE     3
+#define BLE_SUCCESS             SNP_SUCCESS // 0x00
+#define BLE_ERROR               SNP_FAILURE // 0x83
+#define BLE_INVALID_HANDLE      0x50
+#define BLE_UNDEFINED_VALUE     0x51
 
 /* Type of connection between the user application's
    processor and the bluetooth chip */
