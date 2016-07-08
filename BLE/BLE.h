@@ -42,8 +42,7 @@ class BLE : public Stream
     int setRespLatency(int respLatency); // Measured in number of connection intervals the slave can miss.
     int setBleTimeout(int timeout);
 
-    void terminateConn(void);
-    void terminateConn(byte abruptly);
+    int terminateConn(void);
 
     int writeValue(int handle, char value);
     int writeValue(int handle, unsigned char value);

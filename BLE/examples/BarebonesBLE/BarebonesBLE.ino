@@ -94,12 +94,14 @@ BLE_Service testService =
 
 BLE_Advert_Settings advertSettings =
 {
-  BLE_ADV_MODE_SCANABLE,
+  BLE_ADV_MODE_CONN,
   0, 0,
   BLE_ADV_RESTART_ON_CONN_TERM
 };
 
 BLE ble;
+unsigned long timer = 0;
+unsigned long start;
 
 void setup() {
   Serial.begin(115200);
@@ -125,10 +127,16 @@ void setup() {
   Serial.println(ble.startAdvert(&advertSettings));
   Serial.println("Done");
   pinMode(LED, OUTPUT);
+  start = millis();
 }
 
 // the loop routine runs over and over again forever as a task.
 void loop() {
+  timer++;
+  if (timer % 15 == 0)
+  {
+    ble.terminateConn();
+  }
   digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
   delay(500);               // wait for 100 ms
   digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW

@@ -382,14 +382,12 @@ int BLE::setBleTimeout(int timeout)
   return BLE_SUCCESS;
 }
 
-void BLE::terminateConn(void)
+int BLE::terminateConn(void)
 {
-  return;
-}
-
-void BLE::terminateConn(byte abruptly)
-{
-  return;
+  int status = SAP_setParam(SAP_PARAM_CONN, SAP_CONN_STATE,
+                            sizeof(connHandle), (uint8_t *) &connHandle);
+  Event_pend(apEvent, AP_NONE, AP_EVT_CONN_TERM, BIOS_WAIT_FOREVER);
+  return status;
 }
 
 static void writeValueHelper(BLE_Char *bleChar, size_t size)
