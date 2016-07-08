@@ -9,6 +9,8 @@ int char2Value = 0;
 long char3Value = 0;
 int char4Value = 0;
 int char6Value = 0;
+char *char7Value = "Hello, World!";
+String char8Value = String("Hello, World!");
 
 BLE_Char heartRateChar =
 {
@@ -53,19 +55,41 @@ BLE_Char char4 =
   "Characteristic 4"
 };
 
-BLE_Char char6 =
-{
-  {0xF6, 0xFF},
-  BLE_INDICATABLE,
-  "Characteristic 6"
-};
-
-BLE_Char *simpleServiceChars[] = {&char1, &char2, &char3, &char4, &char6};
+BLE_Char *simpleServiceChars[] = {&char1, &char2, &char3, &char4};
 
 BLE_Service simpleService =
 {
   {0xF0, 0xFF},
-  5, simpleServiceChars
+  4, simpleServiceChars
+};
+
+BLE_Char char6 =
+{
+  {0xE6, 0xF7, 0xA2, 0xA6, 0x7F, 0xEF, 0x47, 0xEF, 0xA2, 0x4B, 0x74, 0xA3, 0x1A, 0x88, 0xEB, 0xD6},
+  BLE_INDICATABLE,
+  "Characteristic 6"
+};
+
+BLE_Char char7 =
+{
+  {0xE7, 0xF7, 0xA2, 0xA6, 0x7F, 0xEF, 0x47, 0xEF, 0xA2, 0x4B, 0x74, 0xA3, 0x1A, 0x88, 0xEB, 0xD6},
+  BLE_READABLE | BLE_WRITABLE | BLE_NOTIFIABLE,
+  "Characteristic 7"
+};
+
+BLE_Char char8 =
+{
+  {0xE8, 0xF7, 0xA2, 0xA6, 0x7F, 0xEF, 0x47, 0xEF, 0xA2, 0x4B, 0x74, 0xA3, 0x1A, 0x88, 0xEB, 0xD6},
+  BLE_READABLE | BLE_WRITABLE | BLE_NOTIFIABLE,
+  "Characteristic 8"
+};
+
+BLE_Char *testServiceChars[] = {&char6, &char7, &char8};
+
+BLE_Service testService =
+{
+  {0xE0, 0xF7, 0xA2, 0xA6, 0x7F, 0xEF, 0x47, 0xEF, 0xA2, 0x4B, 0x74, 0xA3, 0x1A, 0x88, 0xEB, 0xD6},
+  3, testServiceChars
 };
 
 BLE ble;
@@ -78,6 +102,7 @@ void setup() {
   Serial.println("add services:");
   ble.addService(&heartRateService);
   ble.addService(&simpleService);
+  ble.addService(&testService);
   Serial.println("Initializing values.");
   ble.writeValue(heartRateChar.handle, heartRateMeasurement);
   ble.writeValue(char1.handle, char1Value);
@@ -85,6 +110,8 @@ void setup() {
   ble.writeValue(char3.handle, char3Value);
   ble.writeValue(char4.handle, char4Value);
   ble.writeValue(char6.handle, char6Value);
+  ble.writeValue(char7.handle, char7Value);
+  ble.writeValue(char8.handle, char8Value);
   Serial.println("set adv data ");
   ble.setAdvertName("Energia BLE");
   Serial.println("start adv ");
@@ -102,7 +129,7 @@ void loop() {
   heartRateMeasurement += 1;
   ble.writeValue(heartRateChar.handle, heartRateMeasurement);
   ble.writeValue(char4.handle, heartRateMeasurement*2);
-  if (heartRateMeasurement % 20 == 0)
+  if (heartRateMeasurement % 5 == 0)
   {
     ble.writeValue(char6.handle, char6Value + 1);
   }
@@ -116,6 +143,10 @@ void loop() {
   Serial.print(ble.error);Serial.print(" char4Value=");Serial.println(char4Value);
   char6Value = ble.readValue_int(char6.handle);
   Serial.print(ble.error);Serial.print(" char6Value=");Serial.println(char6Value);
+  char7Value = ble.readValue_string(char7.handle);
+  Serial.print(ble.error);Serial.print(" char7Value=");Serial.println(char7Value);
+  char8Value = ble.readValue_String(char8.handle);
+  Serial.print(ble.error);Serial.print(" char8Value=");Serial.println(char8Value);
   Serial.print("Flag 0:");Serial.println(flag0);
   Serial.print("Flag 1:");Serial.println(flag1);
   Serial.print("Flag 2:");Serial.println(flag2);
