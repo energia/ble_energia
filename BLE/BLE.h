@@ -15,6 +15,7 @@ class BLE : public Stream
 
     int setAdvertName(int advertStringLen, char *advertString);
     int writeValue(int handle, int len, char *str);
+    void advertDataInit(void);
 
   public:
     int error = BLE_SUCCESS;
@@ -28,7 +29,7 @@ class BLE : public Stream
     int addService(BLE_Service *bleService);
 
     int startAdvert(void); // Default settings
-    int startAdvert(BLE_Advert_Settings advertSettings);
+    int startAdvert(BLE_Advert_Settings *advertSettings);
     int stopAdvert(void);
     int setAdvertData(int advertType, uint8_t len, uint8_t *advertData);
     int setAdvertName(char *advertString);

@@ -35,9 +35,14 @@
  * Scannable undirected advertisement.
  * Non-connectable undirected advertisement.
  */
-#define BLE_ADV_MODE_CONN       SNP_ADV_TYPE_CONN
-#define BLE_ADV_MODE_SCANABLE   SNP_ADV_TYPE_SCANABLE
-#define BLE_ADV_MODE_NONCONN    SNP_ADV_TYPE_NONCONN
+#define BLE_ADV_MODE_CONN               SNP_ADV_TYPE_CONN
+#define BLE_ADV_MODE_SCANABLE           SNP_ADV_TYPE_SCANABLE
+#define BLE_ADV_MODE_NONCONN            SNP_ADV_TYPE_NONCONN
+
+/* startAdvert connectedBehavior */
+#define BLE_ADV_STOP_ON_CONN            SNP_ADV_STOP_ON_CONN
+#define BLE_ADV_RESTART_ON_CONN_EST     SNP_ADV_RESTART_ON_CONN_EST
+#define BLE_ADV_RESTART_ON_CONN_TERM    SNP_ADV_RESTART_ON_CONN_TERM
 
 /* Characteristic value properties */
 #define BLE_READABLE            SNP_GATT_PROP_READ

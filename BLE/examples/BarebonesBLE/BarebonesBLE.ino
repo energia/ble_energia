@@ -92,6 +92,13 @@ BLE_Service testService =
   3, testServiceChars
 };
 
+BLE_Advert_Settings advertSettings =
+{
+  BLE_ADV_MODE_SCANABLE,
+  0, 0,
+  BLE_ADV_RESTART_ON_CONN_TERM
+};
+
 BLE ble;
 
 void setup() {
@@ -115,7 +122,7 @@ void setup() {
   Serial.println("set adv data ");
   ble.setAdvertName("Energia BLE");
   Serial.println("start adv ");
-  ble.startAdvert();
+  Serial.println(ble.startAdvert(&advertSettings));
   Serial.println("Done");
   pinMode(LED, OUTPUT);
 }

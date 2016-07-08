@@ -246,7 +246,7 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
   sapChar->pLongUUID   = NULL;
 }
 
-int BLE::startAdvert(void)
+void BLE::advertDataInit(void)
 {
   if (nonConnAdvertData == NULL)
   {
@@ -258,15 +258,35 @@ int BLE::startAdvert(void)
     scanRspData = defScanRspData;
     setAdvertData(BLE_ADV_DATA_SCANRSP, sizeof(defScanRspData), defScanRspData);
   }
-  uint8_t enableAdv = SAP_ADV_STATE_ENABLE;
-  uint8_t status = SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE, 1, &enableAdv);
-  Event_pend(apEvent, AP_NONE, AP_EVT_ADV_ENB, BIOS_WAIT_FOREVER);
-  return status;
 }
 
-int BLE::startAdvert(BLE_Advert_Settings advertSettings)
+int BLE::startAdvert(void)
 {
-  return BLE_SUCCESS;
+  return startAdvert((BLE_Advert_Settings *) NULL);
+}
+
+int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
+{
+  advertDataInit();
+
+  uint8_t status;
+  if (advertSettings == NULL)
+  {
+    uint8_t enableAdv = SAP_ADV_STATE_ENABLE;
+    status = SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE, 1, &enableAdv);
+  }
+  else
+  {
+    snpStartAdvReq_t lReq;
+    lReq.type = advertSettings->advertMode;
+    lReq.timeout = advertSettings->timeout;
+    lReq.interval = advertSettings->interval;
+    lReq.behavior = advertSettings->connectedBehavior;
+    status = SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE,
+                          sizeof(snpStartAdvReq_t), (uint8_t *) &lReq);
+  }
+  Event_pend(apEvent, AP_NONE, AP_EVT_ADV_ENB, BIOS_WAIT_FOREVER);
+  return status;
 }
 
 int BLE::stopAdvert(void)
