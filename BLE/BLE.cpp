@@ -158,9 +158,24 @@ int BLE::addService(BLE_Service *bleService)
     {
       bleService->chars[i]->handle = service->charAttrHandles[i].valueHandle;
       bleService->chars[i]->_CCCDHandle = service->charAttrHandles[i].cccdHandle;
+      if (service->charTable[i].pUserDesc)
+      {
+        free(service->charTable[i].pUserDesc);
+      }
+      if (service->charTable[i].pCccd)
+      {
+        free(service->charTable[i].pCccd);
+      }
+      if (service->charTable[i].pFormat)
+      {
+        free(service->charTable[i].pFormat);
+      }
     }
     addServiceNode(bleService);
   }
+  free(service->charTable);
+  free(service->charAttrHandles);
+  free(service);
   return status;
 }
 
@@ -259,6 +274,14 @@ void BLE::advertDataInit(void)
     setAdvertData(BLE_ADV_DATA_SCANRSP, sizeof(defScanRspData), defScanRspData);
   }
 }
+
+// void BLE::advertDataReset(void)
+// {
+//   if (scanRspData && scanRspData != defScanRspData)
+//   {
+//     free(scanRspData);
+//   }
+// }
 
 int BLE::startAdvert(void)
 {

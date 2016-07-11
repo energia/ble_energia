@@ -134,10 +134,6 @@ void setup() {
 // the loop routine runs over and over again forever as a task.
 void loop() {
   timer++;
-  if (timer % 15 == 0)
-  {
-    ble.terminateConn();
-  }
   digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
   delay(500);               // wait for 100 ms
   digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
@@ -169,10 +165,5 @@ void loop() {
   Serial.print("Flag 3:");Serial.println(flag3);
   Serial.print("Flag 4:");Serial.println(flag4);
   Serial.print("Flag 5:");Serial.println(flag5);
-  flag0 = 0;
-  flag1 = 0;
-  flag2 = 0;
-  flag3 = 0;
-  flag4 = 0;
-  flag5 = 0;
+  flag0 = 0; flag1 = 0; flag2 = 0; flag3 = 0; flag4 = 0; flag5 = 0;
 }
