@@ -15,8 +15,9 @@ class BLE : public Stream
     uint8_t *scanRspData = NULL;
 
     int setAdvertName(int advertStringLen, char *advertString);
-    int writeValue(int handle, int len, char *str);
+    int writeValue(BLE_Char *bleChar, int len, char *str);
     void advertDataInit(void);
+    bool isSerialEnabled(void);
 
   public:
     int error = BLE_SUCCESS;
@@ -44,29 +45,29 @@ class BLE : public Stream
 
     int terminateConn(void);
 
-    int writeValue(int handle, char value);
-    int writeValue(int handle, unsigned char value);
-    int writeValue(int handle, int value);
-    int writeValue(int handle, unsigned int value);
-    int writeValue(int handle, long value);
-    int writeValue(int handle, unsigned long value);
-    int writeValue(int handle, float value);
-    int writeValue(int handle, double value);
-    int writeValue(int handle, char *str); // Char array
-    int writeValue(int handle, String str); // Object, calls fxn for char array
-    boolean readValue_boolean(int handle);
-    char readValue_char(int handle);
-    unsigned char readValue_uchar(int handle);
-    byte readValue_byte(int handle);
-    int readValue_int(int handle);
-    unsigned int readValue_uint(int handle);
-    word readValue_word(int handle);
-    long readValue_long(int handle);
-    unsigned long readValue_ulong(int handle);
-    float readValue_float(int handle);
-    double readValue_double(int handle);
-    char* readValue_string(int handle);
-    String readValue_String(int handle);
+    int writeValue(BLE_Char *bleChar, char value);
+    int writeValue(BLE_Char *bleChar, unsigned char value);
+    int writeValue(BLE_Char *bleChar, int value);
+    int writeValue(BLE_Char *bleChar, unsigned int value);
+    int writeValue(BLE_Char *bleChar, long value);
+    int writeValue(BLE_Char *bleChar, unsigned long value);
+    int writeValue(BLE_Char *bleChar, float value);
+    int writeValue(BLE_Char *bleChar, double value);
+    int writeValue(BLE_Char *bleChar, char *str); // Char array
+    int writeValue(BLE_Char *bleChar, String str); // Object, calls fxn for char array
+    boolean readValue_boolean(BLE_Char *bleChar);
+    char readValue_char(BLE_Char *bleChar);
+    unsigned char readValue_uchar(BLE_Char *bleChar);
+    byte readValue_byte(BLE_Char *bleChar);
+    int readValue_int(BLE_Char *bleChar);
+    unsigned int readValue_uint(BLE_Char *bleChar);
+    word readValue_word(BLE_Char *bleChar);
+    long readValue_long(BLE_Char *bleChar);
+    unsigned long readValue_ulong(BLE_Char *bleChar);
+    float readValue_float(BLE_Char *bleChar);
+    double readValue_double(BLE_Char *bleChar);
+    char* readValue_string(BLE_Char *bleChar);
+    String readValue_String(BLE_Char *bleChar);
 
     int serial(void);
     int iBeacon(void);

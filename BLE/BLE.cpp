@@ -35,7 +35,6 @@
 // From bcomdef.h in the BLE SDK
 #define B_ADDR_LEN 6
 
-BLE *_ble;
 Event_Handle apEvent = NULL;
 char ownAddressString[16] = { 0 };
 uint16_t connHandle = 0;
@@ -53,10 +52,9 @@ static void AP_convertBdAddr2Str(char *str, uint8_t *pAddr);
 static uint8_t getUUIDLen(uint8_t *UUID);
 static void constructService(SAP_Service_t *service, BLE_Service *bleService);
 static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar);
-static void writeValueHelper(BLE_Char *bleChar, size_t size);
 static void writeNotifInd(BLE_Char *bleChar);
-static void charValueInit(BLE_Char *bleChar, size_t size);
-static BLE_Char* readValueHelper(int handle, size_t size);
+static uint8_t charValueInit(BLE_Char *bleChar, size_t size);
+static uint8_t readValueValidateSize(BLE_Char *bleChar, size_t size);
 static uint8_t serviceReadAttrCB(void *context,
                                  uint16_t connectionHandle,
                                  uint16_t charHdl, uint16_t offset,
@@ -74,7 +72,6 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param);
 
 BLE::BLE(byte portType)
 {
-  _ble = this;
   _portType = portType;
 }
 
@@ -138,11 +135,6 @@ int BLE::begin(void)
 }
 
 int BLE::end(void)
-{
-  return BLE_NOT_IMPLEMENTED;
-}
-
-int BLE::useProfile(BLE_Profile *profile)
 {
   return BLE_NOT_IMPLEMENTED;
 }
@@ -221,6 +213,8 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
   bleChar->_value = NULL;
   bleChar->_valueLen = 0;
   bleChar->_CCCD = 0;
+  bleChar->_CCCDHandle = 0;
+  bleChar->_resizable = false;
   sapChar->UUID.len    = getUUIDLen(bleChar->UUID);
   sapChar->UUID.pUUID  = bleChar->UUID;
   sapChar->properties  = bleChar->properties;
@@ -412,12 +406,6 @@ int BLE::terminateConn(void)
   return status;
 }
 
-static void writeValueHelper(BLE_Char *bleChar, size_t size)
-{
-  writeNotifInd(bleChar);
-  charValueInit(bleChar, size);
-}
-
 static void writeNotifInd(BLE_Char *bleChar)
 {
   if (bleChar->_CCCD)
@@ -439,301 +427,297 @@ static void writeNotifInd(BLE_Char *bleChar)
   }
 }
 
-static void charValueInit(BLE_Char *bleChar, size_t size)
+static uint8_t charValueInit(BLE_Char *bleChar, size_t size)
 {
-  if (bleChar->_value && bleChar->_valueLen != size)
+  if (bleChar->_value && bleChar->_valueLen < size)
   {
-    free(bleChar->_value);
-    bleChar->_value == NULL;
+    if (bleChar->_resizable)
+    {
+      free(bleChar->_value);
+      bleChar->_value == NULL;
+    }
+    else
+    {
+      return BLE_INVALID_PARAMETERS;
+    }
   }
   if (bleChar->_value == NULL)
   {
     bleChar->_value = (void *) malloc(size);
     bleChar->_valueLen = size;
   }
-}
-
-int BLE::writeValue(int handle, char value)
-{
-  BLE_Char *bleChar = getChar(handle);
-  if (bleChar == NULL)
-  {
-    return BLE_INVALID_HANDLE;
-  }
-  writeValueHelper(bleChar, sizeof(char));
-  *(char *) bleChar->_value = value;
   return BLE_SUCCESS;
 }
 
-int BLE::writeValue(int handle, unsigned char value)
+int BLE::writeValue(BLE_Char *bleChar, char value)
 {
-  BLE_Char *bleChar = getChar(handle);
-  if (bleChar == NULL)
+  int status = charValueInit(bleChar, sizeof(char));
+  if (status == BLE_SUCCESS)
   {
-    return BLE_INVALID_HANDLE;
+    *(char *) bleChar->_value = value;
+    writeNotifInd(bleChar);
   }
-  writeValueHelper(bleChar, sizeof(unsigned char));
-  *(unsigned char *) bleChar->_value = value;
-  return BLE_SUCCESS;
+  return status;
 }
 
-int BLE::writeValue(int handle, int value)
+int BLE::writeValue(BLE_Char *bleChar, unsigned char value)
 {
-  BLE_Char *bleChar = getChar(handle);
-  if (bleChar == NULL)
+  int status = charValueInit(bleChar, sizeof(unsigned char));
+  if (status == BLE_SUCCESS)
   {
-    return BLE_INVALID_HANDLE;
+    *(unsigned char *) bleChar->_value = value;
+    writeNotifInd(bleChar);
   }
-  writeValueHelper(bleChar, sizeof(int));
-  *(int *) bleChar->_value = value;
-  return BLE_SUCCESS;
+  return status;
 }
 
-int BLE::writeValue(int handle, unsigned int value)
+int BLE::writeValue(BLE_Char *bleChar, int value)
 {
-  BLE_Char *bleChar = getChar(handle);
-  if (bleChar == NULL)
+  int status = charValueInit(bleChar, sizeof(int));
+  if (status == BLE_SUCCESS)
   {
-    return BLE_INVALID_HANDLE;
+    *(int *) bleChar->_value = value;
+    writeNotifInd(bleChar);
   }
-  writeValueHelper(bleChar, sizeof(unsigned int));
-  *(unsigned int *) bleChar->_value = value;
-  return BLE_SUCCESS;
+  return status;
 }
 
-int BLE::writeValue(int handle, long value)
+int BLE::writeValue(BLE_Char *bleChar, unsigned int value)
 {
-  BLE_Char *bleChar = getChar(handle);
-  if (bleChar == NULL)
+  int status = charValueInit(bleChar, sizeof(unsigned int));
+  if (status == BLE_SUCCESS)
   {
-    return BLE_INVALID_HANDLE;
+    *(unsigned int *) bleChar->_value = value;
+    writeNotifInd(bleChar);
   }
-  writeValueHelper(bleChar, sizeof(long));
-  *(long *) bleChar->_value = value;
-  return BLE_SUCCESS;
+  return status;
 }
 
-int BLE::writeValue(int handle, unsigned long value)
+int BLE::writeValue(BLE_Char *bleChar, long value)
 {
-  BLE_Char *bleChar = getChar(handle);
-  if (bleChar == NULL)
+  int status = charValueInit(bleChar, sizeof(long));
+  if (status == BLE_SUCCESS)
   {
-    return BLE_INVALID_HANDLE;
+    *(long *) bleChar->_value = value;
+    writeNotifInd(bleChar);
   }
-  writeValueHelper(bleChar, sizeof(unsigned long));
-  *(unsigned long *) bleChar->_value = value;
-  return BLE_SUCCESS;
+  return status;
 }
 
-int BLE::writeValue(int handle, float value)
+int BLE::writeValue(BLE_Char *bleChar, unsigned long value)
 {
-  BLE_Char *bleChar = getChar(handle);
-  if (bleChar == NULL)
+  int status = charValueInit(bleChar, sizeof(unsigned long));
+  if (status == BLE_SUCCESS)
   {
-    return BLE_INVALID_HANDLE;
+    *(unsigned long *) bleChar->_value = value;
+    writeNotifInd(bleChar);
   }
-  writeValueHelper(bleChar, sizeof(float));
-  *(float *) bleChar->_value = value;
-  return BLE_SUCCESS;
+  return status;
 }
 
-int BLE::writeValue(int handle, double value)
+int BLE::writeValue(BLE_Char *bleChar, float value)
 {
-  BLE_Char *bleChar = getChar(handle);
-  if (bleChar == NULL)
+  int status = charValueInit(bleChar, sizeof(float));
+  if (status == BLE_SUCCESS)
   {
-    return BLE_INVALID_HANDLE;
+    *(float *) bleChar->_value = value;
+    writeNotifInd(bleChar);
   }
-  writeValueHelper(bleChar, sizeof(double));
-  *(double *) bleChar->_value = value;
-  return BLE_SUCCESS;
+  return status;
+}
+
+int BLE::writeValue(BLE_Char *bleChar, double value)
+{
+  int status = charValueInit(bleChar, sizeof(double));
+  if (status == BLE_SUCCESS)
+  {
+    *(double *) bleChar->_value = value;
+    writeNotifInd(bleChar);
+  }
+  return status;
 }
 
 /*
  * Use buffer of size len+1 so the null-termination is stored. This way the
  * stored strings match the functionality of strcpy, which copies it.
  */
-int BLE::writeValue(int handle, int len, char *str)
+int BLE::writeValue(BLE_Char *bleChar, int len, char *str)
 {
-  BLE_Char *bleChar = getChar(handle);
-  if (bleChar == NULL)
+  bleChar->_resizable = true;
+  int status = charValueInit(bleChar, (len+1)*sizeof(char));
+  if (status == BLE_SUCCESS)
   {
-    return BLE_INVALID_HANDLE;
+    strcpy((char *) bleChar->_value, str);
+    writeNotifInd(bleChar);
   }
-  writeValueHelper(bleChar, (len+1)*sizeof(char));
-  strcpy((char *) bleChar->_value, str);
-  return BLE_SUCCESS;
+  return status;
 }
 
-int BLE::writeValue(int handle, char *str)
+int BLE::writeValue(BLE_Char *bleChar, char *str)
 {
-  return writeValue(handle, strlen(str), str);
+  return writeValue(bleChar, strlen(str), str);
 }
 
-int BLE::writeValue(int handle, String str)
+int BLE::writeValue(BLE_Char *bleChar, String str)
 {
   int len = str.length();
   char *buf = (char *) malloc((len+1)*sizeof(char));
   str.toCharArray(buf, len+1);
-  int status = writeValue(handle, len, buf);
+  int status = writeValue(bleChar, len, buf);
   free(buf);
   return status;
 }
 
-static BLE_Char* readValueHelper(int handle, size_t size)
+static uint8_t readValueValidateSize(BLE_Char *bleChar, size_t size)
 {
-  _ble->error = BLE_SUCCESS;
-  BLE_Char *bleChar = getChar(handle);
-  if (bleChar == NULL)
+  if (bleChar->_value == NULL || bleChar->_valueLen != size)
   {
-    _ble->error = BLE_INVALID_HANDLE;
+    return BLE_UNDEFINED_VALUE;
   }
-  else if (bleChar->_value == NULL || bleChar->_valueLen != size)
-  {
-    _ble->error = BLE_UNDEFINED_VALUE;
-  }
-  return bleChar;
+  return BLE_SUCCESS;
 }
 
-boolean BLE::readValue_boolean(int handle)
+boolean BLE::readValue_boolean(BLE_Char *bleChar)
 {
-  BLE_Char *bleChar = readValueHelper(handle, sizeof(boolean));
+  error = readValueValidateSize(bleChar, sizeof(boolean));
   if (error == BLE_SUCCESS)
   {
     return *(boolean *) bleChar->_value;
   }
-  return BLE_ERROR;
+  return 0;
 }
 
-char BLE::readValue_char(int handle)
+char BLE::readValue_char(BLE_Char *bleChar)
 {
-  BLE_Char *bleChar = readValueHelper(handle, sizeof(char));
+  error = readValueValidateSize(bleChar, sizeof(char));
   if (error == BLE_SUCCESS)
   {
     return *(char *) bleChar->_value;
   }
-  return BLE_ERROR;
+  return 0;
 }
 
-unsigned char BLE::readValue_uchar(int handle)
+unsigned char BLE::readValue_uchar(BLE_Char *bleChar)
 {
-  BLE_Char *bleChar = readValueHelper(handle, sizeof(unsigned char));
+  error = readValueValidateSize(bleChar, sizeof(unsigned char));
   if (error == BLE_SUCCESS)
   {
     return *(unsigned char *) bleChar->_value;
   }
-  return BLE_ERROR;
+  return 0;
 }
 
-byte BLE::readValue_byte(int handle)
+byte BLE::readValue_byte(BLE_Char *bleChar)
 {
-  BLE_Char *bleChar = readValueHelper(handle, sizeof(byte));
+  error = readValueValidateSize(bleChar, sizeof(byte));
   if (error == BLE_SUCCESS)
   {
     return *(byte *) bleChar->_value;
   }
-  return BLE_ERROR;
+  return 0;
 }
 
-int BLE::readValue_int(int handle)
+int BLE::readValue_int(BLE_Char *bleChar)
 {
-  BLE_Char *bleChar = readValueHelper(handle, sizeof(int));
+  error = readValueValidateSize(bleChar, sizeof(int));
   if (error == BLE_SUCCESS)
   {
     return *(int *) bleChar->_value;
   }
-  return BLE_ERROR;
+  return 0;
 }
 
-unsigned int BLE::readValue_uint(int handle)
+unsigned int BLE::readValue_uint(BLE_Char *bleChar)
 {
-  BLE_Char *bleChar = readValueHelper(handle, sizeof(unsigned int));
+  error = readValueValidateSize(bleChar, sizeof(unsigned int));
   if (error == BLE_SUCCESS)
   {
     return *(unsigned int *) bleChar->_value;
   }
-  return BLE_ERROR;
+  return 0;
 }
 
-word BLE::readValue_word(int handle)
+word BLE::readValue_word(BLE_Char *bleChar)
 {
-  BLE_Char *bleChar = readValueHelper(handle, sizeof(word));
+  error = readValueValidateSize(bleChar, sizeof(word));
   if (error == BLE_SUCCESS)
   {
     return *(word *) bleChar->_value;
   }
-  return BLE_ERROR;
+  return 0;
 }
 
-long BLE::readValue_long(int handle)
+long BLE::readValue_long(BLE_Char *bleChar)
 {
-  BLE_Char *bleChar = readValueHelper(handle, sizeof(long));
+  error = readValueValidateSize(bleChar, sizeof(long));
   if (error == BLE_SUCCESS)
   {
     return *(long *) bleChar->_value;
   }
-  return BLE_ERROR;
+  return 0;
 }
 
-unsigned long BLE::readValue_ulong(int handle)
+unsigned long BLE::readValue_ulong(BLE_Char *bleChar)
 {
-  BLE_Char *bleChar = readValueHelper(handle, sizeof(unsigned long));
+  error = readValueValidateSize(bleChar, sizeof(unsigned long));
   if (error == BLE_SUCCESS)
   {
     return *(unsigned long *) bleChar->_value;
   }
-  return BLE_ERROR;
+  return 0;
 }
 
-float BLE::readValue_float(int handle)
+float BLE::readValue_float(BLE_Char *bleChar)
 {
-  BLE_Char *bleChar = readValueHelper(handle, sizeof(float));
+  error = readValueValidateSize(bleChar, sizeof(float));
   if (error == BLE_SUCCESS)
   {
     return *(float *) bleChar->_value;
   }
-  return BLE_ERROR;
+  return 0;
 }
 
-double BLE::readValue_double(int handle)
+double BLE::readValue_double(BLE_Char *bleChar)
 {
-  BLE_Char *bleChar = readValueHelper(handle, sizeof(double));
+  error = readValueValidateSize(bleChar, sizeof(double));
   if (error == BLE_SUCCESS)
   {
     return *(double *) bleChar->_value;
   }
-  return BLE_ERROR;
+  return 0;
 }
 
-char* BLE::readValue_string(int handle)
+char* BLE::readValue_string(BLE_Char *bleChar)
 {
   // readValueHelper but with different length handling
   error = BLE_SUCCESS;
-  BLE_Char *bleChar = getChar(handle);
-  if (bleChar == NULL)
-  {
-    error = BLE_INVALID_HANDLE;
-  }
-  else if (bleChar->_value == NULL)
+  if (bleChar->_value == NULL)
   {
     error = BLE_UNDEFINED_VALUE;
   }
-  // End readValueHelper
   if (error == BLE_SUCCESS)
   {
     char *buf = (char *) malloc((bleChar->_valueLen)*sizeof(char));
     strcpy(buf, (char *) bleChar->_value);
     return buf;
   }
-  return (char *) BLE_ERROR;
+  return NULL;
 }
 
 // TO-DO: Return pointer instead? Not sure if ok for Energia.
-String BLE::readValue_String(int handle)
+String BLE::readValue_String(BLE_Char *bleChar)
 {
-  char *buf = readValue_string(handle);
-  String str = String(buf);
-  free(buf);
+  char *buf = readValue_string(bleChar);
+  String str;
+  if (buf)
+  {
+    str = String(buf);
+    free(buf);
+  }
+  else
+  {
+    str = String();
+  }
   return str;
 }
 
@@ -886,13 +870,17 @@ static uint8_t serviceWriteAttrCB(void *context,
 {
   connHandle = connectionHandle;
   BLE_Char *bleChar = getChar(charHdl);
+  uint8_t status = SNP_SUCCESS;
   if (bleChar == NULL)
   {
-    return SNP_UNKNOWN_ATTRIBUTE;
+    status = SNP_UNKNOWN_ATTRIBUTE;
   }
-  charValueInit(bleChar, len);
-  memcpy((uint8_t *) bleChar->_value, pData, len);
-  return SNP_SUCCESS;
+  status = charValueInit(bleChar, len);
+  if (status == SNP_SUCCESS)
+  {
+    memcpy((uint8_t *) bleChar->_value, pData, len);
+  }
+  return status;
 }
 
 static uint8_t serviceCCCDIndCB(void *context,
