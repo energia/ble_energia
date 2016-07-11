@@ -10,15 +10,15 @@ class BLE : public Stream
 {
   private:
     uint8_t _portType; // UART or SPI connection with network processor
-    uint8_t *nonConnAdvertData;
-    uint8_t *scanRspData;
+    uint8_t *nonConnAdvertData = NULL;
+    uint8_t *scanRspData = NULL;
 
     int setAdvertName(int advertStringLen, char *advertString);
     int writeValue(int handle, int len, char *str);
     void advertDataInit(void);
 
   public:
-    int error;
+    int error = BLE_SUCCESS;
 
     BLE(byte portType=BLE_PORT_UART);
 

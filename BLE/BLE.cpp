@@ -75,9 +75,6 @@ BLE::BLE(byte portType)
 {
   _ble = this;
   _portType = portType;
-  *nonConnAdvertData = NULL;
-  *scanRspData = NULL;
-  error = BLE_SUCCESS;
 }
 
 int BLE::begin(void)
