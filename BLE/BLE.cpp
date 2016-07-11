@@ -39,6 +39,7 @@ BLE *_ble;
 Event_Handle apEvent = NULL;
 char ownAddressString[16] = { 0 };
 uint16_t connHandle = 0;
+bool serialEnabled = false;
 
 int flag0 = 0;
 int flag1 = 0;
@@ -761,29 +762,49 @@ int BLE::eddystone(void)
   return BLE_NOT_IMPLEMENTED;
 }
 
+inline bool BLE::isSerialEnabled(void)
+{
+  return serialEnabled;
+}
+
 int BLE::available(void)
 {
-  return BLE_NOT_IMPLEMENTED;
+  if (!isSerialEnabled())
+  {
+    return BLE_SERIAL_DISABLED;
+  }
 }
 
 int BLE::read(void)
 {
-  return BLE_NOT_IMPLEMENTED;
+  if (!isSerialEnabled())
+  {
+    return BLE_SERIAL_DISABLED;
+  }
 }
 
 int BLE::peek(void)
 {
-  return BLE_NOT_IMPLEMENTED;
+  if (!isSerialEnabled())
+  {
+    return BLE_SERIAL_DISABLED;
+  }
 }
 
 void BLE::flush(void)
 {
-  return;
+  if (!isSerialEnabled())
+  {
+    return;
+  }
 }
 
 size_t BLE::write(uint8_t c)
 {
-  return BLE_SUCCESS;
+  if (!isSerialEnabled())
+  {
+    return BLE_SERIAL_DISABLED;
+  }
 }
 
 static void AP_asyncCB(uint8_t cmd1, void *pParams) {
