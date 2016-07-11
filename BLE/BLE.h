@@ -26,7 +26,6 @@ class BLE : public Stream
     int begin(void);
     int end(void);
 
-    int useProfile(BLE_Profile *profile); // For predefined profiles
     int addService(BLE_Service *bleService);
 
     int startAdvert(void); // Default settings

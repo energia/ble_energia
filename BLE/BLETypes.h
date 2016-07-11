@@ -96,12 +96,6 @@ typedef struct
 
 typedef struct
 {
-  byte              numServices;
-  BLE_Service       **services;
-} BLE_Profile;
-
-typedef struct
-{
   byte advertMode;
   int timeout; // How long to advertise for (in ms), 0 for indefinitely
   int interval; // Advertising Interval (n * 0.625 ms), 0 for 100ms default
