@@ -327,10 +327,18 @@ int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
   {
     if (advertType == BLE_ADV_DATA_NOTCONN)
     {
+      if (nonConnAdvertData && nonConnAdvertData != defAdvertData)
+      {
+        free(defAdvertData);
+      }
       nonConnAdvertData = advertData;
     }
     else if (advertType == BLE_ADV_DATA_SCANRSP)
     {
+      if (scanRspData && scanRspData != defScanRspData)
+      {
+        free(defScanRspData);
+      }
       scanRspData = advertData;
     }
   }
@@ -345,10 +353,6 @@ int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
  */
 int BLE::setAdvertName(int advertStringLen, char *advertString)
 {
-  if (scanRspData && scanRspData != defScanRspData)
-  {
-    free(scanRspData);
-  }
   uint8_t newSize = sizeof(defScanRspData) - defScanRspData[0]
                   + 1 + advertStringLen;
   uint8_t *newData = (uint8_t *) malloc(newSize);
@@ -372,7 +376,9 @@ int BLE::setAdvertName(String *advertString)
   int len = (*advertString).length();
   char *buf = (char *) malloc((len+1)*sizeof(char));
   (*advertString).toCharArray(buf, len);
-  return setAdvertName(len, buf);
+  int status = setAdvertName(len, buf);
+  free(buf);
+  return status;
 }
 
 int BLE::setConnParams(BLE_Conn_Params *connParams)
@@ -576,7 +582,9 @@ int BLE::writeValue(int handle, String str)
   int len = str.length();
   char *buf = (char *) malloc((len+1)*sizeof(char));
   str.toCharArray(buf, len+1);
-  return writeValue(handle, len, buf);
+  int status = writeValue(handle, len, buf);
+  free(buf);
+  return status;
 }
 
 static BLE_Char* readValueHelper(int handle, size_t size)
