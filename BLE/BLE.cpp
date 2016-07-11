@@ -138,12 +138,12 @@ int BLE::begin(void)
 
 int BLE::end(void)
 {
-  return BLE_SUCCESS;
+  return BLE_NOT_IMPLEMENTED;
 }
 
 int BLE::useProfile(BLE_Profile *profile)
 {
-  return BLE_SUCCESS;
+  return BLE_NOT_IMPLEMENTED;
 }
 
 int BLE::addService(BLE_Service *bleService)
@@ -275,14 +275,6 @@ void BLE::advertDataInit(void)
   }
 }
 
-// void BLE::advertDataReset(void)
-// {
-//   if (scanRspData && scanRspData != defScanRspData)
-//   {
-//     free(scanRspData);
-//   }
-// }
-
 int BLE::startAdvert(void)
 {
   return startAdvert((BLE_Advert_Settings *) NULL);
@@ -383,32 +375,32 @@ int BLE::setAdvertName(String *advertString)
 
 int BLE::setConnParams(BLE_Conn_Params *connParams)
 {
-  return BLE_SUCCESS;
+  return BLE_NOT_IMPLEMENTED;
 }
 
 int BLE::setGapParam(int paramId, int Value)
 {
-  return BLE_SUCCESS;
+  return BLE_NOT_IMPLEMENTED;
 }
 
 int BLE::setMinConnInt(int minConnInt)
 {
-  return BLE_SUCCESS;
+  return BLE_NOT_IMPLEMENTED;
 }
 
 int BLE::setMaxConnInt(int maxConnInt)
 {
-  return BLE_SUCCESS;
+  return BLE_NOT_IMPLEMENTED;
 }
 
 int BLE::setRespLatency(int respLatency)
 {
-  return BLE_SUCCESS;
+  return BLE_NOT_IMPLEMENTED;
 }
 
 int BLE::setBleTimeout(int timeout)
 {
-  return BLE_SUCCESS;
+  return BLE_NOT_IMPLEMENTED;
 }
 
 int BLE::terminateConn(void)
@@ -746,42 +738,42 @@ String BLE::readValue_String(int handle)
 
 int BLE::serial(void)
 {
-  return BLE_SUCCESS;
+  return BLE_NOT_IMPLEMENTED;
 }
 
 int BLE::iBeacon(void)
 {
-  return BLE_SUCCESS;
+  return BLE_NOT_IMPLEMENTED;
 }
 
 int BLE::nordicBeacon(void)
 {
-  return BLE_SUCCESS;
+  return BLE_NOT_IMPLEMENTED;
 }
 
 int BLE::uriBeacon(void)
 {
-  return BLE_SUCCESS;
+  return BLE_NOT_IMPLEMENTED;
 }
 
 int BLE::eddystone(void)
 {
-  return BLE_SUCCESS;
+  return BLE_NOT_IMPLEMENTED;
 }
 
 int BLE::available(void)
 {
-  return BLE_SUCCESS;
+  return BLE_NOT_IMPLEMENTED;
 }
 
 int BLE::read(void)
 {
-  return BLE_SUCCESS;
+  return BLE_NOT_IMPLEMENTED;
 }
 
 int BLE::peek(void)
 {
-  return BLE_SUCCESS;
+  return BLE_NOT_IMPLEMENTED;
 }
 
 void BLE::flush(void)

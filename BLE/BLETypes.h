@@ -12,6 +12,7 @@
 #define BLE_ERROR               SNP_FAILURE // 0x83
 #define BLE_INVALID_HANDLE      0x50
 #define BLE_UNDEFINED_VALUE     0x51
+#define BLE_NOT_IMPLEMENTED     0x52
 
 /* Type of connection between the user application's
    processor and the bluetooth chip */
