@@ -723,11 +723,6 @@ String BLE::readValue_String(BLE_Char *bleChar)
   return str;
 }
 
-int BLE::serial(void)
-{
-  return BLE_NOT_IMPLEMENTED;
-}
-
 int BLE::iBeacon(void)
 {
   return BLE_NOT_IMPLEMENTED;
@@ -750,14 +745,24 @@ int BLE::eddystone(void)
 
 inline bool BLE::isSerialEnabled(void)
 {
+  error = serialEnabled ? BLE_SUCCESS : BLE_SERIAL_DISABLED;
   return serialEnabled;
+}
+
+int BLE::serial(void)
+{
+  addService(&serialService);
+  writeValue(&txChar, "defTX");
+  writeValue(&rxChar, "defRX");
+  serialEnabled = true;
+  return BLE_SUCCESS;
 }
 
 int BLE::available(void)
 {
   if (!isSerialEnabled())
   {
-    return BLE_SERIAL_DISABLED;
+    return 0;
   }
 }
 
@@ -765,7 +770,7 @@ int BLE::read(void)
 {
   if (!isSerialEnabled())
   {
-    return BLE_SERIAL_DISABLED;
+    return 0;
   }
 }
 
@@ -773,7 +778,7 @@ int BLE::peek(void)
 {
   if (!isSerialEnabled())
   {
-    return BLE_SERIAL_DISABLED;
+    return 0;
   }
 }
 
@@ -789,9 +794,28 @@ size_t BLE::write(uint8_t c)
 {
   if (!isSerialEnabled())
   {
-    return BLE_SERIAL_DISABLED;
+    return 0;
   }
+  error = writeValue(&txChar, c);
+  if (error == BLE_SUCCESS)
+  {
+    return 1;
+  }
+  return 0;
 }
+
+size_t BLE::write(const uint8_t *buffer, size_t size)
+{
+  if (!isSerialEnabled())
+  {
+    return 0;
+  }
+  error = writeValue(&txChar, buffer);
+  if (error == BLE_SUCCESS)
+  {
+    return size;
+  }
+  return 0;}
 
 static void AP_asyncCB(uint8_t cmd1, void *pParams) {
   switch (SNP_GET_OPCODE_HDR_CMD1(cmd1)) {
