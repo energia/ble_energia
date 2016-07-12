@@ -36,7 +36,6 @@
 #define B_ADDR_LEN 6
 
 Event_Handle apEvent = NULL;
-char ownAddressString[16] = { 0 };
 uint16_t connHandle = 0;
 bool serialEnabled = false;
 
@@ -48,7 +47,6 @@ int flag4 = 0;
 int flag5 = 0;
 
 static void AP_asyncCB(uint8_t cmd1, void *pParams);
-static void AP_convertBdAddr2Str(char *str, uint8_t *pAddr);
 static uint8_t getUUIDLen(uint8_t *UUID);
 static void constructService(SAP_Service_t *service, BLE_Service *bleService);
 static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar);
@@ -127,9 +125,6 @@ int BLE::begin(void)
     SAP_reset();
     Event_pend(apEvent, AP_NONE, AP_EVT_PUI, BIOS_WAIT_FOREVER);
   }
-
-  // Gets device MAC address from network processor
-  SAP_setParam(SAP_PARAM_HCI, SNP_HCI_OPCODE_READ_BDADDR, 0, NULL);
 
   return BLE_SUCCESS;
 }
@@ -803,11 +798,6 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams) {
         case SNP_HCI_CMD_RSP: {
           snpHciCmdRsp_t *hciRsp = (snpHciCmdRsp_t *) pParams;
           switch (hciRsp->opcode) {
-            case SNP_HCI_OPCODE_READ_BDADDR:
-              // Update NWP Addr String
-              AP_convertBdAddr2Str(ownAddressString, hciRsp->pData);
-              // Log_info1("Got own address: 0x%s", (uintptr_t)ownAddressString);
-              break;
             default:
               break;
           }
@@ -819,20 +809,6 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams) {
     default:
       break;
   }
-}
-
-static void AP_convertBdAddr2Str(char *str, uint8_t *pAddr) {
-  uint8_t charCnt;
-  char hex[] = "0123456789ABCDEF";
-
-  // Start from end of addr
-  pAddr += B_ADDR_LEN;
-
-  for (charCnt = B_ADDR_LEN; charCnt > 0; charCnt--) {
-    *str++ = hex[*--pAddr >> 4];
-    *str++ = hex[*pAddr & 0x0F];
-  }
-  return;
 }
 
 static uint8_t serviceReadAttrCB(void *context,
