@@ -425,12 +425,13 @@ static void writeNotifInd(BLE_Char *bleChar)
 
 static uint8_t charValueInit(BLE_Char *bleChar, size_t size)
 {
-  if (bleChar->_valueLen != size)
+  // Only go here when the value has been defined!
+  if (bleChar->_valueLen != size && bleChar->_value)
   {
-    if (bleChar->_resizable && bleChar->_value)
+    if (bleChar->_resizable)
     {
       free(bleChar->_value);
-      bleChar->_value == NULL;
+      bleChar->_value = NULL;
     }
     else
     {
