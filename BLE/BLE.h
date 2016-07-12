@@ -14,10 +14,11 @@ class BLE : public Stream
     uint8_t *nonConnAdvertData = NULL;
     uint8_t *scanRspData = NULL;
 
-    int setAdvertName(int advertStringLen, char *advertString);
-    int writeValue(BLE_Char *bleChar, int len, char *str);
+    int setAdvertName(int advertStringLen, const char *advertString);
+    int writeValue(BLE_Char *bleChar, int len, const char *str);
     void advertDataInit(void);
     bool isSerialEnabled(void);
+    int writeValue(BLE_Char *bleChar, const uint8_t *str);
 
   public:
     int error = BLE_SUCCESS;
@@ -33,7 +34,7 @@ class BLE : public Stream
     int startAdvert(BLE_Advert_Settings *advertSettings);
     int stopAdvert(void);
     int setAdvertData(int advertType, uint8_t len, uint8_t *advertData);
-    int setAdvertName(char *advertString);
+    int setAdvertName(const char *advertString);
     int setAdvertName(String *advertString);
 
     int setConnParams(BLE_Conn_Params *connParams);
@@ -53,7 +54,7 @@ class BLE : public Stream
     int writeValue(BLE_Char *bleChar, unsigned long value);
     int writeValue(BLE_Char *bleChar, float value);
     int writeValue(BLE_Char *bleChar, double value);
-    int writeValue(BLE_Char *bleChar, char *str); // Char array
+    int writeValue(BLE_Char *bleChar, const char *str); // Char array
     int writeValue(BLE_Char *bleChar, String str); // Object, calls fxn for char array
     boolean readValue_boolean(BLE_Char *bleChar);
     char readValue_char(BLE_Char *bleChar);
@@ -80,6 +81,7 @@ class BLE : public Stream
     virtual int peek(void);
     virtual void flush(void);
     virtual size_t write(uint8_t c);
+    virtual size_t write(const uint8_t *buffer, size_t size);
 };
 
 

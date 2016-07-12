@@ -333,7 +333,7 @@ int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
  * SAP_GAP_ADTYPE_LOCAL_NAME_COMPLETE, and the third and so on are the
  * characters of the name.
  */
-int BLE::setAdvertName(int advertStringLen, char *advertString)
+int BLE::setAdvertName(int advertStringLen, const char *advertString)
 {
   uint8_t newSize = sizeof(defScanRspData) - defScanRspData[0]
                   + 1 + advertStringLen;
@@ -348,7 +348,7 @@ int BLE::setAdvertName(int advertStringLen, char *advertString)
   return setAdvertData(BLE_ADV_DATA_SCANRSP, newSize, newData);
 }
 
-int BLE::setAdvertName(char *advertString)
+int BLE::setAdvertName(const char *advertString)
 {
   return setAdvertName(strlen(advertString), advertString);
 }
@@ -536,7 +536,7 @@ int BLE::writeValue(BLE_Char *bleChar, double value)
  * Use buffer of size len+1 so the null-termination is stored. This way the
  * stored strings match the functionality of strcpy, which copies it.
  */
-int BLE::writeValue(BLE_Char *bleChar, int len, char *str)
+int BLE::writeValue(BLE_Char *bleChar, int len, const char *str)
 {
   bleChar->_resizable = true;
   int status = charValueInit(bleChar, (len+1)*sizeof(char));
@@ -548,9 +548,14 @@ int BLE::writeValue(BLE_Char *bleChar, int len, char *str)
   return status;
 }
 
-int BLE::writeValue(BLE_Char *bleChar, char *str)
+int BLE::writeValue(BLE_Char *bleChar, const char *str)
 {
   return writeValue(bleChar, strlen(str), str);
+}
+
+int BLE::writeValue(BLE_Char *bleChar, const uint8_t *str)
+{
+  return writeValue(bleChar, (char *) str);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, String str)
