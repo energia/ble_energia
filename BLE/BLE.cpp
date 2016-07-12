@@ -691,7 +691,6 @@ double BLE::readValue_double(BLE_Char *bleChar)
 
 char* BLE::readValue_string(BLE_Char *bleChar)
 {
-  // readValueHelper but with different length handling
   error = BLE_SUCCESS;
   if (bleChar->_value == NULL)
   {
@@ -699,9 +698,14 @@ char* BLE::readValue_string(BLE_Char *bleChar)
   }
   if (error == BLE_SUCCESS)
   {
-    char *buf = (char *) malloc((bleChar->_valueLen)*sizeof(char));
-    strcpy(buf, (char *) bleChar->_value);
-    return buf;
+    int len = bleChar->_valueLen;
+    /* Convert value to null-termiated string, if not already */
+    if (((char *) bleChar->_value)[len-1] != '\0')
+    {
+      bleChar->_value = realloc(bleChar->_value, (len+1)*sizeof(bleChar->_value));
+      ((char *) bleChar->_value)[len] = '\0';
+    }
+    return (char *) bleChar->_value;
   }
   return NULL;
 }
@@ -714,7 +718,6 @@ String BLE::readValue_String(BLE_Char *bleChar)
   if (buf)
   {
     str = String(buf);
-    free(buf);
   }
   else
   {
