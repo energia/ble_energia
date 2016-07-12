@@ -21,7 +21,7 @@ class BLE : public Stream
     int writeValue(BLE_Char *bleChar, const uint8_t *str);
 
   public:
-    int error = BLE_SUCCESS;
+    int error;
 
     BLE(byte portType=BLE_PORT_UART);
 

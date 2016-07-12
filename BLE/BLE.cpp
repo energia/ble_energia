@@ -1,5 +1,4 @@
 
-#include <stdbool.h>
 #include <string.h>
 
 #include <ti/drivers/gpio.h>
@@ -71,6 +70,7 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param);
 BLE::BLE(byte portType)
 {
   _portType = portType;
+  error = BLE_SUCCESS;
 }
 
 int BLE::begin(void)
@@ -139,7 +139,7 @@ int BLE::addService(BLE_Service *bleService)
   SAP_Service_t *service = (SAP_Service_t *) malloc(sizeof(SAP_Service_t));
   constructService(service, bleService);
   int status = SAP_registerService(service);
-  if (status != SNP_FAILURE && service->serviceHandle != NULL) {
+  if (status != SNP_FAILURE && service->serviceHandle != 0) {
     bleService->handle = service->serviceHandle;
     uint8_t i;
     for (i = 0; i < bleService->numChars; i++)
@@ -182,7 +182,7 @@ static uint8_t getUUIDLen(uint8_t *UUID)
 
 static void constructService(SAP_Service_t *service, BLE_Service *bleService)
 {
-  bleService->handle = NULL;
+  bleService->handle = 0;
   service->serviceUUID.len    = getUUIDLen(bleService->UUID);
   service->serviceUUID.pUUID  = bleService->UUID;
   service->serviceType        = SNP_PRIMARY_SERVICE;
@@ -239,9 +239,9 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
     sapChar->pFormat = (SAP_FormatAttr_t *) malloc(sizeof(SAP_FormatAttr_t));
     sapChar->pFormat->format     = bleChar->valueFormat;
     sapChar->pFormat->exponent   = bleChar->valueExponent;
-    sapChar->pFormat->unit       = NULL;
-    sapChar->pFormat->name_space = NULL;
-    sapChar->pFormat->desc       = NULL;
+    sapChar->pFormat->unit       = 0;
+    sapChar->pFormat->name_space = 0;
+    sapChar->pFormat->desc       = 0;
   }
   else
   {
@@ -311,7 +311,7 @@ int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
     {
       if (nonConnAdvertData && nonConnAdvertData != defAdvertData)
       {
-        free(defAdvertData);
+        free(nonConnAdvertData);
       }
       nonConnAdvertData = advertData;
     }
@@ -319,7 +319,7 @@ int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
     {
       if (scanRspData && scanRspData != defScanRspData)
       {
-        free(defScanRspData);
+        free(scanRspData);
       }
       scanRspData = advertData;
     }
