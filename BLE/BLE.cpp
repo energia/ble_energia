@@ -19,6 +19,7 @@
 
 #include <BLE.h>
 #include "BLEServiceList.h"
+#include "BLEServices.h"
 #include "Flags.h"
 
 #define AP_NONE                              Event_Id_NONE   // No Event

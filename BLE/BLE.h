@@ -5,7 +5,6 @@
 #include <Energia.h>
 #include "Stream.h"
 #include "BLETypes.h"
-#include "BLEServices.h"
 
 class BLE : public Stream
 {
