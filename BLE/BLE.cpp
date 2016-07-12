@@ -907,13 +907,14 @@ static uint8_t serviceCCCDIndCB(void *context,
   {
     status = SNP_UNKNOWN_ATTRIBUTE;
   }
-  else if (!(value == 0 || notify || indicate))
+  // Only 0, or either notify/indicate but not both, is valid.
+  else if (!(value == 0 || (!notify || !indicate)))
   {
     status = SNP_INVALID_PARAMS;
   }
   // Attempting to set to mode not allowed by char properties
-  else if ((notify && bleChar->properties != BLE_NOTIFIABLE)
-        || (indicate && bleChar->properties != BLE_INDICATABLE))
+  else if ((notify && !(bleChar->properties & BLE_NOTIFIABLE))
+        || (indicate && !(bleChar->properties & BLE_INDICATABLE)))
   {
     status = SNP_NOTIF_IND_NOT_ALLOWED;
   }
