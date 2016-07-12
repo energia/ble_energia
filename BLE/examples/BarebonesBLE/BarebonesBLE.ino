@@ -12,6 +12,8 @@ int char4Value = 0;
 int char6Value = 0;
 char *char7Value = "Hello, World!";
 String char8Value = String("The quick brown fox jumped over the lazy dog.");
+char *txValue = "UNSET";
+char *rxValue = "UNSET";
 
 BLE_Char heartRateChar =
 {
@@ -113,6 +115,7 @@ void setup() {
   ble.addService(&heartRateService);
   ble.addService(&simpleService);
   ble.addService(&testService);
+  ble.serial();
   Serial.println("Initializing values.");
   ble.writeValue(&heartRateChar, heartRateMeasurement);
   ble.writeValue(&char1, char1Value);
@@ -134,6 +137,7 @@ void setup() {
 
 // the loop routine runs over and over again forever as a task.
 void loop() {
+  flag0 = 0; flag1 = 0; flag2 = 0; flag3 = 0; flag4 = 0; flag5 = 0;
   timer++;
   digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
   delay(500);               // wait for 100 ms
@@ -142,9 +146,14 @@ void loop() {
   heartRateMeasurement += 1;
   ble.writeValue(&heartRateChar, heartRateMeasurement);
   ble.writeValue(&char4, heartRateMeasurement*2);
-  if (heartRateMeasurement % 5 == 0)
+  if (timer % 5 == 0)
   {
     ble.writeValue(&char6, char6Value + 1);
+  }
+  if (timer % 3 == 0)
+  {
+    // Write ASCII in hex from 0x21 through 0x7E
+    ble.write(((timer/3) % (0x7E - 0x21 + 1)) + 0x21);
   }
   char1Value = ble.readValue_byte(&char1);
   Serial.print(ble.error);Serial.print(" char1Value=");Serial.println(char1Value);
@@ -160,11 +169,14 @@ void loop() {
   Serial.print(ble.error);Serial.print(" char7Value=");Serial.println(char7Value);
   char8Value = ble.readValue_String(&char8);
   Serial.print(ble.error);Serial.print(" char8Value=");Serial.println(char8Value);
+  txValue = ble.readValue_string(&txChar);
+  Serial.print(ble.error);Serial.print(" txValue=");Serial.println(txValue);
+  rxValue = ble.readValue_string(&rxChar);
+  Serial.print(ble.error);Serial.print(" rxValue=");Serial.println(rxValue);
   Serial.print("Flag 0:");Serial.println(flag0);
   Serial.print("Flag 1:");Serial.println(flag1);
   Serial.print("Flag 2:");Serial.println(flag2);
   Serial.print("Flag 3:");Serial.println(flag3);
   Serial.print("Flag 4:");Serial.println(flag4);
   Serial.print("Flag 5:");Serial.println(flag5);
-  flag0 = 0; flag1 = 0; flag2 = 0; flag3 = 0; flag4 = 0; flag5 = 0;
 }
