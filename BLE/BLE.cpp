@@ -144,7 +144,7 @@ int BLE::end(void)
 
 int BLE::addService(BLE_Service *bleService)
 {
-  SAP_Service_t *service = (SAP_Service_t *) malloc(sizeof(SAP_Service_t));
+  SAP_Service_t *service = malloc(sizeof(SAP_Service_t));
   constructService(service, bleService);
   int status = SAP_registerService(service);
   if (status != SNP_FAILURE && service->serviceHandle != 0) {
@@ -195,13 +195,13 @@ static void constructService(SAP_Service_t *service, BLE_Service *bleService)
   service->serviceUUID.pUUID  = bleService->UUID;
   service->serviceType        = SNP_PRIMARY_SERVICE;
   service->charTableLen       = bleService->numChars; // sizeof with static array?
-  service->charTable          = (SAP_Char_t *) malloc(service->charTableLen *
+  service->charTable          = malloc(service->charTableLen *
                                                     sizeof(SAP_Char_t));
   service->context            = NULL;
   service->charReadCallback   = serviceReadAttrCB;
   service->charWriteCallback  = serviceWriteAttrCB;
   service->cccdIndCallback    = serviceCCCDIndCB;
-  service->charAttrHandles    = (SAP_CharHandle_t *) malloc(service->charTableLen *
+  service->charAttrHandles    = malloc(service->charTableLen *
                                                             sizeof(SAP_CharHandle_t));
   uint8_t i;
   for (i = 0; i < bleService->numChars; i++)
@@ -227,12 +227,12 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
                             ? SNP_GATT_PERMIT_WRITE : 0);
   if (bleChar->charDesc)
   {
-    sapChar->pUserDesc = (SAP_UserDescAttr_t *) malloc(sizeof(SAP_UserDescAttr_t));
+    sapChar->pUserDesc = malloc(sizeof(SAP_UserDescAttr_t));
     sapChar->pUserDesc->perms    = SNP_GATT_PERMIT_READ;
     uint16_t charStrLen = strlen(bleChar->charDesc);
     sapChar->pUserDesc->maxLen   = charStrLen;
     sapChar->pUserDesc->initLen  = charStrLen;
-    // sapChar->pUserDesc->pDesc    = (uint8_t *) malloc(charStrLen*sizeof(uint8_t));
+    // sapChar->pUserDesc->pDesc    = malloc(charStrLen*sizeof(uint8_t));
     // memcpy(sapChar->pUserDesc->pDesc, bleChar->charDesc, charStrLen);
     sapChar->pUserDesc->pDesc    = (uint8_t *) bleChar->charDesc;
   }
@@ -240,11 +240,11 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
   {
     sapChar->pUserDesc = NULL;
   }
-  sapChar->pCccd = (SAP_UserCCCDAttr_t *) malloc(sizeof(SAP_UserCCCDAttr_t));
+  sapChar->pCccd = malloc(sizeof(SAP_UserCCCDAttr_t));
   sapChar->pCccd->perms          = SNP_GATT_PERMIT_READ | SNP_GATT_PERMIT_WRITE;
   if (bleChar->valueFormat)
   {
-    sapChar->pFormat = (SAP_FormatAttr_t *) malloc(sizeof(SAP_FormatAttr_t));
+    sapChar->pFormat = malloc(sizeof(SAP_FormatAttr_t));
     sapChar->pFormat->format     = bleChar->valueFormat;
     sapChar->pFormat->exponent   = bleChar->valueExponent;
     sapChar->pFormat->unit       = 0;
@@ -345,7 +345,7 @@ int BLE::setAdvertName(int advertStringLen, const char *advertString)
 {
   uint8_t newSize = sizeof(defScanRspData) - defScanRspData[0]
                   + 1 + advertStringLen;
-  uint8_t *newData = (uint8_t *) malloc(newSize);
+  uint8_t *newData = malloc(newSize);
   newData[0] = 1 + advertStringLen;
   newData[1] = defScanRspData[1];
   strcpy((char *) &newData[2], advertString);
@@ -364,7 +364,7 @@ int BLE::setAdvertName(const char *advertString)
 int BLE::setAdvertName(String *advertString)
 {
   int len = (*advertString).length();
-  char *buf = (char *) malloc((len+1)*sizeof(char));
+  char *buf = malloc((len+1)*sizeof(char));
   (*advertString).toCharArray(buf, len);
   int status = setAdvertName(len, buf);
   free(buf);
@@ -447,7 +447,7 @@ static uint8_t charValueInit(BLE_Char *bleChar, size_t size)
   }
   if (bleChar->_value == NULL)
   {
-    bleChar->_value = (void *) malloc(size);
+    bleChar->_value = malloc(size);
     bleChar->_valueLen = size;
   }
   return BLE_SUCCESS;
@@ -570,7 +570,7 @@ int BLE::writeValue(BLE_Char *bleChar, const uint8_t *str)
 int BLE::writeValue(BLE_Char *bleChar, String str)
 {
   int len = str.length();
-  char *buf = (char *) malloc((len+1)*sizeof(char));
+  char *buf = malloc((len+1)*sizeof(char));
   str.toCharArray(buf, len+1);
   int status = writeValue(bleChar, len, buf);
   free(buf);
