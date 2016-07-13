@@ -762,8 +762,8 @@ inline bool BLE::isSerialEnabled(void)
 int BLE::serial(void)
 {
   addService(&serialService);
-  writeValue(&txChar, "defTX");
-  writeValue(&rxChar, "defRX");
+  writeValue(&txChar, "");
+  writeValue(&rxChar, "");
   serialEnabled = true;
   return BLE_SUCCESS;
 }

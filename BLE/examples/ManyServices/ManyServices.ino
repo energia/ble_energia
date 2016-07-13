@@ -148,6 +148,14 @@ void loop() {
   }
   // Write ASCII in hex from 0x21 through 0x7E
   ble.print((char) ((timer % (0x7E - 0x21 + 1)) + 0x21));
+  if (Serial.available())
+  {
+    Serial.println("RFS");
+    String stringFromSerial = Serial.readString();
+    Serial.print("read:");Serial.println(stringFromSerial);
+    ble.print(stringFromSerial);
+    Serial.println("printed");
+  }
   char1Value = ble.readValue_byte(&char1);
   Serial.print(ble.error);Serial.print(" char1Value=");Serial.println(char1Value);
   char2Value = ble.readValue_int(&char2);

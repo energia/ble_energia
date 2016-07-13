@@ -2,8 +2,6 @@
 #include <BLE.h>
 #define LED RED_LED
 
-unsigned long timer = 0;
-
 void setup() {
   Serial.begin(115200);
   ble.begin();
@@ -15,10 +13,15 @@ void setup() {
 
 void loop() {
   digitalWrite(LED, HIGH);
-  delay(500);
+  delay(100);
   digitalWrite(LED, LOW);
-  delay(500);
-  // Write ASCII in hex from 0x21 through 0x7E
-  ble.print((timer % (0x7E - 0x21 + 1)) + 0x21);
-  Serial.println(ble.readString())
+  delay(100);
+  if (Serial.available())
+  {
+    ble.print(Serial.readString());
+  }
+  if (ble.available())
+  {
+    Serial.println(ble.readString());
+  }
 }
