@@ -108,7 +108,11 @@ int BLE::begin(void)
   SAP_Params sapParams;
   SAP_initParams(_portType, &sapParams);
   sapParams.port.remote.boardID = 1;
-  SAP_open(&sapParams);
+  if (SAP_open(&sapParams) != SNP_SUCCESS)
+  {
+    SAP_close();
+    return BLE_FAILURE;
+  }
 
   /*
    * Register callback to receive asynchronous requests from the NP.
@@ -116,22 +120,39 @@ int BLE::begin(void)
    * those above. This function may be called multiple times to
    * register multiple callbacks. Runs in NPI task.
    */
-  SAP_setAsyncCB(AP_asyncCB);
+  if (SAP_setAsyncCB(AP_asyncCB) != SNP_SUCCESS)
+  {
+    SAP_close();
+    return BLE_FAILURE;
+  }
 
   /*
    * Register async SNP event handler. Includes connection establisment,
    * termination, advertisement enabling, security events.
    */
-  SAP_registerEventCB(processSNPEventCB, 0xFFFF);
+  if (SAP_registerEventCB(processSNPEventCB, 0xFFFF) != SNP_SUCCESS)
+  {
+    SAP_close();
+    return BLE_FAILURE;
+  }
 
-  //Give the NP time to send a PUIND, if we receive one then
-  //we can assume the NP has just started and we don't need to send a reset
-  //otherwise, we can assume the NP was running previously and needs to be
-  //reset to a known state
+  /*
+   * Give the NP time to send a power up indicator, if we receive one then
+   * we can assume the NP has just started and we don't need to send a reset
+   * otherwise, we can assume the NP was running previously and needs to be
+   * reset to a known state
+   */
   if (0 == Event_pend(apEvent, AP_NONE, AP_EVT_PUI, 1000)) {
     // Assuming that at SAP start up that SNP is already running
-    SAP_reset();
-    Event_pend(apEvent, AP_NONE, AP_EVT_PUI, BIOS_WAIT_FOREVER);
+    if (SAP_reset() != SNP_SUCCESS)
+    {
+      SAP_close();
+      return BLE_FAILURE;
+    }
+    if (0 == Event_pend(apEvent, AP_NONE, AP_EVT_PUI, 1000))
+    {
+      return BLE_FAILURE;
+    }
   }
 
   return BLE_SUCCESS;

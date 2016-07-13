@@ -9,7 +9,7 @@
 
 /* Energia BLE status codes */
 #define BLE_SUCCESS             SNP_SUCCESS // 0x00
-#define BLE_ERROR               SNP_FAILURE // 0x83
+#define BLE_FAILURE             SNP_FAILURE // 0x83
 #define BLE_INVALID_HANDLE      0x50
 #define BLE_UNDEFINED_VALUE     0x51
 #define BLE_NOT_IMPLEMENTED     0x52
