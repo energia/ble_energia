@@ -100,13 +100,11 @@ BLE_Service testService =
 //  BLE_ADV_RESTART_ON_CONN_TERM
 //};
 
-BLE ble;
 unsigned long timer = 0;
 unsigned long start;
 
 void setup() {
   Serial.begin(115200);
-  ble = BLE();
   Serial.println("begin ");
   ble.begin();
   Serial.println("add services:");

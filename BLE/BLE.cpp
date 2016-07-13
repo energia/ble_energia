@@ -44,6 +44,7 @@ uint8_t rxBuffer[SERIAL_BUFFER_SIZE] = {0};
 volatile uint16_t rxWriteIndex = 0;
 volatile uint16_t rxReadIndex = 0;
 
+BLE ble = BLE();
 
 int flag0 = 0;
 int flag1 = 0;

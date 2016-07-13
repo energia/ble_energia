@@ -43,11 +43,8 @@ BLE_Service simpleService =
   4, simpleServiceChars
 };
 
-BLE ble;
-
 void setup() {
   Serial.begin(115200);
-  ble = BLE();
   ble.begin();
   ble.addService(&simpleService);
   ble.writeValue(&char1, char1Value);

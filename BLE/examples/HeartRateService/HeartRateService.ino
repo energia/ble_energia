@@ -19,11 +19,8 @@ BLE_Service heartRateService =
   1, heartRateChars
 };
 
-BLE ble;
-
 void setup() {
   Serial.begin(115200);
-  ble = BLE();
   ble.begin();
   ble.addService(&heartRateService);
   ble.writeValue(&heartRateChar, heartRateMeasurement);

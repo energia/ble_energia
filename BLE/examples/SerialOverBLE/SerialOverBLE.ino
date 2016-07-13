@@ -2,12 +2,10 @@
 #include <BLE.h>
 #define LED RED_LED
 
-BLE ble;
 unsigned long timer = 0;
 
 void setup() {
   Serial.begin(115200);
-  ble = BLE();
   ble.begin();
   ble.serial();
   ble.setAdvertName("Energia Serial");
