@@ -159,4 +159,6 @@ static uint8_t defAdvertData[] =
   0x00                                    // Key state
 };
 
+extern uint16_t connHandle;
+
 #endif

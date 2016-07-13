@@ -16,7 +16,6 @@ class BLE : public Stream
     int setAdvertName(int advertStringLen, const char *advertString);
     int writeValue(BLE_Char *bleChar, int len, const char *str);
     void advertDataInit(void);
-    bool isSerialEnabled(void);
     int writeValue(BLE_Char *bleChar, const uint8_t *str);
 
   public:

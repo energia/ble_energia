@@ -10,11 +10,10 @@ typedef struct BLE_Service_Node
   BLE_Service *service;
 } BLE_Service_Node;
 
-void addServiceNode(BLE_Service *service);
-BLE_Char* getChar(int handle);
-BLE_Char* getCCCD(int handle);
-BLE_Service* getService(int handle);
-BLE_Service* getServiceWithChar(int handle);
-void resetCCCD(void);
+int BLE_registerService(BLE_Service *bleService);
+BLE_Char* BLE_getChar(int handle);
+BLE_Char* BLE_getCCCD(int handle);
+void BLE_resetCCCD(void);
+uint8_t BLE_charValueInit(BLE_Char *bleChar, size_t size);
 
 #endif
