@@ -12,8 +12,6 @@ int char4Value = 0;
 int char6Value = 0;
 char *char7Value = "Hello, World!";
 String char8Value = String("The quick brown fox jumped over the lazy dog.");
-char *txValue = "UNSET";
-char *rxValue = "UNSET";
 
 BLE_Char heartRateChar =
 {
@@ -150,11 +148,8 @@ void loop() {
   {
     ble.writeValue(&char6, char6Value + 1);
   }
-  if (timer % 3 == 0)
-  {
-    // Write ASCII in hex from 0x21 through 0x7E
-    ble.write(((timer/3) % (0x7E - 0x21 + 1)) + 0x21);
-  }
+  // Write ASCII in hex from 0x21 through 0x7E
+  ble.print((char) ((timer % (0x7E - 0x21 + 1)) + 0x21));
   char1Value = ble.readValue_byte(&char1);
   Serial.print(ble.error);Serial.print(" char1Value=");Serial.println(char1Value);
   char2Value = ble.readValue_int(&char2);
@@ -169,10 +164,12 @@ void loop() {
   Serial.print(ble.error);Serial.print(" char7Value=");Serial.println(char7Value);
   char8Value = ble.readValue_String(&char8);
   Serial.print(ble.error);Serial.print(" char8Value=");Serial.println(char8Value);
-  txValue = ble.readValue_string(&txChar);
-  Serial.print(ble.error);Serial.print(" txValue=");Serial.println(txValue);
-  rxValue = ble.readValue_string(&rxChar);
-  Serial.print(ble.error);Serial.print(" rxValue=");Serial.println(rxValue);
+  String uartValue = ble.readValue_String(&txChar);
+  Serial.print(ble.error);Serial.print(" txCharValue=");Serial.println(uartValue);
+  uartValue = ble.readValue_String(&rxChar);
+  Serial.print(ble.error);Serial.print(" rxCharValue=");Serial.println(uartValue);
+  uartValue = ble.readString();
+  Serial.print(ble.error);Serial.print(" actualRxValue=");Serial.println(uartValue);
   Serial.print("Flag 0:");Serial.println(flag0);
   Serial.print("Flag 1:");Serial.println(flag1);
   Serial.print("Flag 2:");Serial.println(flag2);

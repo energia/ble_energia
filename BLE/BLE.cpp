@@ -35,9 +35,15 @@
 // From bcomdef.h in the BLE SDK
 #define B_ADDR_LEN 6
 
+#define SERIAL_BUFFER_SIZE 128
+
 Event_Handle apEvent = NULL;
 uint16_t connHandle = 0;
 bool serialEnabled = false;
+uint8_t rxBuffer[SERIAL_BUFFER_SIZE] = {0};
+volatile uint16_t rxWriteIndex = 0;
+volatile uint16_t rxReadIndex = 0;
+
 
 int flag0 = 0;
 int flag1 = 0;
@@ -763,26 +769,38 @@ int BLE::serial(void)
 
 int BLE::available(void)
 {
-  if (!isSerialEnabled())
+  int numChars = 0;
+  if (isSerialEnabled())
   {
-    return 0;
+    numChars = (rxWriteIndex >= rxReadIndex) ?
+      (rxWriteIndex - rxReadIndex)
+      : SERIAL_BUFFER_SIZE - (rxReadIndex - rxWriteIndex);
   }
+  return numChars;
 }
 
 int BLE::read(void)
 {
-  if (!isSerialEnabled())
+  int iChar = -1;
+  if (isSerialEnabled())
   {
-    return 0;
+    iChar = peek();
+    if (0 <= iChar)
+    {
+      rxReadIndex = (rxReadIndex + 1) % SERIAL_BUFFER_SIZE;
+    }
   }
+  return iChar;
 }
 
 int BLE::peek(void)
 {
-  if (!isSerialEnabled())
+  int iChar = -1;
+  if (isSerialEnabled() && available())
   {
-    return 0;
+    iChar = (int) rxBuffer[rxReadIndex];
   }
+  return iChar;
 }
 
 void BLE::flush(void)
@@ -889,6 +907,21 @@ static uint8_t serviceWriteAttrCB(void *context,
   if (status == SNP_SUCCESS)
   {
     memcpy((uint8_t *) bleChar->_value, pData, len);
+  }
+  if (bleChar == &rxChar)
+  {
+    flag0 = 100;
+    // if the read index will be written over
+    if (rxWriteIndex < rxReadIndex && rxReadIndex < rxWriteIndex + len)
+    {
+      rxReadIndex = (rxWriteIndex + len) % SERIAL_BUFFER_SIZE;
+    }
+    uint8_t idx;
+    for (idx = 0; idx < len; idx++)
+    {
+      rxBuffer[rxWriteIndex] = pData[idx];
+      rxWriteIndex = (rxWriteIndex + 1) % SERIAL_BUFFER_SIZE;
+    }
   }
   return status;
 }
