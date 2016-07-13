@@ -7,7 +7,7 @@ BLE_Service_Node *bleServiceListTail = NULL;
 
 void addServiceNode(BLE_Service *service)
 {
-  BLE_Service_Node *newNode = (BLE_Service_Node *) malloc(sizeof(BLE_Service_Node));
+  BLE_Service_Node *newNode = malloc(sizeof(BLE_Service_Node));
   newNode->next = NULL;
   newNode->service = service;
   if (bleServiceListHead == NULL)
