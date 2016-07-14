@@ -182,7 +182,7 @@ int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
     lReq.interval = advertSettings->interval;
     lReq.behavior = advertSettings->connectedBehavior;
     status = SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE,
-                          sizeof(snpStartAdvReq_t), (uint8_t *) &lReq);
+                          sizeof(lReq), (uint8_t *) &lReq);
   }
   Event_pend(apEvent, AP_NONE, AP_EVT_ADV_ENB, BIOS_WAIT_FOREVER);
   return status;
@@ -325,7 +325,7 @@ static void writeNotifInd(BLE_Char *bleChar)
 
 int BLE::writeValue(BLE_Char *bleChar, char value)
 {
-  int status = BLE_charValueInit(bleChar, sizeof(char));
+  int status = BLE_charValueInit(bleChar, sizeof(value));
   if (status == BLE_SUCCESS)
   {
     *(char *) bleChar->_value = value;
@@ -336,7 +336,7 @@ int BLE::writeValue(BLE_Char *bleChar, char value)
 
 int BLE::writeValue(BLE_Char *bleChar, unsigned char value)
 {
-  int status = BLE_charValueInit(bleChar, sizeof(unsigned char));
+  int status = BLE_charValueInit(bleChar, sizeof(value));
   if (status == BLE_SUCCESS)
   {
     *(unsigned char *) bleChar->_value = value;
@@ -347,7 +347,7 @@ int BLE::writeValue(BLE_Char *bleChar, unsigned char value)
 
 int BLE::writeValue(BLE_Char *bleChar, int value)
 {
-  int status = BLE_charValueInit(bleChar, sizeof(int));
+  int status = BLE_charValueInit(bleChar, sizeof(value));
   if (status == BLE_SUCCESS)
   {
     *(int *) bleChar->_value = value;
@@ -358,7 +358,7 @@ int BLE::writeValue(BLE_Char *bleChar, int value)
 
 int BLE::writeValue(BLE_Char *bleChar, unsigned int value)
 {
-  int status = BLE_charValueInit(bleChar, sizeof(unsigned int));
+  int status = BLE_charValueInit(bleChar, sizeof(value));
   if (status == BLE_SUCCESS)
   {
     *(unsigned int *) bleChar->_value = value;
@@ -369,7 +369,7 @@ int BLE::writeValue(BLE_Char *bleChar, unsigned int value)
 
 int BLE::writeValue(BLE_Char *bleChar, long value)
 {
-  int status = BLE_charValueInit(bleChar, sizeof(long));
+  int status = BLE_charValueInit(bleChar, sizeof(value));
   if (status == BLE_SUCCESS)
   {
     *(long *) bleChar->_value = value;
@@ -380,7 +380,7 @@ int BLE::writeValue(BLE_Char *bleChar, long value)
 
 int BLE::writeValue(BLE_Char *bleChar, unsigned long value)
 {
-  int status = BLE_charValueInit(bleChar, sizeof(unsigned long));
+  int status = BLE_charValueInit(bleChar, sizeof(value));
   if (status == BLE_SUCCESS)
   {
     *(unsigned long *) bleChar->_value = value;
@@ -391,7 +391,7 @@ int BLE::writeValue(BLE_Char *bleChar, unsigned long value)
 
 int BLE::writeValue(BLE_Char *bleChar, float value)
 {
-  int status = BLE_charValueInit(bleChar, sizeof(float));
+  int status = BLE_charValueInit(bleChar, sizeof(value));
   if (status == BLE_SUCCESS)
   {
     *(float *) bleChar->_value = value;
@@ -402,7 +402,7 @@ int BLE::writeValue(BLE_Char *bleChar, float value)
 
 int BLE::writeValue(BLE_Char *bleChar, double value)
 {
-  int status = BLE_charValueInit(bleChar, sizeof(double));
+  int status = BLE_charValueInit(bleChar, sizeof(value));
   if (status == BLE_SUCCESS)
   {
     *(double *) bleChar->_value = value;
@@ -418,7 +418,7 @@ int BLE::writeValue(BLE_Char *bleChar, double value)
 int BLE::writeValue(BLE_Char *bleChar, int len, const char *str)
 {
   bleChar->_resizable = true;
-  int status = BLE_charValueInit(bleChar, (len+1)*sizeof(char));
+  int status = BLE_charValueInit(bleChar, (len+1)*sizeof(*str));
   if (status == BLE_SUCCESS)
   {
     strcpy((char *) bleChar->_value, str);
@@ -579,7 +579,7 @@ char* BLE::readValue_string(BLE_Char *bleChar)
     /* Convert value to null-termiated string, if not already */
     if (((char *) bleChar->_value)[len-1] != '\0')
     {
-      bleChar->_value = realloc(bleChar->_value, (len+1)*sizeof(bleChar->_value));
+      bleChar->_value = realloc(bleChar->_value, (len+1)*sizeof(char));
       ((char *) bleChar->_value)[len] = '\0';
     }
     return (char *) bleChar->_value;
