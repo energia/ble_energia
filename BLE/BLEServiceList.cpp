@@ -10,9 +10,9 @@ BLE_Service_Node *bleServiceListHead = NULL;
 BLE_Service_Node *bleServiceListTail = NULL;
 
 static void addServiceNode(BLE_Service *service);
-static BLE_Char* getChar(int handle);
-static BLE_Char* getCCCD(int handle);
-static BLE_Service* getServiceWithChar(int handle);
+static BLE_Char* getChar(uint16_t handle);
+static BLE_Char* getCCCD(uint16_t handle);
+static BLE_Service* getServiceWithChar(uint16_t handle);
 static void constructService(SAP_Service_t *service, BLE_Service *bleService);
 static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar);
 static uint8_t getUUIDLen(uint8_t *UUID);
@@ -117,7 +117,7 @@ static void addServiceNode(BLE_Service *service)
   }
 }
 
-static BLE_Char* getChar(int handle)
+static BLE_Char* getChar(uint16_t handle)
 {
   BLE_Service *service = getServiceWithChar(handle);
   uint8_t i;
@@ -131,7 +131,7 @@ static BLE_Char* getChar(int handle)
   return NULL;
 }
 
-static BLE_Char* getCCCD(int handle)
+static BLE_Char* getCCCD(uint16_t handle)
 {
   BLE_Service *service = getServiceWithChar(handle);
   uint8_t i;
@@ -145,7 +145,7 @@ static BLE_Char* getCCCD(int handle)
   return NULL;
 }
 
-static BLE_Service* getServiceWithChar(int handle)
+static BLE_Service* getServiceWithChar(uint16_t handle)
 {
   BLE_Service_Node *curr = bleServiceListHead;
   while (curr->next && curr->next->service->handle <= handle)
