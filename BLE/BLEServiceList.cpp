@@ -289,13 +289,13 @@ static uint8_t serviceWriteAttrCB(void *context,
     // if the read index will be written over
     if (rxWriteIndex < rxReadIndex && rxReadIndex < rxWriteIndex + len)
     {
-      rxReadIndex = (rxWriteIndex + len) % SERIAL_BUFFER_SIZE;
+      rxReadIndex = (rxWriteIndex + len) % BLE_SERIAL_BUFFER_SIZE;
     }
     uint8_t idx;
     for (idx = 0; idx < len; idx++)
     {
       rxBuffer[rxWriteIndex] = pData[idx];
-      rxWriteIndex = (rxWriteIndex + 1) % SERIAL_BUFFER_SIZE;
+      rxWriteIndex = (rxWriteIndex + 1) % BLE_SERIAL_BUFFER_SIZE;
     }
   }
   return status;

@@ -5,9 +5,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define SERIAL_BUFFER_SIZE 128
+#define BLE_SERIAL_BUFFER_SIZE 128
 
-extern uint8_t rxBuffer[SERIAL_BUFFER_SIZE];
+extern uint8_t rxBuffer[BLE_SERIAL_BUFFER_SIZE];
 extern volatile uint16_t rxWriteIndex;
 extern volatile uint16_t rxReadIndex;
 
