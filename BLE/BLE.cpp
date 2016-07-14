@@ -49,6 +49,7 @@ int flag4 = 0;
 int flag5 = 0;
 
 static void AP_asyncCB(uint8_t cmd1, void *pParams);
+static int setSingleConnParam(size_t offset, int value);
 static void writeNotifInd(BLE_Char *bleChar);
 static uint8_t readValueValidateSize(BLE_Char *bleChar, size_t size);
 static void processSNPEventCB(uint16_t event, snpEventParam_t *param);
@@ -265,6 +266,11 @@ int BLE::setAdvertName(String *advertString)
   return status;
 }
 
+int BLE::setGapParam(int paramId, int Value)
+{
+  return BLE_NOT_IMPLEMENTED;
+}
+
 int BLE::setConnParams(BLE_Conn_Params *connParams)
 {
   snpUpdateConnParamReq_t lReq;
@@ -277,29 +283,32 @@ int BLE::setConnParams(BLE_Conn_Params *connParams)
                       sizeof(lReq), (uint8_t *) &lReq);
 }
 
-int BLE::setGapParam(int paramId, int Value)
+int BLE::setSingleConnParam(size_t offset, int value)
 {
-  return BLE_NOT_IMPLEMENTED;
+  BLE_Conn_Params paramsReq;
+  memcpy(&paramsReq, &usedConnParams, sizeof(paramsReq));
+  *(int *)((char *) &paramsReq + offset) = value;
+  return setConnParams(&paramsReq);
 }
 
-int BLE::setMinConnInt(int minConnInt)
+int BLE::setMinConnInt(unsigned int minConnInt)
 {
-  return BLE_NOT_IMPLEMENTED;
+  return setSingleConnParam(offsetof(BLE_Conn_Params, minConnInt), minConnInt);
 }
 
-int BLE::setMaxConnInt(int maxConnInt)
+int BLE::setMaxConnInt(unsigned int maxConnInt)
 {
-  return BLE_NOT_IMPLEMENTED;
+  return setSingleConnParam(offsetof(BLE_Conn_Params, maxConnInt), maxConnInt);;
 }
 
-int BLE::setRespLatency(int respLatency)
+int BLE::setRespLatency(unsigned int respLatency)
 {
-  return BLE_NOT_IMPLEMENTED;
+  return setSingleConnParam(offsetof(BLE_Conn_Params, respLatency), respLatency);;
 }
 
-int BLE::setBleTimeout(int timeout)
+int BLE::setBleTimeout(unsigned int timeout)
 {
-  return BLE_NOT_IMPLEMENTED;
+  return setSingleConnParam(offsetof(BLE_Conn_Params, bleTimeout), timeout);;
 }
 
 int BLE::terminateConn(void)
@@ -721,10 +730,10 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
   {
     case SNP_CONN_EST_EVT: {
       snpConnEstEvt_t *evt = (snpConnEstEvt_t *) param;
-      ble.usedConnParams.minConnInt = evt->connInterval;
-      ble.usedConnParams.maxConnInt = evt->connInterval;
-      ble.usedConnParams.respLatency = evt->slaveLatency;
-      ble.usedConnParams.bleTimeout = evt->supervisionTimeout;
+      ble.usedConnParams.minConnInt =   evt->connInterval;
+      ble.usedConnParams.maxConnInt =   evt->connInterval;
+      ble.usedConnParams.respLatency =  evt->slaveLatency;
+      ble.usedConnParams.bleTimeout =   evt->supervisionTimeout;
       Event_post(apEvent, AP_EVT_CONN_EST);
     } break;
     case SNP_CONN_TERM_EVT: {
@@ -733,10 +742,10 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
     } break;
     case SNP_CONN_PARAM_UPDATED_EVT: {
       snpUpdateConnParamEvt_t *evt = (snpUpdateConnParamEvt_t *) param;
-      ble.usedConnParams.minConnInt = evt->connInterval;
-      ble.usedConnParams.maxConnInt = evt->connInterval;
-      ble.usedConnParams.respLatency = evt->slaveLatency;
-      ble.usedConnParams.bleTimeout = evt->supervisionTimeout;
+      ble.usedConnParams.minConnInt =   evt->connInterval;
+      ble.usedConnParams.maxConnInt =   evt->connInterval;
+      ble.usedConnParams.respLatency =  evt->slaveLatency;
+      ble.usedConnParams.bleTimeout =   evt->supervisionTimeout;
       Event_post(apEvent, AP_EVT_CONN_PARAMS_UPDATED);
     } break;
     case SNP_ADV_STARTED_EVT: {

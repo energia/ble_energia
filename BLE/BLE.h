@@ -14,6 +14,7 @@ class BLE : public Stream
     uint8_t *scanRspData = NULL;
 
     int setAdvertName(int advertStringLen, const char *advertString);
+    int setSingleConnParam(size_t offset, int value);
     int writeValue(BLE_Char *bleChar, int len, const char *str);
     void advertDataInit(void);
     int writeValue(BLE_Char *bleChar, const uint8_t *str);
@@ -42,12 +43,13 @@ class BLE : public Stream
     int setAdvertName(const char *advertString);
     int setAdvertName(String *advertString);
 
-    int setConnParams(BLE_Conn_Params *connParams);
     int setGapParam(int paramId, int Value); // Will probably just copy the network processor docs
-    int setMinConnInt(int minConnInt); // Number of 1.25ms time slots
-    int setMaxConnInt(int maxConnInt); // Number of 1.25ms time slots
-    int setRespLatency(int respLatency); // Measured in number of connection intervals the slave can miss.
-    int setBleTimeout(int timeout);
+
+    int setConnParams(BLE_Conn_Params *connParams);
+    int setMinConnInt(unsigned int minConnInt); // Number of 1.25ms time slots
+    int setMaxConnInt(unsigned int maxConnInt); // Number of 1.25ms time slots
+    int setRespLatency(unsigned int respLatency); // Measured in number of connection intervals the slave can miss.
+    int setBleTimeout(unsigned int timeout);
 
     int terminateConn(void);
 
