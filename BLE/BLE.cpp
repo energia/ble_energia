@@ -259,7 +259,14 @@ int BLE::setAdvertName(String *advertString)
 
 int BLE::setConnParams(BLE_Conn_Params *connParams)
 {
-  return BLE_NOT_IMPLEMENTED;
+  snpUpdateConnParamReq_t lReq;
+  lReq.connHandle =          _connHandle;
+  lReq.intervalMin =         connParams->minConnInt;
+  lReq.intervalMax =         connParams->maxConnInt;
+  lReq.slaveLatency =        connParams->respLatency;
+  lReq.supervisionTimeout =  connParams->bleTimeout;
+  return SAP_setParam(SAP_PARAM_CONN, SAP_CONN_PARAM,
+                      sizeof(lReq), (uint8_t *) &lReq);
 }
 
 int BLE::setGapParam(int paramId, int Value)
