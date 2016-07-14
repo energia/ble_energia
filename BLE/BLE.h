@@ -19,7 +19,14 @@ class BLE : public Stream
     int writeValue(BLE_Char *bleChar, const uint8_t *str);
 
   public:
-    int error;
+    int error; // Reason for error
+    int error_opcode; // Command that caused an error. Not guaranteed to be set.
+
+    /*
+     * The actual connection parameters used. Set by the async event handler
+     * in response to a connection establishment event.
+     */
+    BLE_Conn_Params usedConnParams;
 
     BLE(byte portType=BLE_PORT_UART);
 

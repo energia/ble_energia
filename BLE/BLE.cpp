@@ -28,6 +28,7 @@
 #define AP_EVT_ADV_END                       Event_Id_02     // Advertisement Ended
 #define AP_EVT_CONN_EST                      Event_Id_03     // Connection Established Event
 #define AP_EVT_CONN_TERM                     Event_Id_04     // Connection Terminated Event
+#define AP_EVT_CONN_PARAMS_UPDATED           Event_Id_05     // Connection Parameters Updated Event
 #define AP_ERROR                             Event_Id_31     // Error
 
 #define PIN6_7 35
@@ -71,8 +72,9 @@ int BLE::begin(void)
 
   /* AP_init() in simple_ap.c */
   apEvent = Event_create(NULL, NULL);
+
   /*
-   * Use this to do something at the applicaiton level on a write or
+   * Use this to do something at the application level on a write or
    * config change. In each SAP service struct, we set read, write, and
    * config change callbacks. In simple_ap, the function below
    * registers its parameters as functions called by the callbacks.
@@ -131,6 +133,12 @@ int BLE::begin(void)
       return BLE_FAILURE;
     }
   }
+
+  /*
+   * Events XORed with full mask are not sent from the SNP to the AP.
+   * This SAP API ignores the status response from the RPC.
+   */
+  SAP_setSNPEventMask(SNP_ATT_MTU_EVT);
 
   return BLE_SUCCESS;
 }
@@ -704,32 +712,40 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
   switch (event)
   {
     case SNP_CONN_EST_EVT: {
+      snpConnEstEvt_t *evt = (snpConnEstEvt_t *) param;
+      ble.usedConnParams.minConnInt = evt->connInterval;
+      ble.usedConnParams.maxConnInt = evt->connInterval;
+      ble.usedConnParams.respLatency = evt->slaveLatency;
+      ble.usedConnParams.bleTimeout = evt->supervisionTimeout;
       Event_post(apEvent, AP_EVT_CONN_EST);
     } break;
     case SNP_CONN_TERM_EVT: {
       Event_post(apEvent, AP_EVT_CONN_TERM);
       BLE_resetCCCD();
     } break;
-    // case SNP_CONN_PARAM_UPDATED_EVT: {
-    // } break;
+    case SNP_CONN_PARAM_UPDATED_EVT: {
+      snpUpdateConnParamEvt_t *evt = (snpUpdateConnParamEvt_t *) param;
+      ble.usedConnParams.minConnInt = evt->connInterval;
+      ble.usedConnParams.maxConnInt = evt->connInterval;
+      ble.usedConnParams.respLatency = evt->slaveLatency;
+      ble.usedConnParams.bleTimeout = evt->supervisionTimeout;
+      Event_post(apEvent, AP_EVT_CONN_PARAMS_UPDATED);
+    } break;
     case SNP_ADV_STARTED_EVT: {
-      snpAdvStatusEvt_t *advEvt = (snpAdvStatusEvt_t *) param;
-      advEvt->status = SNP_SUCCESS;
-      // flag1 = advEvt->status;
-      if (advEvt->status == SNP_SUCCESS)
+      snpAdvStatusEvt_t *evt = (snpAdvStatusEvt_t *) param;
+      evt->status = SNP_SUCCESS;
+      if (evt->status == SNP_SUCCESS)
       {
-        // flag0 = 100;
         Event_post(apEvent, AP_EVT_ADV_ENB);
       }
       else
       {
-        // flag0 = 101;
         Event_post(apEvent, AP_ERROR);
       }
     } break;
     case SNP_ADV_ENDED_EVT: {
-      snpAdvStatusEvt_t *advEvt = (snpAdvStatusEvt_t *) param;
-      if (advEvt->status == SNP_SUCCESS) {
+      snpAdvStatusEvt_t *evt = (snpAdvStatusEvt_t *) param;
+      if (evt->status == SNP_SUCCESS) {
         Event_post(apEvent, AP_EVT_ADV_END);
       }
       else
@@ -737,13 +753,21 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
         Event_post(apEvent, AP_ERROR);
       }
     } break;
+    /*
+     * Unused because value size handling in this library is agnostic of
+     * MTU (maximum transmission unit) size.
+     */
     // case SNP_ATT_MTU_EVT: {
     // } break;
     // case SNP_SECURITY_EVT: {
     // } break;
     // case SNP_AUTHENTICATION_EVT: {
     // } break;
-    // case SNP_ERROR_EVT: {
-    // } break;
+    case SNP_ERROR_EVT: {
+      snpErrorEvt_t *evt = (snpErrorEvt_t *) param;
+      ble.error_opcode = evt->opcode;
+      ble.error = evt->status;
+      Event_post(apEvent, AP_ERROR);
+    } break;
   }
 }
