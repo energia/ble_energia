@@ -49,7 +49,6 @@ int flag4 = 0;
 int flag5 = 0;
 
 static void AP_asyncCB(uint8_t cmd1, void *pParams);
-static int setSingleConnParam(size_t offset, int value);
 static void writeNotifInd(BLE_Char *bleChar);
 static uint8_t readValueValidateSize(BLE_Char *bleChar, size_t size);
 static void processSNPEventCB(uint16_t event, snpEventParam_t *param);
@@ -266,8 +265,10 @@ int BLE::setAdvertName(String *advertString)
   return status;
 }
 
-int BLE::setGapParam(int paramId, int Value)
+int BLE::setGapParam(int paramId, int value)
 {
+  (void) paramId;
+  (void) value;
   return BLE_NOT_IMPLEMENTED;
 }
 

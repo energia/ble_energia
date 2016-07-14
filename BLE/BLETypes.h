@@ -77,14 +77,14 @@ typedef struct
   unsigned char     UUID[16]; // array of UUID bytes, little-endian
   unsigned char     properties; // bitwise OR of macros: e.g. BLE_READABLE | BLE_WRITABLE
   // Null terminated; internally set permissions to read only so we don't have to worry about the length changing
-  char     *charDesc;
+  const char        *charDesc;
   unsigned char     valueFormat;
   unsigned char     valueExponent; // only used with integer formats, e.g. value = storedValue*10^valueExponent
   unsigned int      handle;
   void              *_value;
-  unsigned int      _valueLen;
-  unsigned char     _CCCD;
-  unsigned int      _CCCDHandle;
+  uint16_t          _valueLen;
+  uint8_t           _CCCD;
+  uint16_t          _CCCDHandle;
   bool              _resizable;
 } BLE_Char;
 
@@ -93,7 +93,7 @@ typedef struct
   unsigned char     UUID[16]; // array of UUID bytes
   unsigned int      numChars;
   BLE_Char          **chars;
-  unsigned int      handle;
+  uint16_t          handle;
 } BLE_Service;
 
 typedef struct
