@@ -37,7 +37,7 @@
 #define B_ADDR_LEN 6
 
 Event_Handle apEvent = NULL;
-uint8_t _connHandle = 0;
+uint16_t _connHandle = 0;
 
 BLE ble = BLE();
 
@@ -145,6 +145,7 @@ int BLE::begin(void)
 
 int BLE::end(void)
 {
+  _connHandle = -1;
   return BLE_NOT_IMPLEMENTED;
 }
 
@@ -315,7 +316,7 @@ int BLE::setBleTimeout(unsigned int timeout)
 int BLE::terminateConn(void)
 {
   int status = SAP_setParam(SAP_PARAM_CONN, SAP_CONN_STATE,
-                            sizeof(_connHandle),  &_connHandle);
+                            sizeof(_connHandle), (uint8_t *) &_connHandle);
   Event_pend(apEvent, AP_NONE, AP_EVT_CONN_TERM, BIOS_WAIT_FOREVER);
   return status;
 }

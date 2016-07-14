@@ -10,7 +10,7 @@ typedef struct BLE_Service_Node
   BLE_Service *service;
 } BLE_Service_Node;
 
-extern uint8_t _connHandle;
+extern uint16_t _connHandle;
 
 int BLE_registerService(BLE_Service *bleService);
 BLE_Char* BLE_getChar(int handle);
