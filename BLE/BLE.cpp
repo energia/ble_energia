@@ -57,6 +57,7 @@ BLE::BLE(byte portType)
 {
   _portType = portType;
   error = BLE_SUCCESS;
+  error_opcode = 0;
 }
 
 int BLE::begin(void)
