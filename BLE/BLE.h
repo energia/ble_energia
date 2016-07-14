@@ -33,6 +33,7 @@ class BLE : public Stream
 
     int begin(void);
     int end(void);
+    int terminateConn(void);
 
     int addService(BLE_Service *bleService);
 
@@ -50,8 +51,6 @@ class BLE : public Stream
     int setMaxConnInt(unsigned int maxConnInt); // Number of 1.25ms time slots
     int setRespLatency(unsigned int respLatency); // Measured in number of connection intervals the slave can miss.
     int setBleTimeout(unsigned int timeout);
-
-    int terminateConn(void);
 
     int writeValue(BLE_Char *bleChar, char value);
     int writeValue(BLE_Char *bleChar, unsigned char value);
