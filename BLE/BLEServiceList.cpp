@@ -244,7 +244,7 @@ static uint8_t serviceReadAttrCB(void *context,
                                  uint8_t *pData)
 {
   uint8_t status = SNP_SUCCESS;
-  connHandle = connectionHandle;
+  _connHandle = connectionHandle;
   BLE_Char *bleChar = BLE_getChar(charHdl);
   if (bleChar == NULL)
   {
@@ -270,7 +270,7 @@ static uint8_t serviceWriteAttrCB(void *context,
                                   uint16_t charHdl, uint16_t len,
                                   uint8_t *pData)
 {
-  connHandle = connectionHandle;
+  _connHandle = connectionHandle;
   BLE_Char *bleChar = BLE_getChar(charHdl);
   uint8_t status = SNP_SUCCESS;
   if (bleChar == NULL)
@@ -305,7 +305,7 @@ static uint8_t serviceCCCDIndCB(void *context,
                                 uint16_t value)
 {
   uint8_t status = SNP_SUCCESS;
-  connHandle = connectionHandle;
+  _connHandle = connectionHandle;
   bool notify = (value == SNP_GATT_CLIENT_CFG_NOTIFY);
   bool indicate = (value == SNP_GATT_CLIENT_CFG_INDICATE);
   BLE_Char *bleChar = BLE_getCCCD(cccdHdl);

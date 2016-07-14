@@ -77,7 +77,7 @@ typedef struct
   unsigned char     UUID[16]; // array of UUID bytes, little-endian
   unsigned char     properties; // bitwise OR of macros: e.g. BLE_READABLE | BLE_WRITABLE
   // Null terminated; internally set permissions to read only so we don't have to worry about the length changing
-  unsigned char     *charDesc;
+  char     *charDesc;
   unsigned char     valueFormat;
   unsigned char     valueExponent; // only used with integer formats, e.g. value = storedValue*10^valueExponent
   unsigned int      handle;
@@ -158,7 +158,5 @@ static uint8_t defAdvertData[] =
   TI_ST_KEY_DATA_ID,
   0x00                                    // Key state
 };
-
-extern uint16_t connHandle;
 
 #endif
