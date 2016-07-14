@@ -82,6 +82,7 @@ class BLE : public Stream
     int eddystone(void);
 
     unsigned int getRand(void);
+    void getRevision(BLE_Get_Revision_Rsp *getRevisionRsp);
 
     virtual int available(void);
     virtual int read(void);

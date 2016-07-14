@@ -636,6 +636,14 @@ unsigned int BLE::getRand(void)
   return SAP_getRand();
 }
 
+/*
+ * Rarely used and advanced-use call so we won't provide a framework for this.
+ */
+void BLE::getRevision(BLE_Get_Revision_Rsp *getRevisionRsp)
+{
+  SAP_getRevision(getRevisionRsp);
+}
+
 int BLE::serial(void)
 {
   addService(&serialService);
