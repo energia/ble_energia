@@ -10,6 +10,8 @@ BLE_Service_Node *bleServiceListHead = NULL;
 BLE_Service_Node *bleServiceListTail = NULL;
 
 static void addServiceNode(BLE_Service *service);
+static BLE_Char* getChar(int handle);
+static BLE_Char* getCCCD(int handle);
 static BLE_Service* getServiceWithChar(int handle);
 static void constructService(SAP_Service_t *service, BLE_Service *bleService);
 static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar);
@@ -59,34 +61,6 @@ int BLE_registerService(BLE_Service *bleService)
   free(service->charAttrHandles);
   free(service);
   return status;
-}
-
-BLE_Char* BLE_getChar(int handle)
-{
-  BLE_Service *service = getServiceWithChar(handle);
-  uint8_t i;
-  for (i = 0; i < service->numChars; i++)
-  {
-    if (service->chars[i]->handle == handle)
-    {
-      return service->chars[i];
-    }
-  }
-  return NULL;
-}
-
-BLE_Char* BLE_getCCCD(int handle)
-{
-  BLE_Service *service = getServiceWithChar(handle);
-  uint8_t i;
-  for (i = 0; i < service->numChars; i++)
-  {
-    if (service->chars[i]->_CCCDHandle == handle)
-    {
-      return service->chars[i];
-    }
-  }
-  return NULL;
 }
 
 void BLE_resetCCCD(void)
@@ -141,6 +115,34 @@ static void addServiceNode(BLE_Service *service)
     bleServiceListTail->next = newNode;
     bleServiceListTail = newNode;
   }
+}
+
+static BLE_Char* getChar(int handle)
+{
+  BLE_Service *service = getServiceWithChar(handle);
+  uint8_t i;
+  for (i = 0; i < service->numChars; i++)
+  {
+    if (service->chars[i]->handle == handle)
+    {
+      return service->chars[i];
+    }
+  }
+  return NULL;
+}
+
+static BLE_Char* getCCCD(int handle)
+{
+  BLE_Service *service = getServiceWithChar(handle);
+  uint8_t i;
+  for (i = 0; i < service->numChars; i++)
+  {
+    if (service->chars[i]->_CCCDHandle == handle)
+    {
+      return service->chars[i];
+    }
+  }
+  return NULL;
 }
 
 static BLE_Service* getServiceWithChar(int handle)
@@ -246,7 +248,7 @@ static uint8_t serviceReadAttrCB(void *context,
   (void) context;
   uint8_t status = SNP_SUCCESS;
   _connHandle = connectionHandle;
-  BLE_Char *bleChar = BLE_getChar(charHdl);
+  BLE_Char *bleChar = getChar(charHdl);
   if (bleChar == NULL)
   {
     *len = 0;
@@ -273,7 +275,7 @@ static uint8_t serviceWriteAttrCB(void *context,
 {
   (void) context;
   _connHandle = connectionHandle;
-  BLE_Char *bleChar = BLE_getChar(charHdl);
+  BLE_Char *bleChar = getChar(charHdl);
   uint8_t status = SNP_SUCCESS;
   if (bleChar == NULL)
   {
@@ -312,7 +314,7 @@ static uint8_t serviceCCCDIndCB(void *context,
   _connHandle = connectionHandle;
   bool notify = (value == SNP_GATT_CLIENT_CFG_NOTIFY);
   bool indicate = (value == SNP_GATT_CLIENT_CFG_INDICATE);
-  BLE_Char *bleChar = BLE_getCCCD(cccdHdl);
+  BLE_Char *bleChar = getCCCD(cccdHdl);
   if (bleChar == NULL)
   {
     status = SNP_UNKNOWN_ATTRIBUTE;
