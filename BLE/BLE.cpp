@@ -623,6 +623,11 @@ int BLE::eddystone(void)
   return BLE_NOT_IMPLEMENTED;
 }
 
+unsigned int BLE::getRand(void)
+{
+  return SAP_getRand();
+}
+
 int BLE::serial(void)
 {
   addService(&serialService);

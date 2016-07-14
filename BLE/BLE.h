@@ -74,6 +74,8 @@ class BLE : public Stream
     int uriBeacon(void);
     int eddystone(void);
 
+    unsigned int getRand(void);
+
     virtual int available(void);
     virtual int read(void);
     virtual int peek(void);
