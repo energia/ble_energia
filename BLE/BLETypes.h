@@ -74,47 +74,47 @@
 
 typedef struct
 {
-  byte              UUID[16]; // array of UUID bytes, little-endian
-  byte              properties; // bitwise OR of macros: e.g. BLE_READABLE | BLE_WRITABLE
+  unsigned char     UUID[16]; // array of UUID bytes, little-endian
+  unsigned char     properties; // bitwise OR of macros: e.g. BLE_READABLE | BLE_WRITABLE
   // Null terminated; internally set permissions to read only so we don't have to worry about the length changing
-  char              *charDesc;
-  byte              valueFormat;
-  byte              valueExponent; // only used with integer formats, e.g. value = storedValue*10^valueExponent
-  int               handle;
+  unsigned char     *charDesc;
+  unsigned char     valueFormat;
+  unsigned char     valueExponent; // only used with integer formats, e.g. value = storedValue*10^valueExponent
+  unsigned int      handle;
   void              *_value;
-  int               _valueLen;
-  byte              _CCCD;
+  unsigned int      _valueLen;
+  unsigned char     _CCCD;
   unsigned int      _CCCDHandle;
   bool              _resizable;
 } BLE_Char;
 
 typedef struct
 {
-  byte              UUID[16]; // array of UUID bytes
-  int               numChars;
+  unsigned char     UUID[16]; // array of UUID bytes
+  unsigned int      numChars;
   BLE_Char          **chars;
-  int               handle;
+  unsigned int      handle;
 } BLE_Service;
 
 typedef struct
 {
-  byte advertMode;
-  int timeout; // How long to advertise for (in ms), 0 for indefinitely
-  int interval; // Advertising Interval (n * 0.625 ms), 0 for 100ms default
+  unsigned char     advertMode;
+  unsigned int      timeout; // How long to advertise for (in ms), 0 for indefinitely
+  unsigned int      interval; // Advertising Interval (n * 0.625 ms), 0 for 100ms default
   /* 0x00   Advertising is disabled during connection and will not start after.
    * 0x01   Advertising will continue with non-connectable advertising when connection is established
         There are separate GAP parameters for setting connected advertising interval.
    * 0x02   Advertising will restart with connectable advertising when a connection is terminated.
    */
-  byte connectedBehavior;
+  unsigned char      connectedBehavior;
 } BLE_Advert_Settings;
 
 typedef struct
 {
-  int minConnInt;
-  int maxConnInt;
-  int respLatency;
-  int bleTimeout;
+  unsigned int               minConnInt;
+  unsigned int               maxConnInt;
+  unsigned int               respLatency;
+  unsigned int               bleTimeout;
 } BLE_Conn_Params;
 
 static uint8_t defScanRspData[] = {
