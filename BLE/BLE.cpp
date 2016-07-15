@@ -71,7 +71,7 @@ static uint8_t defNotConnAD[] =
   0x00                                    // Key state
 };
 
-static uint8_t defConnAD[] =
+static uint8_t defConnAD[] = // TODO
 {
   0
 };
@@ -100,14 +100,14 @@ static uint8_t defScanRspData[] = {
 static uint8_t *defADArr[] =
 {
   defNotConnAD,
-  defConnAD,
+  defNotConnAD, // TODO
   defScanRspData
 };
 
 static size_t defADSizes[] =
 {
   sizeof(defNotConnAD),
-  sizeof(defConnAD),
+  sizeof(defNotConnAD), // TODO
   sizeof(defScanRspData)
 };
 
@@ -227,8 +227,7 @@ int BLE::begin(void)
 int BLE::end(void)
 {
   /* Reset private members of BLE.h */
-  nonConnAdvertData = NULL;
-  scanRspData = NULL;
+  for (uint8_t idx = 0; idx < MAX_ADVERT_IDX; idx++) {advertDataArr[idx] = NULL;}
 
   /* Reset public members of BLE.h */
   resetPublicMembers();
