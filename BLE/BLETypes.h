@@ -29,7 +29,7 @@
  * active action to request more data.
  */
 #define BLE_ADV_DATA_NOTCONN    SAP_ADV_DATA_NOTCONN
-#define BLE_ADV_DATA_CONN       SAP_ADV_DATA_CONN
+#define BLE_ADV_DATA_CONN       SAP_ADV_DATA_CONN // TO-DO
 #define BLE_ADV_DATA_SCANRSP    SAP_ADV_DATA_SCANRSP
 
 /*
@@ -124,47 +124,5 @@ typedef struct
  * uint8_t  stackBuildVer[10]; // Stack Revision see TI HCI vendor guide.
  */
 typedef snpGetRevisionRsp_t BLE_Get_Revision_Rsp;
-
-static uint8_t defScanRspData[] = {
-  // complete name
-  0xc,// length of this data
-  SAP_GAP_ADTYPE_LOCAL_NAME_COMPLETE,
-  'E', 'n', 'e', 'r', 'g', 'i', 'a', ' ',
-  'B', 'L', 'E',
-
-  // connection interval range
-  0x05,   // length of this data
-  0x12, //GAP_ADTYPE_SLAVE_CONN_INTERVAL_RANGE,
-  LO_UINT16( BLE_DEF_DESIRED_MIN_CONN_INT ),
-  HI_UINT16( BLE_DEF_DESIRED_MIN_CONN_INT ),
-  LO_UINT16( BLE_DEF_DESIRED_MAX_CONN_INT ),
-  HI_UINT16( BLE_DEF_DESIRED_MAX_CONN_INT ),
-
-  // Tx power level
-  0x02,   // length of this data
-  0x0A, //GAP_ADTYPE_POWER_LEVEL,
-  0       // 0dBm
-};
-
-// GAP - Advertisement data (max size = 31 bytes, though this is
-// best kept short to conserve power while advertisting)
-static uint8_t defAdvertData[] =
-{
-  // Flags; this sets the device to use limited discoverable
-  // mode (advertises for 30 seconds at a time) instead of general
-  // discoverable mode (advertises indefinitely)
-  0x02,   // length of this data
-  SAP_GAP_ADTYPE_FLAGS,
-  SAP_GAP_ADTYPE_FLAGS_GENERAL | SAP_GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED,
-
-  // Manufacturer specific advertising data
-  0x06,
-  0xFF, //GAP_ADTYPE_MANUFACTURER_SPECIFIC,
-  LO_UINT16(TI_COMPANY_ID),
-  HI_UINT16(TI_COMPANY_ID),
-  TI_ST_DEVICE_ID,
-  TI_ST_KEY_DATA_ID,
-  0x00                                    // Key state
-};
 
 #endif

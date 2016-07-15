@@ -41,6 +41,48 @@ uint16_t _connHandle = 0;
 
 BLE ble = BLE();
 
+static uint8_t defScanRspData[] = {
+  // complete name
+  0xc,// length of this data
+  SAP_GAP_ADTYPE_LOCAL_NAME_COMPLETE,
+  'E', 'n', 'e', 'r', 'g', 'i', 'a', ' ',
+  'B', 'L', 'E',
+
+  // connection interval range
+  0x05,   // length of this data
+  0x12, //GAP_ADTYPE_SLAVE_CONN_INTERVAL_RANGE,
+  LO_UINT16( BLE_DEF_DESIRED_MIN_CONN_INT ),
+  HI_UINT16( BLE_DEF_DESIRED_MIN_CONN_INT ),
+  LO_UINT16( BLE_DEF_DESIRED_MAX_CONN_INT ),
+  HI_UINT16( BLE_DEF_DESIRED_MAX_CONN_INT ),
+
+  // Tx power level
+  0x02,   // length of this data
+  0x0A, //GAP_ADTYPE_POWER_LEVEL,
+  0       // 0dBm
+};
+
+// GAP - Advertisement data (max size = 31 bytes, though this is
+// best kept short to conserve power while advertisting)
+static uint8_t defAdvertData[] =
+{
+  // Flags; this sets the device to use limited discoverable
+  // mode (advertises for 30 seconds at a time) instead of general
+  // discoverable mode (advertises indefinitely)
+  0x02,   // length of this data
+  SAP_GAP_ADTYPE_FLAGS,
+  SAP_GAP_ADTYPE_FLAGS_GENERAL | SAP_GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED,
+
+  // Manufacturer specific advertising data
+  0x06,
+  0xFF, //GAP_ADTYPE_MANUFACTURER_SPECIFIC,
+  LO_UINT16(TI_COMPANY_ID),
+  HI_UINT16(TI_COMPANY_ID),
+  TI_ST_DEVICE_ID,
+  TI_ST_KEY_DATA_ID,
+  0x00                                    // Key state
+};
+
 int flag0 = 0;
 int flag1 = 0;
 int flag2 = 0;
@@ -206,6 +248,34 @@ int BLE::stopAdvert(void)
   return BLE_SUCCESS;
 }
 
+int BLE::resetAdvertData(void)
+{
+  if (resetAdvertData(BLE_ADV_DATA_NOTCONN) != SNP_SUCCESS)
+  {
+    error = BLE_ADV_DATA_NOTCONN;
+    return BLE_FAILURE;
+  }
+  if (resetAdvertData(BLE_ADV_DATA_SCANRSP) != SNP_SUCCESS)
+  {
+    error = BLE_ADV_DATA_SCANRSP;
+    return BLE_FAILURE;
+  }
+  return BLE_SUCCESS;
+}
+
+int BLE::resetAdvertData(int advertType)
+{
+  if (advertType == BLE_ADV_DATA_NOTCONN)
+  {
+    return setAdvertData(advertType, sizeof(defAdvertData), defAdvertData);
+  }
+  else if (advertType == BLE_ADV_DATA_SCANRSP)
+  {
+    return setAdvertData(advertType, sizeof(defScanRspData), defScanRspData);
+  }
+  return BLE_INVALID_PARAMETERS;
+}
+
 int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
 {
   uint8_t status = SAP_setParam(SAP_PARAM_ADV, advertType, len, advertData);
@@ -226,6 +296,10 @@ int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
         free(scanRspData);
       }
       scanRspData = advertData;
+    }
+    else
+    {
+      return BLE_INVALID_PARAMETERS;
     }
   }
   return status;

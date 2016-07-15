@@ -41,6 +41,8 @@ class BLE : public Stream
     int startAdvert(BLE_Advert_Settings *advertSettings);
     int stopAdvert(void);
     int setAdvertData(int advertType, uint8_t len, uint8_t *advertData);
+    int resetAdvertData(void);
+    int resetAdvertData(int advertType);
     int setAdvertName(const char *advertString);
     int setAdvertName(String *advertString);
 
