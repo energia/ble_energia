@@ -860,10 +860,20 @@ size_t BLE::write(const uint8_t *buffer, size_t size)
   return 0;
 }
 
-static void AP_asyncCB(uint8_t cmd1, void *pParams) {
-  switch (SNP_GET_OPCODE_HDR_CMD1(cmd1)) {
-    case SNP_DEVICE_GRP: {
-      switch (cmd1) {
+/*
+ * Even though many events and resposes are asynchronous, we still handle them
+ * synchronously. Any request that generates an asynchronous response should
+ * Event_pend on the corresponding Event_post here.
+ */
+static void AP_asyncCB(uint8_t cmd1, void *pParams)
+{
+  ble.error = BLE_SUCCESS;
+  switch (SNP_GET_OPCODE_HDR_CMD1(cmd1))
+  {
+    case SNP_DEVICE_GRP:
+    {
+      switch (cmd1)
+      {
         case SNP_POWER_UP_IND:
           // Notify state machine of Power Up Indication
           // Log_info0("Got PowerUp indication from NP");
