@@ -35,7 +35,17 @@ int BLESerial_read(void)
   return iChar;
 }
 
+/*
+ * Serial.flush is supposed to wait for outgoing data to transmit, but since
+ * a write call operates in the same task all the way throught the RPC, we
+ * don't need to worry.
+ */
 void BLESerial_flush(void)
 {
+  /*
+   * Essentially fast-forward the read index to the write index.
+   * When rxReadIndex == rxWriteIndex, available() returns 0.
+   */
+  rxReadIndex = rxWriteIndex;
   return;
 }

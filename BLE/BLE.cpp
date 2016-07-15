@@ -353,7 +353,7 @@ int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
 }
 
 /*
- * Uses the default scan response data defScanRspData in BLETypes.h. The first
+ * Uses the default scan response data defScanRspData. The first
  * byte is one plus the length of the name. The second should be
  * SAP_GAP_ADTYPE_LOCAL_NAME_COMPLETE, and the third and so on are the
  * characters of the name.
@@ -803,6 +803,7 @@ int BLE::peek(void)
 void BLE::flush(void)
 {
   BLESerial_flush();
+  return;
 }
 
 size_t BLE::write(uint8_t c)
