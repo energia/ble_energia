@@ -10,11 +10,13 @@
 /* Energia BLE status codes */
 #define BLE_SUCCESS             SNP_SUCCESS // 0x00
 #define BLE_FAILURE             SNP_FAILURE // 0x83
+#define BLE_INVALID_PARAMETERS  SNP_INVALID_PARAMS // 0x84
 #define BLE_INVALID_HANDLE      0x50
 #define BLE_UNDEFINED_VALUE     0x51
 #define BLE_NOT_IMPLEMENTED     0x52
 #define BLE_SERIAL_DISABLED     0x53
-#define BLE_INVALID_PARAMETERS  SNP_INVALID_PARAMS
+#define BLE_TIMEOUT             0x54
+#define BLE_CHECK_ERROR         0x55
 
 /* Type of connection between the user application's
    processor and the bluetooth chip */

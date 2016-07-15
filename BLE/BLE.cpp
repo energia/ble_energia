@@ -4,6 +4,7 @@
 // #include <ti/drivers/gpio.h>
 // #include <ti/drivers/gpio/GPIOMSP432.h>
 #include <ti/sysbios/BIOS.h>
+#include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Event.h>
 
 #include <sap.h>
@@ -22,6 +23,13 @@
 #include "BLEServices.h"
 #include "Flags.h"
 
+/*
+ * Event_pend timeout set in units of ticks. Tick period is microseconds,
+ * so this evaluates to 1 second.
+ */
+#define AP_EVENT_PEND_TIMEOUT                (1000000/Clock_tickPeriod)
+
+// Event ID's are integers
 #define AP_NONE                              Event_Id_NONE   // No Event
 #define AP_EVT_PUI                           Event_Id_00     // Power-Up Indication
 #define AP_EVT_ADV_ENB                       Event_Id_01     // Advertisement Enable
@@ -37,6 +45,7 @@
 #define B_ADDR_LEN 6
 
 Event_Handle apEvent = NULL;
+uint8_t *asyncRspData = NULL;
 uint16_t _connHandle = 0;
 
 BLE ble = BLE();
@@ -120,6 +129,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams);
 static void writeNotifInd(BLE_Char *bleChar);
 static uint8_t readValueValidateSize(BLE_Char *bleChar, size_t size);
 static void processSNPEventCB(uint16_t event, snpEventParam_t *param);
+static bool apEventPend(uint32_t event);
 
 BLE::BLE(byte portType)
 {
@@ -191,17 +201,18 @@ int BLE::begin(void)
    * otherwise, we can assume the NP was running previously and needs to be
    * reset to a known state
    */
-  if (0 == Event_pend(apEvent, AP_NONE, AP_EVT_PUI, 1000)) {
+  if (!apEventPend(AP_EVT_PUI)) {
     // Assuming that at SAP start up that SNP is already running
     if (SAP_reset() != SNP_SUCCESS)
     {
       SAP_close();
       return BLE_FAILURE;
     }
-    if (0 == Event_pend(apEvent, AP_NONE, AP_EVT_PUI, 1000))
+    if (!apEventPend(AP_EVT_PUI))
     {
       return BLE_FAILURE;
     }
+    return BLE_SUCCESS;
   }
 
   /*
@@ -301,15 +312,21 @@ int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
     status = SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE,
                           sizeof(lReq), (uint8_t *) &lReq);
   }
-  Event_pend(apEvent, AP_NONE, AP_EVT_ADV_ENB, BIOS_WAIT_FOREVER);
-  return status;
+  if (!apEventPend(AP_EVT_ADV_ENB))
+  {
+    return BLE_CHECK_ERROR;
+  }
+  return BLE_SUCCESS;
 }
 
 int BLE::stopAdvert(void)
 {
   uint8_t disableAdv = SAP_ADV_STATE_DISABLE;
   SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE, 1, &disableAdv);
-  Event_pend(apEvent, AP_NONE, AP_EVT_ADV_END, BIOS_WAIT_FOREVER);
+  if (!apEventPend(AP_EVT_ADV_END))
+  {
+    return BLE_CHECK_ERROR;
+  }
   return BLE_SUCCESS;
 }
 
@@ -330,11 +347,11 @@ int BLE::resetAdvertData(void)
 int BLE::resetAdvertData(int advertType)
 {
   uint8_t idx = advertIndex(advertType);
-  if (idx < MAX_ADVERT_IDX)
+  if (!(idx < MAX_ADVERT_IDX))
   {
-    return setAdvertData(advertType, defADSizes[idx], defADArr[idx]);
+    return idx;
   }
-  return idx;
+  return setAdvertData(advertType, defADSizes[idx], defADArr[idx]);
 }
 
 int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
@@ -913,3 +930,31 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
     } break;
   }
 }
+
+/*
+ * Can't return specific error beacuse that's only in the async handler,
+ * so we return true/false and let caller check ble.error.
+ */
+static bool apEventPend(uint32_t event)
+{
+  ble.error = BLE_SUCCESS;
+  uint32_t postedEvent = Event_pend(apEvent, AP_NONE, event + AP_ERROR,
+                                  AP_EVENT_PEND_TIMEOUT);
+  bool status = true;
+  if (postedEvent & event)
+  {
+    // pass
+  }
+  else if (postedEvent == 0)
+  {
+    ble.error = BLE_TIMEOUT;
+    status = false;
+  }
+  else if (postedEvent & AP_ERROR)
+  {
+    // Function that posts AP_ERROR should set ble.error
+    status = false;
+  }
+  return status;
+}
+
