@@ -13,6 +13,7 @@ class BLE : public Stream
     uint8_t *nonConnAdvertData = NULL;
     uint8_t *scanRspData = NULL;
 
+    void resetPublicMembers(void);
     int setAdvertName(int advertStringLen, const char *advertString);
     int setSingleConnParam(size_t offset, int value);
     int writeValue(BLE_Char *bleChar, int len, const char *str);

@@ -98,8 +98,7 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param);
 BLE::BLE(byte portType)
 {
   _portType = portType;
-  error = BLE_SUCCESS;
-  error_opcode = 0;
+  resetPublicMembers();
 }
 
 int BLE::begin(void)
@@ -188,8 +187,33 @@ int BLE::begin(void)
 
 int BLE::end(void)
 {
-  _connHandle = -1;
+  /* Reset private members of BLE.h */
+  nonConnAdvertData = NULL;
+  scanRspData = NULL;
+
+  /* Reset public members of BLE.h */
+  resetPublicMembers();
+
+
+  // _connHandle = -1;
+  // txChar;
+  // rxChar;
+  // serialService;
+  // bleServiceListHead;
+  // bleServiceListTail;
+  // rxBuffer;
+  // rxWriteIndex;
+  // rxReadIndex;
+  // SAP_reset();
+  // SAP_close();
   return BLE_NOT_IMPLEMENTED;
+}
+
+void BLE::resetPublicMembers(void)
+{
+  error = BLE_SUCCESS;
+  error_opcode = 0;
+  memset(&usedConnParams, 0, sizeof(usedConnParams));
 }
 
 int BLE::addService(BLE_Service *bleService)
