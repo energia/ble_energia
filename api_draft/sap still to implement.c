@@ -559,26 +559,6 @@ uint8_t SAP_setAuthenticationRsp(uint32_t authData)
   return SNP_RPC_setAuthenticationData(&pReq);
 }
 
-/**
- * @brief       Set event mask of SNP events
- *
- * @param       eventMask - mask of event flags for SNP to send. event types
- *                          not included in this mask will not be sent.
- *
- * @return      SNP_SUCCESS: mask set.<BR>
- */
-uint8_t SAP_setSNPEventMask(uint16_t eventMask)
-{
-  snpMaskEventReq_t req;
-  snpMaskEventRsp_t rsp;
-
-  req.eventMask = eventMask;
-
-  SNP_RPC_maskEvent(&req, &rsp);
-
-  return SNP_SUCCESS;
-}
-
 /*********************************************************************
  * @fn      SAP_getRevision
  *

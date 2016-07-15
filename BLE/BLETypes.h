@@ -31,6 +31,8 @@
 #define BLE_ADV_DATA_NOTCONN    SAP_ADV_DATA_NOTCONN
 #define BLE_ADV_DATA_CONN       SAP_ADV_DATA_CONN // TO-DO
 #define BLE_ADV_DATA_SCANRSP    SAP_ADV_DATA_SCANRSP
+ /* The number of kinds of advertising data */
+#define MAX_ADVERT_IDX          3
 
 /*
  * For startAdvert.

@@ -41,6 +41,32 @@ uint16_t _connHandle = 0;
 
 BLE ble = BLE();
 
+// GAP - Advertisement data (max size = 31 bytes, though this is
+// best kept short to conserve power while advertisting)
+static uint8_t defNotConnAD[] =
+{
+  // Flags; this sets the device to use limited discoverable
+  // mode (advertises for 30 seconds at a time) instead of general
+  // discoverable mode (advertises indefinitely)
+  0x02,   // length of this data
+  SAP_GAP_ADTYPE_FLAGS,
+  SAP_GAP_ADTYPE_FLAGS_GENERAL | SAP_GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED,
+
+  // Manufacturer specific advertising data
+  0x06,
+  0xFF, //GAP_ADTYPE_MANUFACTURER_SPECIFIC,
+  LO_UINT16(TI_COMPANY_ID),
+  HI_UINT16(TI_COMPANY_ID),
+  TI_ST_DEVICE_ID,
+  TI_ST_KEY_DATA_ID,
+  0x00                                    // Key state
+};
+
+static uint8_t defConnAD[] =
+{
+  0
+};
+
 static uint8_t defScanRspData[] = {
   // complete name
   0xc,// length of this data
@@ -62,25 +88,25 @@ static uint8_t defScanRspData[] = {
   0       // 0dBm
 };
 
-// GAP - Advertisement data (max size = 31 bytes, though this is
-// best kept short to conserve power while advertisting)
-static uint8_t defAdvertData[] =
+static uint8_t *defADArr[] =
 {
-  // Flags; this sets the device to use limited discoverable
-  // mode (advertises for 30 seconds at a time) instead of general
-  // discoverable mode (advertises indefinitely)
-  0x02,   // length of this data
-  SAP_GAP_ADTYPE_FLAGS,
-  SAP_GAP_ADTYPE_FLAGS_GENERAL | SAP_GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED,
+  defNotConnAD,
+  defConnAD,
+  defScanRspData
+};
 
-  // Manufacturer specific advertising data
-  0x06,
-  0xFF, //GAP_ADTYPE_MANUFACTURER_SPECIFIC,
-  LO_UINT16(TI_COMPANY_ID),
-  HI_UINT16(TI_COMPANY_ID),
-  TI_ST_DEVICE_ID,
-  TI_ST_KEY_DATA_ID,
-  0x00                                    // Key state
+static size_t defADSizes[] =
+{
+  sizeof(defNotConnAD),
+  sizeof(defConnAD),
+  sizeof(defScanRspData)
+};
+
+static uint8_t aDIdxToType[] =
+{
+  BLE_ADV_DATA_NOTCONN,
+  BLE_ADV_DATA_CONN,
+  BLE_ADV_DATA_SCANRSP
 };
 
 int flag0 = 0;
@@ -98,6 +124,8 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param);
 BLE::BLE(byte portType)
 {
   _portType = portType;
+  uint8_t idx;
+  for (idx = 0; idx < MAX_ADVERT_IDX; idx++) {advertDataArr[idx] = NULL;}
   resetPublicMembers();
 }
 
@@ -221,17 +249,30 @@ int BLE::addService(BLE_Service *bleService)
   return BLE_registerService(bleService);
 }
 
+uint8_t BLE::advertIndex(int advertType)
+{
+  switch (advertType)
+  {
+    case BLE_ADV_DATA_NOTCONN:
+      return 0;
+    case BLE_ADV_DATA_CONN:
+      return 1;
+    case BLE_ADV_DATA_SCANRSP:
+      return 2;
+  }
+  return BLE_INVALID_PARAMETERS;
+}
+
 void BLE::advertDataInit(void)
 {
-  if (nonConnAdvertData == NULL)
+  uint8_t idx;
+  for (idx = 0; idx < MAX_ADVERT_IDX; idx++)
   {
-    nonConnAdvertData = defAdvertData;
-    setAdvertData(BLE_ADV_DATA_NOTCONN, sizeof(defAdvertData), defAdvertData);
-  }
-  if (scanRspData == NULL)
-  {
-    scanRspData = defScanRspData;
-    setAdvertData(BLE_ADV_DATA_SCANRSP, sizeof(defScanRspData), defScanRspData);
+    if (advertDataArr[idx] == NULL)
+    {
+      advertDataArr[idx] = defADArr[idx];
+      setAdvertData(aDIdxToType[idx], sizeof(defADArr[idx]), defADArr[idx]);
+    }
   }
 }
 
@@ -274,30 +315,26 @@ int BLE::stopAdvert(void)
 
 int BLE::resetAdvertData(void)
 {
-  if (resetAdvertData(BLE_ADV_DATA_NOTCONN) != SNP_SUCCESS)
+  uint8_t idx;
+  for (idx = 0; idx < MAX_ADVERT_IDX; idx++)
   {
-    error = BLE_ADV_DATA_NOTCONN;
-    return BLE_FAILURE;
-  }
-  if (resetAdvertData(BLE_ADV_DATA_SCANRSP) != SNP_SUCCESS)
-  {
-    error = BLE_ADV_DATA_SCANRSP;
-    return BLE_FAILURE;
+    if (resetAdvertData(aDIdxToType[idx]) != SNP_SUCCESS)
+    {
+      error = aDIdxToType[idx];
+      return BLE_FAILURE;
+    }
   }
   return BLE_SUCCESS;
 }
 
 int BLE::resetAdvertData(int advertType)
 {
-  if (advertType == BLE_ADV_DATA_NOTCONN)
+  uint8_t idx = advertIndex(advertType);
+  if (idx < MAX_ADVERT_IDX)
   {
-    return setAdvertData(advertType, sizeof(defAdvertData), defAdvertData);
+    return setAdvertData(advertType, defADSizes[idx], defADArr[idx]);
   }
-  else if (advertType == BLE_ADV_DATA_SCANRSP)
-  {
-    return setAdvertData(advertType, sizeof(defScanRspData), defScanRspData);
-  }
-  return BLE_INVALID_PARAMETERS;
+  return idx;
 }
 
 int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
@@ -305,26 +342,12 @@ int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
   uint8_t status = SAP_setParam(SAP_PARAM_ADV, advertType, len, advertData);
   if (status == SNP_SUCCESS)
   {
-    if (advertType == BLE_ADV_DATA_NOTCONN)
+    uint8_t idx = advertIndex(advertType); // advertType validated by SAP_setParam
+    if (advertDataArr[idx] && advertDataArr[idx] != defADArr[idx])
     {
-      if (nonConnAdvertData && nonConnAdvertData != defAdvertData)
-      {
-        free(nonConnAdvertData);
-      }
-      nonConnAdvertData = advertData;
+      free(advertDataArr[idx]);
     }
-    else if (advertType == BLE_ADV_DATA_SCANRSP)
-    {
-      if (scanRspData && scanRspData != defScanRspData)
-      {
-        free(scanRspData);
-      }
-      scanRspData = advertData;
-    }
-    else
-    {
-      return BLE_INVALID_PARAMETERS;
-    }
+    advertDataArr[idx] = advertData;
   }
   return status;
 }
