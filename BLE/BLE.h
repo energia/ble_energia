@@ -11,11 +11,9 @@ class BLE : public Stream
   private:
     uint8_t _portType; // UART or SPI connection with network processor
     uint8_t *advertDataArr[MAX_ADVERT_IDX];
-    uint8_t *nonConnAdvertData = NULL;
-    uint8_t *scanRspData = NULL;
 
-    void resetPublicMembers(void);
-    void advertDataInit(void);
+    int resetPublicMembers(void);
+    int advertDataInit(void);
     uint8_t advertIndex(int advertType);
     int setAdvertName(int advertStringLen, const char *advertString);
     int setSingleConnParam(size_t offset, int value);
@@ -23,7 +21,7 @@ class BLE : public Stream
     int writeValue(BLE_Char *bleChar, const uint8_t *str);
 
   public:
-    int error; // Reason for error
+    int error; // Set to BLE_SUCCESS before conditionally setting
     int error_opcode; // Command that caused an error. Not guaranteed to be set.
 
     /*

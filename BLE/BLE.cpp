@@ -39,6 +39,15 @@
 #define AP_EVT_CONN_PARAMS_UPDATED           Event_Id_05     // Connection Parameters Updated Event
 #define AP_ERROR                             Event_Id_31     // Error
 
+/* Implement this macro with the following regex:
+ * Find:( *)if \(isError\((.*)\)\)[\n {]*return BLE_CHECK_ERROR;[\n ]*}\n
+ * Replace:\1IF_ERR_RET(\2)\n
+ */
+#define IF_ERR_RET(call) if (isError((call)))\
+  {\
+    return BLE_CHECK_ERROR;\
+  }\
+
 #define PIN6_7 35
 
 // From bcomdef.h in the BLE SDK
@@ -130,6 +139,7 @@ static void writeNotifInd(BLE_Char *bleChar);
 static uint8_t readValueValidateSize(BLE_Char *bleChar, size_t size);
 static void processSNPEventCB(uint16_t event, snpEventParam_t *param);
 static bool apEventPend(uint32_t event);
+static bool isError(int status);
 
 BLE::BLE(byte portType)
 {
@@ -167,10 +177,10 @@ int BLE::begin(void)
   SAP_Params sapParams;
   SAP_initParams(_portType, &sapParams);
   sapParams.port.remote.boardID = 1;
-  if (SAP_open(&sapParams) != SNP_SUCCESS)
+  if (isError(SAP_open(&sapParams)))
   {
     SAP_close();
-    return BLE_FAILURE;
+    return BLE_CHECK_ERROR;
   }
 
   /*
@@ -179,20 +189,20 @@ int BLE::begin(void)
    * those above. This function may be called multiple times to
    * register multiple callbacks. Runs in NPI task.
    */
-  if (SAP_setAsyncCB(AP_asyncCB) != SNP_SUCCESS)
+  if (isError(SAP_setAsyncCB(AP_asyncCB)))
   {
     SAP_close();
-    return BLE_FAILURE;
+    return BLE_CHECK_ERROR;
   }
 
   /*
    * Register async SNP event handler. Includes connection establisment,
    * termination, advertisement enabling, security events.
    */
-  if (SAP_registerEventCB(processSNPEventCB, 0xFFFF) != SNP_SUCCESS)
+  if (isError(SAP_registerEventCB(processSNPEventCB, 0xFFFF)))
   {
     SAP_close();
-    return BLE_FAILURE;
+    return BLE_CHECK_ERROR;
   }
 
   /*
@@ -203,21 +213,21 @@ int BLE::begin(void)
    */
   if (!apEventPend(AP_EVT_PUI)) {
     // Assuming that at SAP start up that SNP is already running
-    if (SAP_reset() != SNP_SUCCESS)
+    if (isError(SAP_reset()))
     {
       SAP_close();
-      return BLE_FAILURE;
+      return BLE_CHECK_ERROR;
     }
     if (!apEventPend(AP_EVT_PUI))
     {
-      return BLE_FAILURE;
+      return BLE_CHECK_ERROR;
     }
     return BLE_SUCCESS;
   }
 
   /*
    * Events XORed with full mask are not sent from the SNP to the AP.
-   * This SAP API ignores the status response from the RPC.
+   * This SAP API always returns success.
    */
   SAP_setSNPEventMask(SNP_ATT_MTU_EVT);
 
@@ -247,16 +257,18 @@ int BLE::end(void)
   return BLE_NOT_IMPLEMENTED;
 }
 
-void BLE::resetPublicMembers(void)
+int BLE::resetPublicMembers(void)
 {
   error = BLE_SUCCESS;
   error_opcode = 0;
   memset(&usedConnParams, 0, sizeof(usedConnParams));
+  return BLE_SUCCESS;
 }
 
 int BLE::addService(BLE_Service *bleService)
 {
-  return BLE_registerService(bleService);
+  if (isError(BLE_registerService(bleService))) {return BLE_CHECK_ERROR;}
+  return BLE_SUCCESS;
 }
 
 uint8_t BLE::advertIndex(int advertType)
@@ -273,17 +285,17 @@ uint8_t BLE::advertIndex(int advertType)
   return BLE_INVALID_PARAMETERS;
 }
 
-void BLE::advertDataInit(void)
+int BLE::advertDataInit(void)
 {
   uint8_t idx;
   for (idx = 0; idx < MAX_ADVERT_IDX; idx++)
   {
     if (advertDataArr[idx] == NULL)
     {
-      advertDataArr[idx] = defADArr[idx];
-      setAdvertData(aDIdxToType[idx], sizeof(defADArr[idx]), defADArr[idx]);
+      if (isError(setAdvertData(aDIdxToType[idx], sizeof(defADArr[idx]), defADArr[idx]))) {return BLE_CHECK_ERROR;}
     }
   }
+  return BLE_SUCCESS;
 }
 
 int BLE::startAdvert(void)
@@ -293,13 +305,15 @@ int BLE::startAdvert(void)
 
 int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
 {
-  advertDataInit();
+  if (isError(advertDataInit())) {return BLE_CHECK_ERROR;}
 
-  uint8_t status;
+  uint16_t reqSize;
+  uint8_t *pData;
   if (advertSettings == NULL)
   {
     uint8_t enableAdv = SAP_ADV_STATE_ENABLE;
-    status = SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE, 1, &enableAdv);
+    reqSize = 1;
+    pData = &enableAdv;
   }
   else
   {
@@ -308,9 +322,10 @@ int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
     lReq.timeout = advertSettings->timeout;
     lReq.interval = advertSettings->interval;
     lReq.behavior = advertSettings->connectedBehavior;
-    status = SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE,
-                          sizeof(lReq), (uint8_t *) &lReq);
+    reqSize = (uint16_t) sizeof(lReq);
+    pData = (uint8_t *) &lReq;
   }
+  if (isError(SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE, reqSize, pData))) {return BLE_CHECK_ERROR;}
   if (!apEventPend(AP_EVT_ADV_ENB))
   {
     return BLE_CHECK_ERROR;
@@ -321,7 +336,7 @@ int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
 int BLE::stopAdvert(void)
 {
   uint8_t disableAdv = SAP_ADV_STATE_DISABLE;
-  SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE, 1, &disableAdv);
+  if (isError(SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE, 1, &disableAdv))) {return BLE_CHECK_ERROR;}
   if (!apEventPend(AP_EVT_ADV_END))
   {
     return BLE_CHECK_ERROR;
@@ -334,11 +349,7 @@ int BLE::resetAdvertData(void)
   uint8_t idx;
   for (idx = 0; idx < MAX_ADVERT_IDX; idx++)
   {
-    if (resetAdvertData(aDIdxToType[idx]) != SNP_SUCCESS)
-    {
-      error = aDIdxToType[idx];
-      return BLE_FAILURE;
-    }
+    if (isError(resetAdvertData(aDIdxToType[idx]))) {return BLE_CHECK_ERROR;}
   }
   return BLE_SUCCESS;
 }
@@ -355,17 +366,15 @@ int BLE::resetAdvertData(int advertType)
 
 int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
 {
-  uint8_t status = SAP_setParam(SAP_PARAM_ADV, advertType, len, advertData);
-  if (status == SNP_SUCCESS)
+  if (isError(SAP_setParam(SAP_PARAM_ADV, advertType, len, advertData))) {return BLE_CHECK_ERROR;}
+  // advertType validated by SAP_setParam
+  uint8_t idx = advertIndex(advertType);
+  if (advertDataArr[idx] && advertDataArr[idx] != defADArr[idx])
   {
-    uint8_t idx = advertIndex(advertType); // advertType validated by SAP_setParam
-    if (advertDataArr[idx] && advertDataArr[idx] != defADArr[idx])
-    {
-      free(advertDataArr[idx]);
-    }
-    advertDataArr[idx] = advertData;
+    free(advertDataArr[idx]);
   }
-  return status;
+  advertDataArr[idx] = advertData;
+  return BLE_SUCCESS;
 }
 
 /*
@@ -730,7 +739,7 @@ char* BLE::readValue_string(BLE_Char *bleChar)
   {
     error = BLE_UNDEFINED_VALUE;
   }
-  if (error == BLE_SUCCESS)
+  else if (error == BLE_SUCCESS)
   {
     int len = bleChar->_valueLen;
     /* Convert value to null-termiated string, if not already */
@@ -867,6 +876,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams) {
 
 static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
 {
+  ble.error = BLE_SUCCESS;
   switch (event)
   {
     case SNP_CONN_EST_EVT: {
@@ -957,3 +967,20 @@ static bool apEventPend(uint32_t event)
   return status;
 }
 
+/*
+ * Handles propogating errors through stack to Energia sketch. Use when
+ * failure of the checked call requires immediate return (e.g. if the
+ * next statements depend on it).
+ */
+static bool isError(int status)
+{
+  if (status == BLE_CHECK_ERROR)
+  {
+    return true;
+  }
+  else if ((ble.error = status) != SNP_SUCCESS)
+  {
+    return true;
+  }
+  return false;
+}
