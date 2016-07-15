@@ -37,6 +37,7 @@
 #define AP_EVT_CONN_EST                      Event_Id_03     // Connection Established Event
 #define AP_EVT_CONN_TERM                     Event_Id_04     // Connection Terminated Event
 #define AP_EVT_CONN_PARAMS_UPDATED           Event_Id_05     // Connection Parameters Updated Event
+#define AP_EVT_HCI_RSP                       Event_Id_06     // HCI Command Response Event
 #define AP_ERROR                             Event_Id_31     // Error
 
 /* Implement this macro with the following regex:
@@ -260,7 +261,7 @@ int BLE::end(void)
 int BLE::resetPublicMembers(void)
 {
   error = BLE_SUCCESS;
-  error_opcode = 0;
+  opcode = 0;
   memset(&usedConnParams, 0, sizeof(usedConnParams));
   return BLE_SUCCESS;
 }
@@ -418,6 +419,16 @@ int BLE::setGapParam(int paramId, int value)
   (void) paramId;
   (void) value;
   return BLE_NOT_IMPLEMENTED;
+}
+
+uint8_t *hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData)
+{
+  if (!isError(SAP_getParam(SAP_PARAM_HCI, opcode, len, pData)) &&
+      apEventPend(AP_EVT_HCI_RSP))
+  {
+    return asyncRspData;
+  }
+  return NULL;
 }
 
 int BLE::setConnParams(BLE_Conn_Params *connParams)
@@ -858,11 +869,19 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams) {
           // Log_info0("Got PowerUp indication from NP");
           Event_post(apEvent, AP_EVT_PUI);
           break;
-        case SNP_HCI_CMD_RSP: {
+        case SNP_HCI_CMD_RSP:
+        {
           snpHciCmdRsp_t *hciRsp = (snpHciCmdRsp_t *) pParams;
-          switch (hciRsp->opcode) {
-            default:
-              break;
+          ble.opcode = hciRsp->opcode;
+          if (hciRsp->status != SNP_SUCCESS)
+          {
+            ble.error = hciRsp->status;
+            Event_post(apEvent, AP_ERROR);
+          }
+          else
+          {
+            asyncRspData = hciRsp->pData;
+            Event_post(apEvent, AP_EVT_HCI_RSP);
           }
         } break;
         default:
@@ -933,7 +952,7 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
     // } break;
     case SNP_ERROR_EVT: {
       snpErrorEvt_t *evt = (snpErrorEvt_t *) param;
-      ble.error_opcode = evt->opcode;
+      ble.opcode = evt->opcode;
       ble.error = evt->status;
       Event_post(apEvent, AP_ERROR);
     } break;

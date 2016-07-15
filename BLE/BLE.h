@@ -22,7 +22,7 @@ class BLE : public Stream
 
   public:
     int error; // Set to BLE_SUCCESS before conditionally setting
-    int error_opcode; // Command that caused an error. Not guaranteed to be set.
+    int opcode; // Command that caused an error. Not guaranteed to be set.
 
     /*
      * The actual connection parameters used. Set by the async event handler
@@ -48,6 +48,7 @@ class BLE : public Stream
     int setAdvertName(String *advertString);
 
     int setGapParam(int paramId, int Value); // Will probably just copy the network processor docs
+    uint8_t *hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData);
 
     int setConnParams(BLE_Conn_Params *connParams);
     int setMinConnInt(unsigned int minConnInt); // Number of 1.25ms time slots
