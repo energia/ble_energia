@@ -38,6 +38,7 @@
 #define AP_EVT_CONN_TERM                     Event_Id_04     // Connection Terminated Event
 #define AP_EVT_CONN_PARAMS_UPDATED           Event_Id_05     // Connection Parameters Updated Event
 #define AP_EVT_HCI_RSP                       Event_Id_06     // HCI Command Response Event
+#define AP_EVT_TEST_RSP                      Event_Id_07     // Test Command Response Event
 #define AP_ERROR                             Event_Id_31     // Error
 
 /* Implement this macro with the following regex:
@@ -223,7 +224,6 @@ int BLE::begin(void)
     {
       return BLE_CHECK_ERROR;
     }
-    return BLE_SUCCESS;
   }
 
   /*
@@ -821,6 +821,11 @@ void BLE::getStatus(BLE_Get_Status_Rsp *getStatusRsp)
   SAP_getStatus(getStatusRsp);
 }
 
+void BLE::testCommand(BLE_Test_Command_Rsp *testCommandRsp)
+{
+  SAP_testCommand();
+}
+
 int BLE::serial(void)
 {
   addService(&serialService);
@@ -901,6 +906,12 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
             Event_post(apEvent, AP_ERROR);
           }
         } break;
+        case SNP_TEST_RSP:
+        {
+          snpTestCmdRsp_t *testRsp = (snpTestCmdRsp_t *) pParams;
+          asyncRspData = (uint8_t *) testRsp;
+          Event_post(apEvent, AP_EVT_TEST_RSP);
+        }
         default:
           break;
       }
@@ -983,8 +994,8 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
 static bool apEventPend(uint32_t event)
 {
   ble.error = BLE_SUCCESS;
-  uint32_t postedEvent = Event_pend(apEvent, AP_NONE, event + AP_ERROR,
-                                  AP_EVENT_PEND_TIMEOUT);
+  uint32_t postedEvent = Event_pend(apEvent, AP_NONE, event | AP_ERROR,
+                                    AP_EVENT_PEND_TIMEOUT);
   bool status = true;
   if (postedEvent & event)
   {

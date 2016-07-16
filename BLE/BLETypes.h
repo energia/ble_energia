@@ -126,5 +126,6 @@ typedef struct
  ******************************************************************************/
 typedef snpGetRevisionRsp_t BLE_Get_Revision_Rsp;
 typedef snpGetStatusCmdRsp_t BLE_Get_Status_Rsp;
+typedef snpTestCmdRsp_t BLE_Test_Command_Rsp;
 
 #endif

@@ -129,6 +129,13 @@ void setup() {
   Serial.println("Done");
   pinMode(LED, OUTPUT);
   start = millis();
+  Serial.print("Rand:");Serial.println(ble.getRand());
+  Serial.println("Getting revision...");
+  ble.getRevision((BLE_Get_Revision_Rsp *) malloc(sizeof(BLE_Get_Revision_Rsp)));
+  // Serial.println("Getting status...");
+  // ble.getStatus((BLE_Get_Status_Rsp *) malloc(sizeof(BLE_Get_Status_Rsp)));
+  Serial.println("Testing...");
+  ble.testCommand((BLE_Test_Command_Rsp *) malloc(sizeof(BLE_Test_Command_Rsp)));
 }
 
 // the loop routine runs over and over again forever as a task.
