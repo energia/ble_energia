@@ -473,8 +473,11 @@ int BLE::setBleTimeout(unsigned int timeout)
 
 int BLE::terminateConn(void)
 {
-  int status = SAP_setParam(SAP_PARAM_CONN, SAP_CONN_STATE,
-                            sizeof(_connHandle), (uint8_t *) &_connHandle);
+  if (isError(SAP_setParam(SAP_PARAM_CONN, SAP_CONN_STATE,
+                           sizeof(_connHandle), (uint8_t *) &_connHandle)))
+  {
+    return BLE_CHECK_ERROR;
+  }
   Event_pend(apEvent, AP_NONE, AP_EVT_CONN_TERM, BIOS_WAIT_FOREVER);
   return status;
 }
@@ -838,8 +841,7 @@ int BLE::peek(void)
 
 void BLE::flush(void)
 {
-  BLESerial_flush();
-  return;
+  return BLESerial_flush();
 }
 
 size_t BLE::write(uint8_t c)
