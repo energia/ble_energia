@@ -474,12 +474,12 @@ int BLE::setBleTimeout(unsigned int timeout)
 int BLE::terminateConn(void)
 {
   if (isError(SAP_setParam(SAP_PARAM_CONN, SAP_CONN_STATE,
-                           sizeof(_connHandle), (uint8_t *) &_connHandle)))
+                           sizeof(_connHandle), (uint8_t *) &_connHandle)) ||
+      !apEventPend(AP_EVT_CONN_TERM))
   {
     return BLE_CHECK_ERROR;
   }
-  Event_pend(apEvent, AP_NONE, AP_EVT_CONN_TERM, BIOS_WAIT_FOREVER);
-  return status;
+  return BLE_SUCCESS;
 }
 
 static void writeNotifInd(BLE_Char *bleChar)
@@ -885,15 +885,15 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
         {
           snpHciCmdRsp_t *hciRsp = (snpHciCmdRsp_t *) pParams;
           ble.opcode = hciRsp->opcode;
-          if (hciRsp->status != SNP_SUCCESS)
-          {
-            ble.error = hciRsp->status;
-            Event_post(apEvent, AP_ERROR);
-          }
-          else
+          if (hciRsp->status == SNP_SUCCESS)
           {
             asyncRspData = hciRsp->pData;
             Event_post(apEvent, AP_EVT_HCI_RSP);
+          }
+          else
+          {
+            ble.error = hciRsp->status;
+            Event_post(apEvent, AP_ERROR);
           }
         } break;
         default:
