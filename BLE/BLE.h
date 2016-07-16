@@ -88,6 +88,7 @@ class BLE : public Stream
 
     unsigned int getRand(void);
     void getRevision(BLE_Get_Revision_Rsp *getRevisionRsp);
+    void getStatus(BLE_Get_Status_Rsp *getStatusRsp);
 
     virtual int available(void);
     virtual int read(void);

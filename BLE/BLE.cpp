@@ -816,6 +816,11 @@ void BLE::getRevision(BLE_Get_Revision_Rsp *getRevisionRsp)
   SAP_getRevision(getRevisionRsp);
 }
 
+void BLE::getStatus(BLE_Get_Status_Rsp *getStatusRsp)
+{
+  SAP_getStatus(getStatusRsp);
+}
+
 int BLE::serial(void)
 {
   addService(&serialService);

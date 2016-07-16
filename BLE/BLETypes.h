@@ -121,12 +121,10 @@ typedef struct
   unsigned int               bleTimeout;
 } BLE_Conn_Params;
 
-/*
- * Members:
- * uint8_t  status;            // status of the request (SUCCESS or Error, see snp.h)
- * uint16_t snpVer;            // Version of the SNP (major, minor)
- * uint8_t  stackBuildVer[10]; // Stack Revision see TI HCI vendor guide.
- */
+/*******************************************************************************
+ * See the SNP API guide for documentation on these typedefs.
+ ******************************************************************************/
 typedef snpGetRevisionRsp_t BLE_Get_Revision_Rsp;
+typedef snpGetStatusCmdRsp_t BLE_Get_Status_Rsp;
 
 #endif
