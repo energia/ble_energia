@@ -34,12 +34,13 @@
 #define AP_EVT_PUI                           Event_Id_00     // Power-Up Indication
 #define AP_EVT_ADV_ENB                       Event_Id_01     // Advertisement Enable
 #define AP_EVT_ADV_END                       Event_Id_02     // Advertisement Ended
-#define AP_EVT_CONN_EST                      Event_Id_03     // Connection Established Event
-#define AP_EVT_CONN_TERM                     Event_Id_04     // Connection Terminated Event
-#define AP_EVT_HCI_RSP                       Event_Id_05     // HCI Command Response Event
-#define AP_EVT_TEST_RSP                      Event_Id_06     // Test Command Response Event
-#define AP_EVT_CONN_PARAMS_UPDATED           Event_Id_07     // Connection Parameters Updated Event
-#define AP_EVT_CONN_PARAMS_CNF               Event_Id_08     // Connection Parameters Request Confirmation Event
+#define AP_EVT_ADV_DATA_RSP                  Event_Id_03     // Advertisement Ended
+#define AP_EVT_CONN_EST                      Event_Id_04     // Connection Established Event
+#define AP_EVT_CONN_TERM                     Event_Id_05     // Connection Terminated Event
+#define AP_EVT_HCI_RSP                       Event_Id_06     // HCI Command Response Event
+#define AP_EVT_TEST_RSP                      Event_Id_07     // Test Command Response Event
+#define AP_EVT_CONN_PARAMS_UPDATED           Event_Id_08     // Connection Parameters Updated Event
+#define AP_EVT_CONN_PARAMS_CNF               Event_Id_09     // Connection Parameters Request Confirmation Event
 #define AP_ERROR                             Event_Id_31     // Error
 
 #define PIN6_7 35
@@ -943,6 +944,27 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           break;
       }
     } break;
+    case SNP_GAP_GRP:
+    {
+      switch (cmd1)
+      {
+        case SNP_SET_ADV_DATA_CNF:
+        {
+          snpSetAdvDataCnf_t *advDataRsp = (snpSetAdvDataCnf_t *) pParams;
+          if (advDataRsp->status == SNP_SUCCESS)
+          {
+            Event_post(apEvent, AP_EVT_ADV_DATA_RSP);
+          }
+          else
+          {
+            ble.error = advDataRsp->status;
+            Event_post(apEvent, AP_ERROR);
+          }
+        } break;
+        default:
+          break;
+      }
+    }
     default:
       break;
   }
@@ -1024,10 +1046,15 @@ static bool apEventPend(uint32_t event)
   ble.error = BLE_SUCCESS;
   uint32_t postedEvent = Event_pend(apEvent, AP_NONE, event | AP_ERROR,
                                     AP_EVENT_PEND_TIMEOUT);
-  bool status = true;
+  /* Bug in NPI causes this specific event to get posted twice */
+  if (event == AP_EVT_ADV_DATA_RSP)
+  {
+    Event_pend(apEvent, AP_NONE, event | AP_ERROR, 1);
+  }
+  bool status;
   if (postedEvent & event)
   {
-    // pass
+    status = true;
   }
   else if (postedEvent == 0)
   {
