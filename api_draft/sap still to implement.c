@@ -109,19 +109,6 @@ uint8_t SAP_setParam(uint8_t subsystemID, uint16_t paramID, uint16_t len,
   // Determine the subsystem.
   switch(subsystemID)
   {
-    // HCI command subsystem.
-    case SAP_PARAM_HCI:
-      {
-        snpHciCmdReq_t lReq;
-
-        // Initialize Request
-        lReq.opcode = paramID;
-        lReq.pData = pData;
-
-        status = SNP_RPC_sendHCICommand(&lReq, len);
-      }
-      break;
-
     // Advertising subsystem
     case SAP_PARAM_ADV:
       {
@@ -279,19 +266,6 @@ uint8_t SAP_getParam(uint8_t subsystemID, uint8_t paramID, uint16_t len,
   // Determine the subsystem.
   switch(subsystemID)
   {
-    // HCI command subsystem.
-    case SAP_PARAM_HCI:
-      {
-        // Add HCI commands with accessible fields.
-        snpHciCmdReq_t lReq;
-
-        // Initialize Request
-        lReq.opcode = paramID;
-        lReq.pData = pData;
-        status = SNP_RPC_sendHCICommand(&lReq, len);
-      }
-      break;
-
     case SAP_PARAM_GAP:
       {
         snpGetGapParamReq_t req;
