@@ -47,9 +47,9 @@ class BLE : public Stream
     int setAdvertName(const char *advertString);
     int setAdvertName(String *advertString);
 
-    int setGATTParam(int serviceID, uint8_t charID,
+    int setGATTParam(uint8_t serviceID, uint8_t charID,
                      uint16_t len, uint8_t *pData);
-    int getGATTParam(int serviceID, uint8_t charID,
+    int getGATTParam(uint8_t serviceID, uint8_t charID,
                      uint16_t *len, uint8_t *pData);
     int setGapParam(int paramId, int Value); // Will probably just copy the network processor docs
     uint8_t *hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData);
