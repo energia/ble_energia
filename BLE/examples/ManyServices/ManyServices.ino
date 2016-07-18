@@ -93,6 +93,8 @@ BLE_Service testService =
   3, testServiceChars
 };
 
+static const char devName[] = "EnergiaBLE2650";
+
 //BLE_Advert_Settings advertSettings =
 //{
 //  BLE_ADV_MODE_CONN,
@@ -112,6 +114,9 @@ void setup() {
   ble.addService(&simpleService);
   ble.addService(&testService);
   ble.serial();
+  Serial.println("Setting device name in GAS");
+  ble.setGATTParam(SNP_GGS_SERV_ID, SNP_GGS_DEVICE_NAME_ATT,
+                   sizeof(devName), (uint8_t *) devName);
   Serial.println("Initializing values.");
   ble.writeValue(&heartRateChar, heartRateMeasurement);
   ble.writeValue(&char1, char1Value);

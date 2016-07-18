@@ -89,63 +89,6 @@ uint8_t SAP_close(void)
 }
 
 /**
- * @fn          SAP_setServiceParam
- *
- * @brief       Write a characteristic value of a service.
- *
- * @param       serviceID - the UUID of the service
- * @param       charID    - the unique handle of the characteristic
- * @param       len       - length of the data to write
- * @param       pData     - pointer to buffer of data to write
- *
- * @return      SNP_SUCCESS: The write completed successfully.
- *              SNP_FAILURE: The write failed.
- */
-uint8_t SAP_setServiceParam(uint8_t serviceID, uint8_t charID,
-                            uint16_t len, uint8_t *pData)
-{
-  snpSetGattParamReq_t lReq;
-
-  // Initialize Request
-  lReq.serviceID = serviceID;
-  lReq.paramID = charID;
-  lReq.pData = pData;
-
-  // Send a set parameter request to the SAP. Ignore response. It only
-  // contains status which is also what the function returns
-  return SNP_RPC_setGATTParam(&lReq, len, NULL);
-}
-
-/**
- * @fn          SAP_getServiceParam
- *
- * @brief       Read a characteristic value of a service.
- *
- * @param       serviceID - the UUID of the service
- * @param       charID    - the unique handle of the characteristic
- * @param       len       - length of the data read
- * @param       pData     - pointer to buffer to write to
- *
- * @return      SNP_SUCCESS: the read completed successfully.
- *              SNP_FAILURE: The read failed.
- */
-uint8_t SAP_getServiceParam(uint8_t serviceID, uint8_t charID,
-                            uint16_t * len, uint8_t * pData)
-{
-  snpGetGattParamReq_t lReq;
-  snpGetGattParamRsp_t lRsp;
-
-  // Initialize Request
-  lReq.serviceID = serviceID;
-  lReq.paramID = charID;
-
-  // Initialize Response data field. SNP call will copy into this buffer
-  lRsp.pData = pData;
-
-  return SNP_RPC_getGATTParam(&lReq, &lRsp, len);
-}
-
-/**
  * @brief       Write to a stack parameter on the SAP. Some responses will
  *              Return immediately, others will generate an event for which
  *              a callback must be registered with the correct event mask.

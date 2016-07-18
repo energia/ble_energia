@@ -414,6 +414,18 @@ int BLE::setAdvertName(String *advertString)
   return status;
 }
 
+int BLE::setGATTParam(int serviceID, uint8_t charID,
+                      uint16_t len, uint8_t *pData)
+{
+  return SAP_setServiceParam(serviceID, charID, len, pData);
+}
+
+int BLE::getGATTParam(int serviceID, uint8_t charID,
+                      uint16_t *len, uint8_t *pData)
+{
+  return SAP_getServiceParam(serviceID, charID, len, pData);
+}
+
 int BLE::setGapParam(int paramId, int value)
 {
   (void) paramId;
