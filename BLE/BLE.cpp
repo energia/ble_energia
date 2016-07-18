@@ -947,6 +947,7 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
   {
     case SNP_CONN_EST_EVT: {
       snpConnEstEvt_t *evt = (snpConnEstEvt_t *) param;
+      _connHandle                    = evt->connHandle;
       ble.usedConnParams.minConnInt  = evt->connInterval;
       ble.usedConnParams.maxConnInt  = evt->connInterval;
       ble.usedConnParams.respLatency = evt->slaveLatency;
