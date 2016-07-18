@@ -476,17 +476,17 @@ int BLE::setMinConnInt(unsigned int minConnInt)
 
 int BLE::setMaxConnInt(unsigned int maxConnInt)
 {
-  return setSingleConnParam(offsetof(BLE_Conn_Params, maxConnInt), maxConnInt);;
+  return setSingleConnParam(offsetof(BLE_Conn_Params, maxConnInt), maxConnInt);
 }
 
 int BLE::setRespLatency(unsigned int respLatency)
 {
-  return setSingleConnParam(offsetof(BLE_Conn_Params, respLatency), respLatency);;
+  return setSingleConnParam(offsetof(BLE_Conn_Params, respLatency), respLatency);
 }
 
 int BLE::setBleTimeout(unsigned int timeout)
 {
-  return setSingleConnParam(offsetof(BLE_Conn_Params, bleTimeout), timeout);;
+  return setSingleConnParam(offsetof(BLE_Conn_Params, bleTimeout), timeout);
 }
 
 int BLE::terminateConn(void)
@@ -905,10 +905,11 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
       switch (cmd1)
       {
         case SNP_POWER_UP_IND:
+        {
           // Notify state machine of Power Up Indication
           // Log_info0("Got PowerUp indication from NP");
           Event_post(apEvent, AP_EVT_PUI);
-          break;
+        } break;
         case SNP_HCI_CMD_RSP:
         {
           snpHciCmdRsp_t *hciRsp = (snpHciCmdRsp_t *) pParams;
@@ -929,7 +930,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           snpTestCmdRsp_t *testRsp = (snpTestCmdRsp_t *) pParams;
           asyncRspData = (uint8_t *) testRsp;
           Event_post(apEvent, AP_EVT_TEST_RSP);
-        }
+        } break;
         default:
           break;
       }
@@ -946,10 +947,10 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
   {
     case SNP_CONN_EST_EVT: {
       snpConnEstEvt_t *evt = (snpConnEstEvt_t *) param;
-      ble.usedConnParams.minConnInt =   evt->connInterval;
-      ble.usedConnParams.maxConnInt =   evt->connInterval;
-      ble.usedConnParams.respLatency =  evt->slaveLatency;
-      ble.usedConnParams.bleTimeout =   evt->supervisionTimeout;
+      ble.usedConnParams.minConnInt  = evt->connInterval;
+      ble.usedConnParams.maxConnInt  = evt->connInterval;
+      ble.usedConnParams.respLatency = evt->slaveLatency;
+      ble.usedConnParams.bleTimeout  = evt->supervisionTimeout;
       Event_post(apEvent, AP_EVT_CONN_EST);
     } break;
     case SNP_CONN_TERM_EVT: {
