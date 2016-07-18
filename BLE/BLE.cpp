@@ -36,9 +36,10 @@
 #define AP_EVT_ADV_END                       Event_Id_02     // Advertisement Ended
 #define AP_EVT_CONN_EST                      Event_Id_03     // Connection Established Event
 #define AP_EVT_CONN_TERM                     Event_Id_04     // Connection Terminated Event
-#define AP_EVT_CONN_PARAMS_UPDATED           Event_Id_05     // Connection Parameters Updated Event
-#define AP_EVT_HCI_RSP                       Event_Id_06     // HCI Command Response Event
-#define AP_EVT_TEST_RSP                      Event_Id_07     // Test Command Response Event
+#define AP_EVT_HCI_RSP                       Event_Id_05     // HCI Command Response Event
+#define AP_EVT_TEST_RSP                      Event_Id_06     // Test Command Response Event
+#define AP_EVT_CONN_PARAMS_UPDATED           Event_Id_07     // Connection Parameters Updated Event
+#define AP_EVT_CONN_PARAMS_CNF               Event_Id_08     // Connection Parameters Request Confirmation Event
 #define AP_ERROR                             Event_Id_31     // Error
 
 /* Implement this macro with the following regex:
