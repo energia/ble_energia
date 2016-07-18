@@ -47,9 +47,9 @@ class BLE : public Stream
     int setAdvertName(const char *advertString);
     int setAdvertName(String *advertString);
 
-    int setGATTParam(uint8_t serviceID, uint8_t charID,
+    int setGattParam(uint8_t serviceID, uint8_t charID,
                      uint16_t len, uint8_t *pData);
-    int getGATTParam(uint8_t serviceID, uint8_t charID,
+    int getGattParam(uint8_t serviceID, uint8_t charID,
                      uint16_t *len, uint8_t *pData);
     int setGapParam(uint16_t paramId, uint16_t value);
     int getGapParam(uint16_t paramId, uint16_t *Value);
