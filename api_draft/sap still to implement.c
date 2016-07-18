@@ -215,80 +215,8 @@ uint8_t SAP_setParam(uint8_t subsystemID, uint16_t paramID, uint16_t len,
       }
       break;
 
-    case SAP_PARAM_GAP:
-      {
-        if (len == sizeof(uint16_t))
-        {
-          snpSetGapParamReq_t req;
-          snpSetGapParamRsp_t rsp;
-
-          req.paramId = paramID;
-          req.value = (uint16_t)*pData;
-
-          SNP_RPC_setGAPparam(&req, &rsp);
-
-          status = rsp.status;
-        }
-        else
-        {
-          status = SNP_INVALID_PARAMS;
-        }
-      }
-      break;
-
     default:
       // Unknown command
-      status = SNP_FAILURE;
-      break;
-  }
-
-  return status;
-}
-
-/**
- * @brief       Read a stack parameter on the SAP. Some responses will
- *              Return immediately, others will generate an event for which
- *              a callback must be registered with the correct event mask.
- *
- * @param       subsystemID - the subsystem ID: @ref SNP_RPC_PARAM_SUBSYSTEMS
- * @param       paramID     - the parameter within the subsystem to read
- * @param       len         - length of the data to read
- * @param       pData       - pointer to buffer to write to
- *
- * @return      SNP_SUCCESS: the read completed successfully.<BR>
- *              SNP_RPC_FAILRUE: stack param read failed.<BR>
- */
-uint8_t SAP_getParam(uint8_t subsystemID, uint8_t paramID, uint16_t len,
-                     uint8_t *pData)
-{
-  uint8_t status = SNP_SUCCESS;
-
-  // Determine the subsystem.
-  switch(subsystemID)
-  {
-    case SAP_PARAM_GAP:
-      {
-        snpGetGapParamReq_t req;
-        snpGetGapParamRsp_t rsp;
-
-        req.paramId = paramID;
-
-        if (len == sizeof(uint16_t))
-        {
-          SNP_RPC_getGAPparam(&req, &rsp);
-
-          status = rsp.status;
-          *pData = rsp.value;
-        }
-        else
-        {
-          status = SNP_INVALID_PARAMS;
-        }
-      }
-      break;
-
-    default:
-      // Unknown parameter
       status = SNP_FAILURE;
       break;
   }

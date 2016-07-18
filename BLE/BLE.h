@@ -51,7 +51,8 @@ class BLE : public Stream
                      uint16_t len, uint8_t *pData);
     int getGATTParam(uint8_t serviceID, uint8_t charID,
                      uint16_t *len, uint8_t *pData);
-    int setGapParam(int paramId, int Value); // Will probably just copy the network processor docs
+    int setGapParam(uint16_t paramId, uint16_t value);
+    int getGapParam(uint16_t paramId, uint16_t *Value);
     uint8_t *hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData);
 
     int setConnParams(BLE_Conn_Params *connParams);

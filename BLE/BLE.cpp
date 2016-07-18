@@ -426,11 +426,16 @@ int BLE::getGATTParam(uint8_t serviceId, uint8_t charId,
   return SAP_getServiceParam(serviceId, charId, len, pData);
 }
 
-int BLE::setGapParam(int paramId, int value)
+int BLE::setGapParam(uint16_t paramId, uint16_t value)
 {
-  (void) paramId;
-  (void) value;
-  return BLE_NOT_IMPLEMENTED;
+  return SAP_setParam(SAP_PARAM_GAP, paramId,
+                      sizeof(value), (uint8_t *) &value);
+}
+
+int BLE::getGapParam(uint16_t paramId, uint16_t *value)
+{
+  return SAP_setParam(SAP_PARAM_GAP, paramId,
+                      sizeof(*value), (uint8_t *) value);
 }
 
 uint8_t *hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData)
