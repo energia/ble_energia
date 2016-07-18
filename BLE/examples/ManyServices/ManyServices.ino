@@ -93,15 +93,6 @@ BLE_Service testService =
   3, testServiceChars
 };
 
-static const char devName[] = "EnergiaBLE2650";
-
-//BLE_Advert_Settings advertSettings =
-//{
-//  BLE_ADV_MODE_CONN,
-//  0, 160,
-//  BLE_ADV_RESTART_ON_CONN_TERM
-//};
-
 unsigned long timer = 0;
 unsigned long start;
 
@@ -114,9 +105,6 @@ void setup() {
   ble.addService(&simpleService);
   ble.addService(&testService);
   ble.serial();
-  Serial.println("Setting device name in GAS");
-  ble.setGATTParam(SNP_GGS_SERV_ID, SNP_GGS_DEVICE_NAME_ATT,
-                   sizeof(devName), (uint8_t *) devName);
   Serial.println("Initializing values.");
   ble.writeValue(&heartRateChar, heartRateMeasurement);
   ble.writeValue(&char1, char1Value);
@@ -129,18 +117,11 @@ void setup() {
   Serial.println("set adv data ");
   ble.setAdvertName("Energia BLE");
   Serial.println("start adv ");
-//  Serial.println(ble.startAdvert(&advertSettings));
   Serial.println(ble.startAdvert());
+  Serial.println(ble.error);
   Serial.println("Done");
   pinMode(LED, OUTPUT);
   start = millis();
-  Serial.print("Rand:");Serial.println(ble.getRand());
-  Serial.println("Getting revision...");
-  ble.getRevision((BLE_Get_Revision_Rsp *) malloc(sizeof(BLE_Get_Revision_Rsp)));
-  // Serial.println("Getting status...");
-  // ble.getStatus((BLE_Get_Status_Rsp *) malloc(sizeof(BLE_Get_Status_Rsp)));
-  Serial.println("Testing...");
-  ble.testCommand((BLE_Test_Command_Rsp *) malloc(sizeof(BLE_Test_Command_Rsp)));
 }
 
 // the loop routine runs over and over again forever as a task.
