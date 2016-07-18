@@ -42,15 +42,6 @@
 #define AP_EVT_CONN_PARAMS_CNF               Event_Id_08     // Connection Parameters Request Confirmation Event
 #define AP_ERROR                             Event_Id_31     // Error
 
-/* Implement this macro with the following regex:
- * Find:( *)if \(isError\((.*)\)\)[\n {]*return BLE_CHECK_ERROR;[\n ]*}\n
- * Replace:\1IF_ERR_RET(\2)\n
- */
-#define IF_ERR_RET(call) if (isError((call)))\
-  {\
-    return BLE_CHECK_ERROR;\
-  }\
-
 #define PIN6_7 35
 
 // From bcomdef.h in the BLE SDK
@@ -269,7 +260,10 @@ int BLE::resetPublicMembers(void)
 
 int BLE::addService(BLE_Service *bleService)
 {
-  if (isError(BLE_registerService(bleService))) {return BLE_CHECK_ERROR;}
+  if (isError(BLE_registerService(bleService)))
+  {
+    return BLE_CHECK_ERROR;
+  }
   return BLE_SUCCESS;
 }
 
@@ -294,7 +288,11 @@ int BLE::advertDataInit(void)
   {
     if (advertDataArr[idx] == NULL)
     {
-      if (isError(setAdvertData(aDIdxToType[idx], sizeof(defADArr[idx]), defADArr[idx]))) {return BLE_CHECK_ERROR;}
+      if (isError(setAdvertData(aDIdxToType[idx], defADSizes[idx],
+                                defADArr[idx])))
+      {
+        return BLE_CHECK_ERROR;
+      }
     }
   }
   return BLE_SUCCESS;
@@ -307,7 +305,10 @@ int BLE::startAdvert(void)
 
 int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
 {
-  if (isError(advertDataInit())) {return BLE_CHECK_ERROR;}
+  if (isError(advertDataInit()))
+  {
+    return BLE_CHECK_ERROR;
+  }
 
   uint16_t reqSize;
   uint8_t *pData;
@@ -327,8 +328,8 @@ int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
     reqSize = (uint16_t) sizeof(lReq);
     pData = (uint8_t *) &lReq;
   }
-  if (isError(SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE, reqSize, pData))) {return BLE_CHECK_ERROR;}
-  if (!apEventPend(AP_EVT_ADV_ENB))
+  if (isError(SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE, reqSize, pData)) ||
+      !apEventPend(AP_EVT_ADV_ENB))
   {
     return BLE_CHECK_ERROR;
   }
@@ -338,8 +339,8 @@ int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
 int BLE::stopAdvert(void)
 {
   uint8_t disableAdv = SAP_ADV_STATE_DISABLE;
-  if (isError(SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE, 1, &disableAdv))) {return BLE_CHECK_ERROR;}
-  if (!apEventPend(AP_EVT_ADV_END))
+  if (isError(SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE, 1, &disableAdv)) ||
+      !apEventPend(AP_EVT_ADV_END))
   {
     return BLE_CHECK_ERROR;
   }
@@ -351,7 +352,10 @@ int BLE::resetAdvertData(void)
   uint8_t idx;
   for (idx = 0; idx < MAX_ADVERT_IDX; idx++)
   {
-    if (isError(resetAdvertData(aDIdxToType[idx]))) {return BLE_CHECK_ERROR;}
+    if (isError(resetAdvertData(aDIdxToType[idx])))
+    {
+      return BLE_CHECK_ERROR;
+    }
   }
   return BLE_SUCCESS;
 }
@@ -368,7 +372,11 @@ int BLE::resetAdvertData(int advertType)
 
 int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
 {
-  if (isError(SAP_setParam(SAP_PARAM_ADV, advertType, len, advertData))) {return BLE_CHECK_ERROR;}
+  if (isError(SAP_setParam(SAP_PARAM_ADV, advertType, len, advertData)) ||
+      !apEventPend(AP_EVT_ADV_DATA_RSP))
+  {
+    return BLE_CHECK_ERROR;
+  }
   // advertType validated by SAP_setParam
   uint8_t idx = advertIndex(advertType);
   if (advertDataArr[idx] && advertDataArr[idx] != defADArr[idx])
@@ -441,12 +449,12 @@ int BLE::getGapParam(uint16_t paramId, uint16_t *value)
 
 uint8_t *hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData)
 {
-  if (!isError(SAP_getParam(SAP_PARAM_HCI, opcode, len, pData)) &&
-      apEventPend(AP_EVT_HCI_RSP))
+  if (isError(SAP_getParam(SAP_PARAM_HCI, opcode, len, pData)) ||
+      !apEventPend(AP_EVT_HCI_RSP))
   {
-    return asyncRspData;
+    return NULL;
   }
-  return NULL;
+  return asyncRspData;
 }
 
 int BLE::setConnParams(BLE_Conn_Params *connParams)
