@@ -30,16 +30,6 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*********************************************************************
- * INCLUDES
- */
-
-#include "npi_ss_ble_sap.h"
-
-/*********************************************************************
- * FUNCTIONS
- */
-
 /**
  * @fn      SAP_close
  *
@@ -109,46 +99,6 @@ uint8_t SAP_setParam(uint8_t subsystemID, uint16_t paramID, uint16_t len,
   // Determine the subsystem.
   switch(subsystemID)
   {
-    // Advertising subsystem
-    case SAP_PARAM_ADV:
-      {
-        // Determine parameter to write
-        switch(paramID)
-        {
-          case SAP_ADV_STATE:
-            if (pData[0] == SAP_ADV_STATE_DISABLE)
-            {
-              // Stop advertising.
-              SNP_RPC_stopAdvertising();
-            }
-            else
-            {
-              snpStartAdvReq_t lReq;
-
-              // Check for application configuration
-              if (pData != NULL && len == sizeof (snpStartAdvReq_t))
-              {
-                lReq = *(snpStartAdvReq_t *)pData;
-              }
-              else
-              {
-                // Initialize request with default configuration
-                lReq.type = SNP_ADV_TYPE_CONN; // connectable advertising
-                lReq.timeout = 0;              // never stops
-                lReq.interval = 160;           // 160 * 625us = 100 ms interval between advertisement events
-                lReq.behavior = SNP_ADV_RESTART_ON_CONN_TERM; // advertising stops upon connection and resumes after the connection terminates
-              }
-              status = SNP_RPC_startAdvertising(&lReq);
-            }
-            break;
-          default:
-            // Unknown command.
-            status = SNP_FAILURE;
-            break;
-        }
-      }
-      break;
-
     case SAP_PARAM_SECURITY:
       {
         snpSetSecParamReq_t lReq;
