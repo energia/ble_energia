@@ -16,7 +16,7 @@ class BLE : public Stream
     int advertDataInit(void);
     uint8_t advertIndex(int advertType);
     int setAdvertName(int advertStringLen, const char *advertString);
-    int setSingleConnParam(size_t offset, int value);
+    int setSingleConnParam(size_t offset, uint16_t value);
     int writeValue(BLE_Char *bleChar, int len, const char *str);
     int writeValue(BLE_Char *bleChar, const uint8_t *str);
 
@@ -59,10 +59,10 @@ class BLE : public Stream
     uint8_t *hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData);
 
     int setConnParams(BLE_Conn_Params *connParams);
-    int setMinConnInt(unsigned int minConnInt); // Number of 1.25ms time slots
-    int setMaxConnInt(unsigned int maxConnInt); // Number of 1.25ms time slots
-    int setRespLatency(unsigned int respLatency); // Measured in number of connection intervals the slave can miss.
-    int setBleTimeout(unsigned int timeout);
+    int setMinConnInt(uint16_t intervalMin); // Number of 1.25ms time slots
+    int setMaxConnInt(uint16_t intervalMax); // Number of 1.25ms time slots
+    int setRespLatency(uint16_t slaveLatency); // Measured in number of connection intervals the slave can miss.
+    int setBleTimeout(uint16_t supervisionTimeout);
 
     int writeValue(BLE_Char *bleChar, char value);
     int writeValue(BLE_Char *bleChar, unsigned char value);

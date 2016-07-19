@@ -492,6 +492,9 @@ int BLE::setConnParams(BLE_Conn_Params *connParams)
   lReq.intervalMax =         connParams->maxConnInt;
   lReq.slaveLatency =        connParams->respLatency;
   lReq.supervisionTimeout =  connParams->bleTimeout;
+/*
+ * Must be currently in a connection.
+ */
   if ((!connected && isError(BLE_NOT_CONNECTED)) ||
       isError(SAP_setParam(SAP_PARAM_CONN, SAP_CONN_PARAM,
                            sizeof(lReq), (uint8_t *) &lReq)) ||
@@ -502,30 +505,30 @@ int BLE::setConnParams(BLE_Conn_Params *connParams)
   return BLE_SUCCESS;
 }
 
-int BLE::setSingleConnParam(size_t offset, int value)
+int BLE::setSingleConnParam(size_t offset, uint16_t value)
 {
   BLE_Conn_Params paramsReq;
   memcpy(&paramsReq, &usedConnParams, sizeof(paramsReq));
-  *(int *)((char *) &paramsReq + offset) = value;
+  *(uint16_t *)(((char *) &paramsReq) + offset) = value;
   return setConnParams(&paramsReq);
 }
 
-int BLE::setMinConnInt(unsigned int minConnInt)
+int BLE::setMinConnInt(uint16_t intervalMin)
 {
   return setSingleConnParam(offsetof(BLE_Conn_Params, minConnInt), minConnInt);
 }
 
-int BLE::setMaxConnInt(unsigned int maxConnInt)
+int BLE::setMaxConnInt(uint16_t intervalMax)
 {
   return setSingleConnParam(offsetof(BLE_Conn_Params, maxConnInt), maxConnInt);
 }
 
-int BLE::setRespLatency(unsigned int respLatency)
+int BLE::setRespLatency(uint16_t slaveLatency)
 {
   return setSingleConnParam(offsetof(BLE_Conn_Params, respLatency), respLatency);
 }
 
-int BLE::setBleTimeout(unsigned int timeout)
+int BLE::setBleTimeout(uint16_t supervisionTimeout)
 {
   return setSingleConnParam(offsetof(BLE_Conn_Params, bleTimeout), timeout);
 }
