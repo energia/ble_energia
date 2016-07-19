@@ -29,6 +29,7 @@ class BLE : public Stream
      * in response to a connection establishment event.
      */
     BLE_Conn_Params usedConnParams;
+    uint8_t bleAddr[6];
 
     BLE(byte portType=BLE_PORT_UART);
 

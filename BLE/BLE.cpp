@@ -280,6 +280,7 @@ int BLE::resetPublicMembers(void)
   error = BLE_SUCCESS;
   opcode = 0;
   memset(&usedConnParams, 0, sizeof(usedConnParams));
+  memset(&bleAddr, 0, sizeof(bleAddr));
   return BLE_SUCCESS;
 }
 
@@ -1023,6 +1024,7 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
       ble.usedConnParams.connInterval       = evt->connInterval;
       ble.usedConnParams.slaveLatency       = evt->slaveLatency;
       ble.usedConnParams.supervisionTimeout = evt->supervisionTimeout;
+      memcpy(&ble.bleAddr, &(evt->pAddr), sizeof(evt->pAddr));
       connected = true;
       Event_post(apEvent, AP_EVT_CONN_EST);
     } break;
