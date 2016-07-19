@@ -132,12 +132,13 @@ int flag3 = 0;
 int flag4 = 0;
 int flag5 = 0;
 
+static uint8_t advertIndex(uint8_t advertType);
 static void AP_asyncCB(uint8_t cmd1, void *pParams);
-static void writeNotifInd(BLE_Char *bleChar);
+static uint8_t writeNotifInd(BLE_Char *bleChar);
 static uint8_t readValueValidateSize(BLE_Char *bleChar, size_t size);
 static void processSNPEventCB(uint16_t event, snpEventParam_t *param);
 static bool apEventPend(uint32_t event);
-static bool isError(int status);
+static bool isError(uint8_t status);
 
 BLE::BLE(byte portType)
 {
@@ -294,7 +295,7 @@ int BLE::addService(BLE_Service *bleService)
   return BLE_SUCCESS;
 }
 
-uint8_t BLE::advertIndex(int advertType)
+static uint8_t advertIndex(uint8_t advertType)
 {
   switch (advertType)
   {
@@ -308,7 +309,7 @@ uint8_t BLE::advertIndex(int advertType)
   return BLE_INVALID_PARAMETERS;
 }
 
-int BLE::advertDataInit(void)
+uint8_t BLE::advertDataInit(void)
 {
   uint8_t idx;
   for (idx = 0; idx < MAX_ADVERT_IDX; idx++)
@@ -389,7 +390,7 @@ int BLE::resetAdvertData(void)
   return BLE_SUCCESS;
 }
 
-int BLE::resetAdvertData(int advertType)
+int BLE::resetAdvertData(uint8_t advertType)
 {
   uint8_t idx = advertIndex(advertType);
   if (!(idx < MAX_ADVERT_IDX))
@@ -399,7 +400,7 @@ int BLE::resetAdvertData(int advertType)
   return setAdvertData(advertType, defADSizes[idx], defADArr[idx]);
 }
 
-int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
+int BLE::setAdvertData(uint8_t advertType, uint8_t len, uint8_t *advertData)
 {
   if (isError(SAP_setParam(SAP_PARAM_ADV, advertType, len, advertData)) ||
       !apEventPend(AP_EVT_ADV_DATA_RSP))
@@ -422,7 +423,7 @@ int BLE::setAdvertData(int advertType, uint8_t len, uint8_t *advertData)
  * SAP_GAP_ADTYPE_LOCAL_NAME_COMPLETE, and the third and so on are the
  * characters of the name.
  */
-int BLE::setAdvertName(int advertStringLen, const char *advertString)
+int BLE::setAdvertName(uint8_t advertStringLen, const char *advertString)
 {
   uint8_t newSize = sizeof(defScanRspData) - defScanRspData[0]
                   + 1 + advertStringLen;
@@ -444,10 +445,10 @@ int BLE::setAdvertName(const char *advertString)
 
 int BLE::setAdvertName(String *advertString)
 {
-  int len = (*advertString).length();
+  uint8_t len = (*advertString).length();
   char *buf = (char *) malloc((len+1)*sizeof(char));
   (*advertString).toCharArray(buf, len);
-  int status = setAdvertName(len, buf);
+  uint8_t status = setAdvertName(len, buf);
   free(buf);
   return status;
 }
@@ -537,7 +538,7 @@ int BLE::setBleTimeout(uint16_t supervisionTimeout)
                             supervisionTimeout);
 }
 
-static void writeNotifInd(BLE_Char *bleChar)
+static uint8_t writeNotifInd(BLE_Char *bleChar)
 {
   if (bleChar->_CCCD)
   {
@@ -554,97 +555,93 @@ static void writeNotifInd(BLE_Char *bleChar)
     {
       localReq.type = SNP_SEND_INDICATION;
     }
-    SNP_RPC_sendNotifInd(&localReq, bleChar->_valueLen);
-    apEventPend(AP_EVT_NOTIF_IND_RSP);
+    if (isError(SNP_RPC_sendNotifInd(&localReq, bleChar->_valueLen)) ||
+        !apEventPend(AP_EVT_NOTIF_IND_RSP))
+    {
+      return BLE_CHECK_ERROR;
+    }
   }
+  return BLE_SUCCESS;
 }
 
 int BLE::writeValue(BLE_Char *bleChar, char value)
 {
-  int status = BLE_charValueInit(bleChar, sizeof(value));
-  if (status == BLE_SUCCESS)
+  if (isError(BLE_charValueInit(bleChar, sizeof(value))))
   {
-    *(char *) bleChar->_value = value;
-    writeNotifInd(bleChar);
+    return BLE_CHECK_ERROR;
   }
-  return status;
+  *(char *) bleChar->_value = value;
+  return writeNotifInd(bleChar);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, unsigned char value)
 {
-  int status = BLE_charValueInit(bleChar, sizeof(value));
-  if (status == BLE_SUCCESS)
+  if (isError(BLE_charValueInit(bleChar, sizeof(value))))
   {
-    *(unsigned char *) bleChar->_value = value;
-    writeNotifInd(bleChar);
+    return BLE_CHECK_ERROR;
   }
-  return status;
+  *(unsigned char *) bleChar->_value = value;
+  return writeNotifInd(bleChar);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, int value)
 {
-  int status = BLE_charValueInit(bleChar, sizeof(value));
-  if (status == BLE_SUCCESS)
+  if (isError(BLE_charValueInit(bleChar, sizeof(value))))
   {
-    *(int *) bleChar->_value = value;
-    writeNotifInd(bleChar);
+    return BLE_CHECK_ERROR;
   }
-  return status;
+  *(int *) bleChar->_value = value;
+  return writeNotifInd(bleChar);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, unsigned int value)
 {
-  int status = BLE_charValueInit(bleChar, sizeof(value));
-  if (status == BLE_SUCCESS)
+  if (isError(BLE_charValueInit(bleChar, sizeof(value))))
   {
-    *(unsigned int *) bleChar->_value = value;
-    writeNotifInd(bleChar);
+    return BLE_CHECK_ERROR;
   }
-  return status;
+  *(unsigned int *) bleChar->_value = value;
+  return writeNotifInd(bleChar);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, long value)
 {
-  int status = BLE_charValueInit(bleChar, sizeof(value));
-  if (status == BLE_SUCCESS)
+  if (isError(BLE_charValueInit(bleChar, sizeof(value))))
   {
-    *(long *) bleChar->_value = value;
-    writeNotifInd(bleChar);
+    return BLE_CHECK_ERROR;
   }
-  return status;
+  *(long *) bleChar->_value = value;
+  return writeNotifInd(bleChar);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, unsigned long value)
 {
-  int status = BLE_charValueInit(bleChar, sizeof(value));
-  if (status == BLE_SUCCESS)
+  if (isError(BLE_charValueInit(bleChar, sizeof(value))))
   {
-    *(unsigned long *) bleChar->_value = value;
-    writeNotifInd(bleChar);
+    return BLE_CHECK_ERROR;
   }
-  return status;
+  *(unsigned long *) bleChar->_value = value;
+  return writeNotifInd(bleChar);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, float value)
 {
-  int status = BLE_charValueInit(bleChar, sizeof(value));
-  if (status == BLE_SUCCESS)
+  if (isError(BLE_charValueInit(bleChar, sizeof(value))))
   {
-    *(float *) bleChar->_value = value;
-    writeNotifInd(bleChar);
+    return BLE_CHECK_ERROR;
   }
-  return status;
+  *(float *) bleChar->_value = value;
+  return writeNotifInd(bleChar);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, double value)
 {
-  int status = BLE_charValueInit(bleChar, sizeof(value));
-  if (status == BLE_SUCCESS)
+  if (isError(BLE_charValueInit(bleChar, sizeof(value))))
   {
-    *(double *) bleChar->_value = value;
-    writeNotifInd(bleChar);
+    return BLE_CHECK_ERROR;
   }
-  return status;
+  *(double *) bleChar->_value = value;
+  return writeNotifInd(bleChar);
 }
 
 /*
@@ -654,13 +651,12 @@ int BLE::writeValue(BLE_Char *bleChar, double value)
 int BLE::writeValue(BLE_Char *bleChar, int len, const char *str)
 {
   bleChar->_resizable = true;
-  int status = BLE_charValueInit(bleChar, (len+1)*sizeof(*str));
-  if (status == BLE_SUCCESS)
+  if (isError(BLE_charValueInit(bleChar, (len+1)*sizeof(*str))))
   {
-    strcpy((char *) bleChar->_value, str);
-    writeNotifInd(bleChar);
+    return BLE_CHECK_ERROR;
   }
-  return status;
+  strcpy((char *) bleChar->_value, str);
+  return writeNotifInd(bleChar);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, const char *str)
@@ -678,7 +674,7 @@ int BLE::writeValue(BLE_Char *bleChar, String str)
   int len = str.length();
   char *buf = (char *) malloc((len+1)*sizeof(char));
   str.toCharArray(buf, len+1);
-  int status = writeValue(bleChar, len, buf);
+  uint8_t status = writeValue(bleChar, len, buf);
   free(buf);
   return status;
 }
@@ -884,9 +880,12 @@ void BLE::testCommand(BLE_Test_Command_Rsp *testCommandRsp)
 
 int BLE::serial(void)
 {
-  addService(&serialService);
-  writeValue(&txChar, "");
-  writeValue(&rxChar, "");
+  if (isError(addService(&serialService)) ||
+      isError(writeValue(&txChar, "")) ||
+      isError(writeValue(&rxChar, "")))
+  {
+    return BLE_CHECK_ERROR;
+  }
   return BLE_SUCCESS;
 }
 
@@ -1128,7 +1127,7 @@ static bool apEventPend(uint32_t event)
   {
     Event_pend(apEvent, AP_NONE, event | AP_ERROR, 1);
   }
-  bool status;
+  bool status = false;
   if (postedEvent & event)
   {
     status = true;
@@ -1151,7 +1150,7 @@ static bool apEventPend(uint32_t event)
  * failure of the checked call requires immediate return (e.g. if the
  * next statements depend on it).
  */
-static bool isError(int status)
+static bool isError(uint8_t status)
 {
   if (status == BLE_CHECK_ERROR)
   {

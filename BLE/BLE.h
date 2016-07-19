@@ -13,9 +13,8 @@ class BLE : public Stream
     uint8_t *advertDataArr[MAX_ADVERT_IDX];
 
     int resetPublicMembers(void);
-    int advertDataInit(void);
-    uint8_t advertIndex(int advertType);
-    int setAdvertName(int advertStringLen, const char *advertString);
+    uint8_t advertDataInit(void);
+    int setAdvertName(uint8_t advertStringLen, const char *advertString);
     int setSingleConnParam(size_t offset, uint16_t value);
     int writeValue(BLE_Char *bleChar, int len, const char *str);
     int writeValue(BLE_Char *bleChar, const uint8_t *str);
@@ -45,9 +44,9 @@ class BLE : public Stream
     int startAdvert(void); // Default settings
     int startAdvert(BLE_Advert_Settings *advertSettings);
     int stopAdvert(void);
-    int setAdvertData(int advertType, uint8_t len, uint8_t *advertData);
+    int setAdvertData(uint8_t advertType, uint8_t len, uint8_t *advertData);
     int resetAdvertData(void);
-    int resetAdvertData(int advertType);
+    int resetAdvertData(uint8_t advertType);
     int setAdvertName(const char *advertString);
     int setAdvertName(String *advertString);
 
