@@ -41,6 +41,7 @@
 #define AP_EVT_TEST_RSP                      Event_Id_07     // Test Command Response
 #define AP_EVT_CONN_PARAMS_UPDATED           Event_Id_08     // Connection Parameters Updated
 #define AP_EVT_CONN_PARAMS_CNF               Event_Id_09     // Connection Parameters Request Confirmation
+#define AP_EVT_NOTIF_IND_RSP                 Event_Id_10     // Notification/Indication Response
 #define AP_ERROR                             Event_Id_31     // Error
 
 #define PIN6_7 35
@@ -554,6 +555,7 @@ static void writeNotifInd(BLE_Char *bleChar)
       localReq.type = SNP_SEND_INDICATION;
     }
     SNP_RPC_sendNotifInd(&localReq, bleChar->_valueLen);
+    apEventPend(AP_EVT_NOTIF_IND_RSP);
   }
 }
 
@@ -1000,6 +1002,27 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           else
           {
             ble.error = connRsp->status;
+            Event_post(apEvent, AP_ERROR);
+          }
+        } break;
+        default:
+          break;
+      }
+    }
+    case SNP_GATT_GRP:
+    {
+      switch (cmd1)
+      {
+        case SNP_SEND_NOTIF_IND_CNF:
+        {
+          snpNotifIndCnf_t *notifIndRsp = (snpNotifIndCnf_t *) pParams;
+          if (notifIndRsp->status == SNP_SUCCESS)
+          {
+            Event_post(apEvent, AP_EVT_NOTIF_IND_RSP);
+          }
+          else
+          {
+            ble.error = notifIndRsp->status;
             Event_post(apEvent, AP_ERROR);
           }
         } break;
