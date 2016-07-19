@@ -50,7 +50,7 @@
 
 Event_Handle apEvent = NULL;
 uint8_t *asyncRspData = NULL;
-uint16_t _connHandle = 0;
+uint16_t _connHandle = -1;
 bool connected;
 bool advertising;
 
