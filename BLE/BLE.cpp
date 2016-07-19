@@ -51,6 +51,8 @@
 Event_Handle apEvent = NULL;
 uint8_t *asyncRspData = NULL;
 uint16_t _connHandle = 0;
+bool connected;
+bool advertising;
 
 BLE ble = BLE();
 
@@ -253,13 +255,24 @@ int BLE::end(void)
 
 int BLE::terminateConn(void)
 {
-  if (isError(SAP_setParam(SAP_PARAM_CONN, SAP_CONN_STATE,
+  if ((!connected && isError(BLE_NOT_CONNECTED)) ||
+      isError(SAP_setParam(SAP_PARAM_CONN, SAP_CONN_STATE,
                            sizeof(_connHandle), (uint8_t *) &_connHandle)) ||
       !apEventPend(AP_EVT_CONN_TERM))
   {
     return BLE_CHECK_ERROR;
   }
   return BLE_SUCCESS;
+}
+
+bool BLE::isConnected(void)
+{
+  return connected;
+}
+
+bool BLE::isAdvertising(void)
+{
+  return advertising;
 }
 
 int BLE::resetPublicMembers(void)
@@ -317,7 +330,8 @@ int BLE::startAdvert(void)
 
 int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
 {
-  if (isError(advertDataInit()))
+  if ((advertising && isError(BLE_ALREADY_ADVERTISING)) ||
+      isError(advertDataInit()))
   {
     return BLE_CHECK_ERROR;
   }
@@ -351,7 +365,8 @@ int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
 int BLE::stopAdvert(void)
 {
   uint8_t disableAdv = SAP_ADV_STATE_DISABLE;
-  if (isError(SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE, 1, &disableAdv)) ||
+  if ((!advertising && isError(BLE_NOT_ADVERTISING)) ||
+      isError(SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE, 1, &disableAdv)) ||
       !apEventPend(AP_EVT_ADV_END))
   {
     return BLE_CHECK_ERROR;
@@ -477,8 +492,14 @@ int BLE::setConnParams(BLE_Conn_Params *connParams)
   lReq.intervalMax =         connParams->maxConnInt;
   lReq.slaveLatency =        connParams->respLatency;
   lReq.supervisionTimeout =  connParams->bleTimeout;
-  return SAP_setParam(SAP_PARAM_CONN, SAP_CONN_PARAM,
-                      sizeof(lReq), (uint8_t *) &lReq);
+  if ((!connected && isError(BLE_NOT_CONNECTED)) ||
+      isError(SAP_setParam(SAP_PARAM_CONN, SAP_CONN_PARAM,
+                           sizeof(lReq), (uint8_t *) &lReq)) ||
+      !apEventPend(AP_EVT_CONN_PARAMS_CNF))
+  {
+    return BLE_CHECK_ERROR;
+  }
+  return BLE_SUCCESS;
 }
 
 int BLE::setSingleConnParam(size_t offset, int value)
@@ -961,6 +982,21 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
             Event_post(apEvent, AP_ERROR);
           }
         } break;
+        // Just a confirmation that the request update was sent.
+        case SNP_UPDATE_CONN_PARAM_CNF:
+        {
+          snpUpdateConnParamCnf_t *connRsp =
+            (snpUpdateConnParamCnf_t *) pParams;
+          if (connRsp->status == SNP_SUCCESS)
+          {
+            Event_post(apEvent, AP_EVT_CONN_PARAMS_CNF);
+          }
+          else
+          {
+            ble.error = connRsp->status;
+            Event_post(apEvent, AP_ERROR);
+          }
+        } break;
         default:
           break;
       }
@@ -983,10 +1019,12 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
       ble.usedConnParams.maxConnInt  = evt->connInterval;
       ble.usedConnParams.respLatency = evt->slaveLatency;
       ble.usedConnParams.bleTimeout  = evt->supervisionTimeout;
+      connected = true;
       Event_post(apEvent, AP_EVT_CONN_EST);
     } break;
     case SNP_CONN_TERM_EVT:
     {
+      connected = false;
       Event_post(apEvent, AP_EVT_CONN_TERM);
       BLE_resetCCCD();
     } break;
@@ -1005,6 +1043,7 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
       evt->status = SNP_SUCCESS;
       if (evt->status == SNP_SUCCESS)
       {
+        advertising = true;
         Event_post(apEvent, AP_EVT_ADV_ENB);
       }
       else
@@ -1016,6 +1055,7 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
     {
       snpAdvStatusEvt_t *evt = (snpAdvStatusEvt_t *) param;
       if (evt->status == SNP_SUCCESS) {
+        advertising = false;
         Event_post(apEvent, AP_EVT_ADV_END);
       }
       else

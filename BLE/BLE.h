@@ -36,6 +36,9 @@ class BLE : public Stream
     int end(void);
     int terminateConn(void);
 
+    bool isConnected(void);
+    bool isAdvertising(void);
+
     int addService(BLE_Service *bleService);
 
     int startAdvert(void); // Default settings
