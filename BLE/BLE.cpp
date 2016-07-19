@@ -484,20 +484,14 @@ uint8_t *hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData)
   return asyncRspData;
 }
 
-int BLE::setConnParams(BLE_Conn_Params *connParams)
-{
-  snpUpdateConnParamReq_t lReq;
-  lReq.connHandle =          _connHandle;
-  lReq.intervalMin =         connParams->minConnInt;
-  lReq.intervalMax =         connParams->maxConnInt;
-  lReq.slaveLatency =        connParams->respLatency;
-  lReq.supervisionTimeout =  connParams->bleTimeout;
 /*
  * Must be currently in a connection.
  */
+int BLE::setConnParams(BLE_Conn_Params_Update_Req *connParams)
+{
   if ((!connected && isError(BLE_NOT_CONNECTED)) ||
       isError(SAP_setParam(SAP_PARAM_CONN, SAP_CONN_PARAM,
-                           sizeof(lReq), (uint8_t *) &lReq)) ||
+                           sizeof(*connParams), (uint8_t *) connParams)) ||
       !apEventPend(AP_EVT_CONN_PARAMS_CNF))
   {
     return BLE_CHECK_ERROR;
@@ -507,30 +501,38 @@ int BLE::setConnParams(BLE_Conn_Params *connParams)
 
 int BLE::setSingleConnParam(size_t offset, uint16_t value)
 {
-  BLE_Conn_Params paramsReq;
-  memcpy(&paramsReq, &usedConnParams, sizeof(paramsReq));
+  BLE_Conn_Params_Update_Req paramsReq;
+  paramsReq.connHandle         = _connHandle;
+  paramsReq.intervalMin        = SNP_CONN_INT_MIN;
+  paramsReq.intervalMax        = SNP_CONN_INT_MAX;
+  paramsReq.slaveLatency       = usedConnParams.slaveLatency;
+  paramsReq.supervisionTimeout = usedConnParams.supervisionTimeout;
   *(uint16_t *)(((char *) &paramsReq) + offset) = value;
   return setConnParams(&paramsReq);
 }
 
 int BLE::setMinConnInt(uint16_t intervalMin)
 {
-  return setSingleConnParam(offsetof(BLE_Conn_Params, minConnInt), minConnInt);
+  return setSingleConnParam(offsetof(BLE_Conn_Params_Update_Req, intervalMin),
+                            intervalMin);
 }
 
 int BLE::setMaxConnInt(uint16_t intervalMax)
 {
-  return setSingleConnParam(offsetof(BLE_Conn_Params, maxConnInt), maxConnInt);
+  return setSingleConnParam(offsetof(BLE_Conn_Params_Update_Req, intervalMax),
+                            intervalMax);
 }
 
 int BLE::setRespLatency(uint16_t slaveLatency)
 {
-  return setSingleConnParam(offsetof(BLE_Conn_Params, respLatency), respLatency);
+  return setSingleConnParam(offsetof(BLE_Conn_Params_Update_Req, slaveLatency),
+                            slaveLatency);
 }
 
 int BLE::setBleTimeout(uint16_t supervisionTimeout)
 {
-  return setSingleConnParam(offsetof(BLE_Conn_Params, bleTimeout), timeout);
+  return setSingleConnParam(offsetof(BLE_Conn_Params_Update_Req, supervisionTimeout),
+                            supervisionTimeout);
 }
 
 static void writeNotifInd(BLE_Char *bleChar)
@@ -1017,11 +1019,10 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
     case SNP_CONN_EST_EVT:
     {
       snpConnEstEvt_t *evt = (snpConnEstEvt_t *) param;
-      _connHandle                    = evt->connHandle;
-      ble.usedConnParams.minConnInt  = evt->connInterval;
-      ble.usedConnParams.maxConnInt  = evt->connInterval;
-      ble.usedConnParams.respLatency = evt->slaveLatency;
-      ble.usedConnParams.bleTimeout  = evt->supervisionTimeout;
+      _connHandle                           = evt->connHandle;
+      ble.usedConnParams.connInterval       = evt->connInterval;
+      ble.usedConnParams.slaveLatency       = evt->slaveLatency;
+      ble.usedConnParams.supervisionTimeout = evt->supervisionTimeout;
       connected = true;
       Event_post(apEvent, AP_EVT_CONN_EST);
     } break;
@@ -1034,10 +1035,9 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
     case SNP_CONN_PARAM_UPDATED_EVT:
     {
       snpUpdateConnParamEvt_t *evt = (snpUpdateConnParamEvt_t *) param;
-      ble.usedConnParams.minConnInt =   evt->connInterval;
-      ble.usedConnParams.maxConnInt =   evt->connInterval;
-      ble.usedConnParams.respLatency =  evt->slaveLatency;
-      ble.usedConnParams.bleTimeout =   evt->supervisionTimeout;
+      ble.usedConnParams.connInterval       = evt->connInterval;
+      ble.usedConnParams.slaveLatency       = evt->slaveLatency;
+      ble.usedConnParams.supervisionTimeout = evt->supervisionTimeout;
       Event_post(apEvent, AP_EVT_CONN_PARAMS_UPDATED);
     } break;
     case SNP_ADV_STARTED_EVT:

@@ -58,7 +58,7 @@ class BLE : public Stream
     int getGapParam(uint16_t paramId, uint16_t *Value);
     uint8_t *hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData);
 
-    int setConnParams(BLE_Conn_Params *connParams);
+    int setConnParams(BLE_Conn_Params_Update_Req *connParams);
     int setMinConnInt(uint16_t intervalMin); // Number of 1.25ms time slots
     int setMaxConnInt(uint16_t intervalMax); // Number of 1.25ms time slots
     int setRespLatency(uint16_t slaveLatency); // Measured in number of connection intervals the slave can miss.

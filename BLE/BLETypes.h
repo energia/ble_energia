@@ -116,19 +116,13 @@ typedef struct
   unsigned char      connectedBehavior;
 } BLE_Advert_Settings;
 
-typedef struct
-{
-  unsigned int               minConnInt;
-  unsigned int               maxConnInt;
-  unsigned int               respLatency;
-  unsigned int               bleTimeout;
-} BLE_Conn_Params;
-
 /*******************************************************************************
  * See the SNP API guide for documentation on these typedefs.
  ******************************************************************************/
 typedef snpGetRevisionRsp_t BLE_Get_Revision_Rsp;
 typedef snpGetStatusCmdRsp_t BLE_Get_Status_Rsp;
 typedef snpTestCmdRsp_t BLE_Test_Command_Rsp;
+typedef snpUpdateConnParamReq_t BLE_Conn_Params_Update_Req;
+typedef snpConnEstEvt_t BLE_Conn_Params;
 
 #endif
