@@ -251,6 +251,17 @@ int BLE::end(void)
   return BLE_NOT_IMPLEMENTED;
 }
 
+int BLE::terminateConn(void)
+{
+  if (isError(SAP_setParam(SAP_PARAM_CONN, SAP_CONN_STATE,
+                           sizeof(_connHandle), (uint8_t *) &_connHandle)) ||
+      !apEventPend(AP_EVT_CONN_TERM))
+  {
+    return BLE_CHECK_ERROR;
+  }
+  return BLE_SUCCESS;
+}
+
 int BLE::resetPublicMembers(void)
 {
   error = BLE_SUCCESS;
@@ -496,17 +507,6 @@ int BLE::setRespLatency(unsigned int respLatency)
 int BLE::setBleTimeout(unsigned int timeout)
 {
   return setSingleConnParam(offsetof(BLE_Conn_Params, bleTimeout), timeout);
-}
-
-int BLE::terminateConn(void)
-{
-  if (isError(SAP_setParam(SAP_PARAM_CONN, SAP_CONN_STATE,
-                           sizeof(_connHandle), (uint8_t *) &_connHandle)) ||
-      !apEventPend(AP_EVT_CONN_TERM))
-  {
-    return BLE_CHECK_ERROR;
-  }
-  return BLE_SUCCESS;
 }
 
 static void writeNotifInd(BLE_Char *bleChar)
@@ -975,7 +975,8 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
   ble.error = BLE_SUCCESS;
   switch (event)
   {
-    case SNP_CONN_EST_EVT: {
+    case SNP_CONN_EST_EVT:
+    {
       snpConnEstEvt_t *evt = (snpConnEstEvt_t *) param;
       _connHandle                    = evt->connHandle;
       ble.usedConnParams.minConnInt  = evt->connInterval;
@@ -984,11 +985,13 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
       ble.usedConnParams.bleTimeout  = evt->supervisionTimeout;
       Event_post(apEvent, AP_EVT_CONN_EST);
     } break;
-    case SNP_CONN_TERM_EVT: {
+    case SNP_CONN_TERM_EVT:
+    {
       Event_post(apEvent, AP_EVT_CONN_TERM);
       BLE_resetCCCD();
     } break;
-    case SNP_CONN_PARAM_UPDATED_EVT: {
+    case SNP_CONN_PARAM_UPDATED_EVT:
+    {
       snpUpdateConnParamEvt_t *evt = (snpUpdateConnParamEvt_t *) param;
       ble.usedConnParams.minConnInt =   evt->connInterval;
       ble.usedConnParams.maxConnInt =   evt->connInterval;
@@ -996,7 +999,8 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
       ble.usedConnParams.bleTimeout =   evt->supervisionTimeout;
       Event_post(apEvent, AP_EVT_CONN_PARAMS_UPDATED);
     } break;
-    case SNP_ADV_STARTED_EVT: {
+    case SNP_ADV_STARTED_EVT:
+    {
       snpAdvStatusEvt_t *evt = (snpAdvStatusEvt_t *) param;
       evt->status = SNP_SUCCESS;
       if (evt->status == SNP_SUCCESS)
@@ -1008,7 +1012,8 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
         Event_post(apEvent, AP_ERROR);
       }
     } break;
-    case SNP_ADV_ENDED_EVT: {
+    case SNP_ADV_ENDED_EVT:
+    {
       snpAdvStatusEvt_t *evt = (snpAdvStatusEvt_t *) param;
       if (evt->status == SNP_SUCCESS) {
         Event_post(apEvent, AP_EVT_ADV_END);
@@ -1022,13 +1027,17 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
      * Unused because value size handling in this library is agnostic of
      * MTU (maximum transmission unit) size.
      */
-    // case SNP_ATT_MTU_EVT: {
+    // case SNP_ATT_MTU_EVT:
+    // {
     // } break;
-    // case SNP_SECURITY_EVT: {
+    // case SNP_SECURITY_EVT:
+    // {
     // } break;
-    // case SNP_AUTHENTICATION_EVT: {
+    // case SNP_AUTHENTICATION_EVT:
+    // {
     // } break;
-    case SNP_ERROR_EVT: {
+    case SNP_ERROR_EVT:
+    {
       snpErrorEvt_t *evt = (snpErrorEvt_t *) param;
       ble.opcode = evt->opcode;
       ble.error = evt->status;
