@@ -405,7 +405,7 @@ int BLE::setAdvertName(uint8_t advertStringLen, const char *advertString)
 {
   uint8_t newSize = sizeof(defScanRspData) - defScanRspData[0]
                   + 1 + advertStringLen;
-  uint8_t *newData = (uint8_t *) malloc(newSize);
+  uint8_t *newData = (uint8_t *) malloc(newSize * sizeof(*newData));
   newData[0] = 1 + advertStringLen;
   newData[1] = defScanRspData[1];
   strcpy((char *) &newData[2], advertString);
@@ -424,7 +424,7 @@ int BLE::setAdvertName(const char *advertString)
 int BLE::setAdvertName(String *advertString)
 {
   uint8_t len = (*advertString).length();
-  char *buf = (char *) malloc((len+1)*sizeof(char));
+  char *buf = (char *) malloc((len+1)*sizeof(*buf));
   (*advertString).toCharArray(buf, len);
   uint8_t status = setAdvertName(len, buf);
   free(buf);
@@ -656,7 +656,7 @@ int BLE::writeValue(BLE_Char *bleChar, const uint8_t *str)
 int BLE::writeValue(BLE_Char *bleChar, String str)
 {
   int len = str.length();
-  char *buf = (char *) malloc((len+1)*sizeof(char));
+  char *buf = (char *) malloc((len+1)*sizeof(*buf));
   str.toCharArray(buf, len+1);
   uint8_t status = writeValue(bleChar, len, buf);
   free(buf);

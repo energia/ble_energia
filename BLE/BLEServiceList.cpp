@@ -32,7 +32,7 @@ static uint8_t serviceCCCDIndCB(void *context,
 
 int BLE_registerService(BLE_Service *bleService)
 {
-  SAP_Service_t *service = (SAP_Service_t *) malloc(sizeof(SAP_Service_t));
+  SAP_Service_t *service = (SAP_Service_t *) malloc(sizeof(*service));
   constructService(service, bleService);
   int status = SAP_registerService(service);
   if (status != SNP_FAILURE && service->serviceHandle != 0) {
@@ -102,7 +102,7 @@ uint8_t BLE_charValueInit(BLE_Char *bleChar, size_t size)
 
 static void addServiceNode(BLE_Service *service)
 {
-  BLE_Service_Node *newNode = (BLE_Service_Node *) malloc(sizeof(BLE_Service_Node));
+  BLE_Service_Node *newNode = (BLE_Service_Node *) malloc(sizeof(*newNode));
   newNode->next = NULL;
   newNode->service = service;
   if (bleServiceListHead == NULL)
@@ -163,13 +163,13 @@ static void constructService(SAP_Service_t *service, BLE_Service *bleService)
   service->serviceType        = SNP_PRIMARY_SERVICE;
   service->charTableLen       = bleService->numChars; // sizeof with static array?
   service->charTable          = (SAP_Char_t *) malloc(service->charTableLen *
-                                                    sizeof(SAP_Char_t));
+                                                    sizeof(*service->charTable));
   service->context            = NULL;
   service->charReadCallback   = serviceReadAttrCB;
   service->charWriteCallback  = serviceWriteAttrCB;
   service->cccdIndCallback    = serviceCCCDIndCB;
   service->charAttrHandles    = (SAP_CharHandle_t *) malloc(service->charTableLen *
-                                                            sizeof(SAP_CharHandle_t));
+                                                            sizeof(*service->charAttrHandles));
   uint8_t i;
   for (i = 0; i < bleService->numChars; i++)
   {
@@ -194,7 +194,7 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
                             ? SNP_GATT_PERMIT_WRITE : 0);
   if (bleChar->charDesc)
   {
-    sapChar->pUserDesc = (SAP_UserDescAttr_t *) malloc(sizeof(SAP_UserDescAttr_t));
+    sapChar->pUserDesc = (SAP_UserDescAttr_t *) malloc(sizeof(*sapChar->pUserDesc));
     sapChar->pUserDesc->perms    = SNP_GATT_PERMIT_READ;
     uint16_t charStrLen = strlen(bleChar->charDesc);
     sapChar->pUserDesc->maxLen   = charStrLen;
@@ -207,11 +207,11 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
   {
     sapChar->pUserDesc = NULL;
   }
-  sapChar->pCccd = (SAP_UserCCCDAttr_t *) malloc(sizeof(SAP_UserCCCDAttr_t));
+  sapChar->pCccd = (SAP_UserCCCDAttr_t *) malloc(sizeof(*sapChar->pCccd));
   sapChar->pCccd->perms          = SNP_GATT_PERMIT_READ | SNP_GATT_PERMIT_WRITE;
   if (bleChar->valueFormat)
   {
-    sapChar->pFormat = (SAP_FormatAttr_t *) malloc(sizeof(SAP_FormatAttr_t));
+    sapChar->pFormat = (SAP_FormatAttr_t *) malloc(sizeof(*sapChar->pFormat));
     sapChar->pFormat->format     = bleChar->valueFormat;
     sapChar->pFormat->exponent   = bleChar->valueExponent;
     sapChar->pFormat->unit       = 0;
