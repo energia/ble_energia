@@ -555,8 +555,14 @@ static uint8_t writeNotifInd(BLE_Char *bleChar)
     {
       localReq.type = SNP_SEND_INDICATION;
     }
-    if (isError(SNP_RPC_sendNotifInd(&localReq, bleChar->_valueLen)) ||
-        !apEventPend(AP_EVT_NOTIF_IND_RSP))
+    if (isError(SNP_RPC_sendNotifInd(&localReq, bleChar->_valueLen)))
+    {
+      return BLE_CHECK_ERROR;
+    }
+    // Only pend for confirmation of indication
+    else if ((bleChar->_CCCD & SNP_GATT_CLIENT_CFG_INDICATE) &&
+             !apEventPend(AP_EVT_NOTIF_IND_RSP))
+
     {
       return BLE_CHECK_ERROR;
     }
