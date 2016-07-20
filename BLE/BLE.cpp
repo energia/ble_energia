@@ -78,10 +78,11 @@ static uint8_t defNotConnAD[] =
   0x00                                    // Key state
 };
 
-static uint8_t defConnAD[] = // TODO
-{
-  0
-};
+/*
+ * The SNP will automatically use the non-connectable advertisement data
+ * if the connectable advertisement data is not set.
+ */
+static uint8_t defConnAD[0] = {};
 
 static uint8_t defScanRspData[] = {
   // complete name
@@ -107,14 +108,14 @@ static uint8_t defScanRspData[] = {
 static uint8_t *defADArr[] =
 {
   defNotConnAD,
-  defNotConnAD, // TODO
+  defConnAD,
   defScanRspData
 };
 
 static size_t defADSizes[] =
 {
   sizeof(defNotConnAD),
-  sizeof(defNotConnAD), // TODO
+  sizeof(defConnAD),
   sizeof(defScanRspData)
 };
 
@@ -314,7 +315,7 @@ uint8_t BLE::advertDataInit(void)
   uint8_t idx;
   for (idx = 0; idx < MAX_ADVERT_IDX; idx++)
   {
-    if (advertDataArr[idx] == NULL)
+    if (advertDataArr[idx] == NULL && defADArr[idx] != NULL)
     {
       if (isError(setAdvertData(aDIdxToType[idx], defADSizes[idx],
                                 defADArr[idx])))
@@ -375,29 +376,6 @@ int BLE::stopAdvert(void)
     return BLE_CHECK_ERROR;
   }
   return BLE_SUCCESS;
-}
-
-int BLE::resetAdvertData(void)
-{
-  uint8_t idx;
-  for (idx = 0; idx < MAX_ADVERT_IDX; idx++)
-  {
-    if (isError(resetAdvertData(aDIdxToType[idx])))
-    {
-      return BLE_CHECK_ERROR;
-    }
-  }
-  return BLE_SUCCESS;
-}
-
-int BLE::resetAdvertData(uint8_t advertType)
-{
-  uint8_t idx = advertIndex(advertType);
-  if (!(idx < MAX_ADVERT_IDX))
-  {
-    return idx;
-  }
-  return setAdvertData(advertType, defADSizes[idx], defADArr[idx]);
 }
 
 int BLE::setAdvertData(uint8_t advertType, uint8_t len, uint8_t *advertData)
