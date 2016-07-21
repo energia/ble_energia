@@ -99,62 +99,7 @@ uint8_t SAP_setParam(uint8_t subsystemID, uint16_t paramID, uint16_t len,
   // Determine the subsystem.
   switch(subsystemID)
   {
-    case SAP_PARAM_SECURITY:
-      {
-        snpSetSecParamReq_t lReq;
-
-        switch(paramID)
-        {
-          case SAP_SECURITY_IOCAPS:
-            lReq.paramId = SNP_GAPBOND_IO_CAPABILITIES;
-            break;
-
-          case SAP_SECURITY_BEHAVIOR:
-            lReq.paramId = SNP_GAPBOND_PAIRING_MODE;
-            break;
-
-          case SAP_SECURITY_BONDING:
-            lReq.paramId = SNP_GAPBOND_BONDING_ENABLED;
-            break;
-
-          case SAP_ERASE_ALL_BONDS:
-            lReq.paramId = SNP_GAPBOND_ERASE_ALLBONDS;
-            break;
-
-          case SAP_ERASE_LRU_BOND:
-            lReq.paramId = SNP_GAPBOND_LRU_BOND_REPLACEMENT;
-            break;
-
-          default:
-            // Unknown command
-            status = SNP_FAILURE;
-            break;
-        }
-
-        if (status != SNP_FAILURE)
-        {
-          if (pData)
-          {
-            lReq.value = *pData;
-          }
-          else
-          {
-            lReq.value = NULL;
-          }
-
-          // Send set parameter request
-          {
-            snpSetSecParamRsp_t lRsp;
-
-            SNP_RPC_setSecurityParam(&lReq, &lRsp);
-
-            status = lRsp.status;
-          }
-        }
-      }
-      break;
-
-    case SAP_PARAM_WHITELIST:
+     case SAP_PARAM_WHITELIST:
       {
         snpSetWhiteListReq_t lReq;
 
@@ -186,23 +131,4 @@ uint8_t SAP_setParam(uint8_t subsystemID, uint16_t paramID, uint16_t len,
 uint8_t SAP_sendSecurityRequest(void)
 {
   return SNP_RPC_sendSecurityRequest();
-}
-
-/**
- * @brief       Send authentication data to SNP.
- *
- * @param       authData - authentication data.  This is the passkey used for
- *                         for the passkey entry protocol.
- *                         For numeric comparisons, this is TRUE if equivalent
- *                         or FALSE if not.
- *
- * @return      SNP_SUCCESS: authentication data sent.<BR>
- *              SNP_RPC_FAILRUE: authentication data failed to be sent.<BR>
- */
-uint8_t SAP_setAuthenticationRsp(uint32_t authData)
-{
-  snpSetAuthDataReq_t pReq;
-
-  pReq.authData = authData;
-  return SNP_RPC_setAuthenticationData(&pReq);
 }

@@ -41,6 +41,7 @@
 #define AP_EVT_CONN_PARAMS_CNF               Event_Id_09     // Connection Parameters Request Confirmation
 #define AP_EVT_NOTIF_IND_RSP                 Event_Id_10     // Notification/Indication Response
 #define AP_EVT_HANDLE_AUTH_EVT               Event_Id_11     // Set Authentication Data Request
+#define AP_EVT_AUTH_RSP                      Event_Id_12     // Set Authentication Data Response
 #define AP_ERROR                             Event_Id_31     // Error
 
 #define PIN6_7 35
@@ -968,9 +969,8 @@ int BLE::handleEvents(void)
           Serial.println(authKey);
         }
       }
-      SAP_setAuthenticationRsp(authKey);
     }
-    if (evt->numCmp)
+    else if (evt->numCmp)
     {
       // TODO
       if (displayStringFxn && displayUIntFxn)
@@ -983,6 +983,11 @@ int BLE::handleEvents(void)
         Serial.print("Left btn if eql; right else");
         Serial.println(evt->numCmp);
       }
+    }
+    if (isError(SAP_setAuthenticationRsp(authKey)) ||
+        !apEventPend(AP_EVT_AUTH_RSP))
+    {
+      return BLE_CHECK_ERROR;
     }
   }
 }
@@ -1064,6 +1069,19 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
             Event_post(apEvent, AP_ERROR);
           }
         } break;
+        case SNP_SEND_AUTHENTICATION_DATA_RSP:
+        {
+          snpSetAuthDataRsp_t *authRsp = (snpSetAuthDataRsp_t *) pParams;
+          if (authRsp->status == SNP_SUCCESS)
+          {
+            Event_post(apEvent, AP_EVT_AUTH_RSP);
+          }
+          else
+          {
+            ble.error = authRsp->status;
+            Event_post(apEvent, AP_ERROR);
+          }
+        }
         default:
           break;
       }
