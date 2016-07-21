@@ -44,6 +44,7 @@
 #define AP_EVT_AUTH_RSP                      Event_Id_12     // Set Authentication Data Response
 #define AP_EVT_SECURITY_STATE                Event_Id_13     // Security State Changed
 #define AP_EVT_SECURITY_PARAM_RSP            Event_Id_14     // Set Security Param Response
+#define AP_EVT_WHITE_LIST_RSP                Event_Id_15     // Set White List Policy Response
 #define AP_ERROR                             Event_Id_31     // Error
 
 #define PIN6_7 35
@@ -867,6 +868,16 @@ int BLE::sendSecurityRequest(void)
   return SAP_sendSecurityRequest();
 }
 
+int BLE::setWhiteListPolicy(uint8_t policy)
+{
+  if (isError(SAP_setParam(SAP_PARAM_WHITELIST, 0, 0, &policy)) ||
+      !apEventPend(AP_EVT_WHITE_LIST_RSP))
+  {
+    return BLE_CHECK_ERROR;
+  }
+  return BLE_SUCCESS;
+}
+
 unsigned int BLE::getRand(void)
 {
   return SAP_getRand();
@@ -1081,6 +1092,18 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           else
           {
             apPostError(authRsp->status);
+          }
+        }
+        case SNP_SET_WHITE_LIST_POLICY_RSP:
+        {
+          snpSetWhiteListRsp_t *whiteListRsp = (snpSetWhiteListRsp_t *) pParams;
+          if (whiteListRsp->status == SNP_SUCCESS)
+          {
+            Event_post(apEvent, AP_EVT_WHITE_LIST_RSP);
+          }
+          else
+          {
+            apPostError(whiteListRsp->status);
           }
         }
         default:

@@ -102,6 +102,7 @@ class BLE : public Stream
     int eraseAllBonds(void);
     int replaceLruBond(uint8_t param);
     int sendSecurityRequest(void);
+    int setWhiteListPolicy(uint8_t policy);
 
     unsigned int getRand(void);
     void getRevision(BLE_Get_Revision_Rsp *getRevisionRsp);

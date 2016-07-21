@@ -81,6 +81,10 @@
 #define BLE_SECURITY_STATE_BONDED     SNP_GAPBOND_PAIRING_STATE_BONDED     // Devices bonded
 #define BLE_SECURITY_STATE_BOND_SAVED SNP_GAPBOND_PAIRING_STATE_BOND_SAVED // Bonding record saved in NV
 
+/* Whitelist Parameters */
+#define BLE_WHITELIST_DISABLE SAP_WHITELIST_DISABLE // Enable White List usage
+#define BLE_WHITELIST_ENABLE  SAP_WHITELIST_ENABLE  // Disable White List usage
+
 // Minimum connection interval (units of 1.25ms, 6=7.5ms) if automatic
 // parameter update request is enabled
 #define BLE_DEF_DESIRED_MIN_CONN_INT     6
