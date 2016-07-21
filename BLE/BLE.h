@@ -86,17 +86,13 @@ class BLE : public Stream
     char* readValue_string(BLE_Char *bleChar);
     String readValue_String(BLE_Char *bleChar);
 
-    int serial(void);
-    int iBeacon(void);
-    int nordicBeacon(void);
-    int uriBeacon(void);
-    int eddystone(void);
 
     unsigned int getRand(void);
     void getRevision(BLE_Get_Revision_Rsp *getRevisionRsp);
     void getStatus(BLE_Get_Status_Rsp *getStatusRsp);
     void testCommand(BLE_Test_Command_Rsp *testCommandRsp);
 
+    int serial(void);
     virtual int available(void);
     virtual int read(void);
     virtual int peek(void);

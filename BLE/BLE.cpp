@@ -1,8 +1,6 @@
 
 #include <string.h>
 
-// #include <ti/drivers/gpio.h>
-// #include <ti/drivers/gpio/GPIOMSP432.h>
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Event.h>
@@ -819,25 +817,9 @@ String BLE::readValue_String(BLE_Char *bleChar)
   return str;
 }
 
-int BLE::iBeacon(void)
-{
-  return BLE_NOT_IMPLEMENTED;
-}
 
-int BLE::nordicBeacon(void)
-{
-  return BLE_NOT_IMPLEMENTED;
-}
 
-int BLE::uriBeacon(void)
-{
-  return BLE_NOT_IMPLEMENTED;
-}
 
-int BLE::eddystone(void)
-{
-  return BLE_NOT_IMPLEMENTED;
-}
 
 unsigned int BLE::getRand(void)
 {
@@ -845,7 +827,7 @@ unsigned int BLE::getRand(void)
 }
 
 /*
- * Rarely used and advanced-use call so we won't provide a framework for this.
+ * Rarely used and advanced-use calls so we won't provide a framework for this.
  */
 void BLE::getRevision(BLE_Get_Revision_Rsp *getRevisionRsp)
 {
