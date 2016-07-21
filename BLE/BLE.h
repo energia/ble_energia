@@ -18,6 +18,7 @@ class BLE : public Stream
     int setSingleConnParam(size_t offset, uint16_t value);
     int writeValue(BLE_Char *bleChar, int len, const char *str);
     int writeValue(BLE_Char *bleChar, const uint8_t *str);
+    int setSecurityParam(uint16_t paramID, uint16_t len, uint8_t *pData);
 
   public:
     int error; // Set to BLE_SUCCESS before conditionally setting

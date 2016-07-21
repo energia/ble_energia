@@ -43,6 +43,7 @@
 #define AP_EVT_HANDLE_AUTH_EVT               Event_Id_11     // Authentication Required Event
 #define AP_EVT_AUTH_RSP                      Event_Id_12     // Set Authentication Data Response
 #define AP_EVT_SECURITY_STATE                Event_Id_13     // Security State Changed
+#define AP_EVT_SECURITY_PARAM_RSP            Event_Id_14     // Set Security Param Response
 #define AP_ERROR                             Event_Id_31     // Error
 
 #define PIN6_7 35
@@ -826,49 +827,39 @@ String BLE::readValue_String(BLE_Char *bleChar)
   return str;
 }
 
-int BLE::setPairingMode(uint8_t param)
+int BLE::setSecurityParam(uint16_t paramID, uint16_t len, uint8_t *pData)
 {
-  if (isError(SAP_setParam(SAP_PARAM_SECURITY, SAP_SECURITY_BEHAVIOR, 1, &param)))
+  if (isError(SAP_setParam(SAP_PARAM_SECURITY, paramID, len, pData)) ||
+      !apEventPend(AP_EVT_SECURITY_PARAM_RSP))
   {
     return BLE_CHECK_ERROR;
   }
   return BLE_SUCCESS;
+}
+
+int BLE::setPairingMode(uint8_t param)
+{
+  return setSecurityParam(SAP_SECURITY_BEHAVIOR, 1, &param);
 }
 
 int BLE::setIoCapabilities(uint8_t param)
 {
-  if (isError(SAP_setParam(SAP_PARAM_SECURITY, SAP_SECURITY_IOCAPS, 1, &param)))
-  {
-    return BLE_CHECK_ERROR;
-  }
-  return BLE_SUCCESS;
+  return setSecurityParam(SAP_SECURITY_IOCAPS, 1, &param);
 }
 
 int BLE::useBonding(uint8_t param)
 {
-  if (isError(SAP_setParam(SAP_PARAM_SECURITY, SAP_SECURITY_BONDING, 1, &param)))
-  {
-    return BLE_CHECK_ERROR;
-  }
-  return BLE_SUCCESS;
+  return setSecurityParam(SAP_SECURITY_BONDING, 1, &param);
 }
 
 int BLE::eraseAllBonds(void)
 {
-  if (isError(SAP_setParam(SAP_PARAM_SECURITY, SAP_ERASE_ALL_BONDS, 0, NULL)))
-  {
-    return BLE_CHECK_ERROR;
-  }
-  return BLE_SUCCESS;
+  return setSecurityParam(SAP_ERASE_ALL_BONDS, 0, NULL);
 }
 
 int BLE::replaceLruBond(uint8_t param)
 {
-  if (isError(SAP_setParam(SAP_PARAM_SECURITY, SAP_ERASE_LRU_BOND, 1, &param)))
-  {
-    return BLE_CHECK_ERROR;
-  }
-  return BLE_SUCCESS;
+  return setSecurityParam(SAP_ERASE_LRU_BOND, 1, &param);
 }
 
 int BLE::sendSecurityRequest(void)
@@ -1066,6 +1057,18 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           else
           {
             apPostError(connRsp->status);
+          }
+        } break;
+        case SNP_SET_SECURITY_PARAM_RSP:
+        {
+          snpSetSecParamRsp_t *securityParamRsp = (snpSetSecParamRsp_t *) pParams;
+          if (securityParamRsp->status == SNP_SUCCESS)
+          {
+            Event_post(apEvent, AP_EVT_SECURITY_PARAM_RSP);
+          }
+          else
+          {
+            apPostError(securityParamRsp->status);
           }
         } break;
         case SNP_SEND_AUTHENTICATION_DATA_RSP:
