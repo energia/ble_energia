@@ -59,11 +59,12 @@ void setup() {
 // the loop routine runs over and over again forever as a task.
 void loop() {
   flag0 = 0; flag1 = 0; flag2 = 0; flag3 = 0; flag4 = 0; flag5 = 0;
+  ble.handleEvents();
   timer++;
   digitalWrite(LED, HIGH);
-  delay(500);
+  delay(100);
   digitalWrite(LED, LOW);
-  delay(500);
+  delay(100);
   heartRateMeasurement += 1;
   ble.writeValue(&heartRateChar, heartRateMeasurement);
   Serial.print("Flag 0:");Serial.println(flag0);

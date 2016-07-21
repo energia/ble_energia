@@ -61,6 +61,21 @@
 #define BLE_NOTIFIABLE          SNP_GATT_PROP_NOTIFICATION
 #define BLE_INDICATABLE         SNP_GATT_PROP_INDICATION
 
+/*
+ * Security Parameters
+ */
+/* Security Mode */
+#define BLE_SECURITY_NONE                     SAP_SECURITY_NONE
+#define BLE_SECURITY_WAIT_FOR_REQUEST         SAP_SECURITY_WAIT_FOR_REQUEST
+#define BLE_SECURITY_INITIATE_UPON_CONNECTION SAP_SECURITY_INITIATE_UPON_CONNECTION
+
+/* Security IO Capabilities */
+#define BLE_DISPLAY_ONLY                      SAP_DISPLAY_ONLY       // Display Only Device
+#define BLE_DISPLAY_YES_NO                    SAP_DISPLAY_YES_NO     // Display and Yes and No Capable
+#define BLE_KEYBOARD_ONLY                     SAP_KEYBOARD_ONLY      // Keyboard Only
+#define BLE_NO_INPUT_NO_OUTPUT                SAP_NO_INPUT_NO_OUTPUT // No Display or Input Device
+#define BLE_KEYBOARD_DISPLAY                  SAP_KEYBOARD_DISPLAY   // Both Keyboard and Display Capable
+
 // Minimum connection interval (units of 1.25ms, 6=7.5ms) if automatic
 // parameter update request is enabled
 #define BLE_DEF_DESIRED_MIN_CONN_INT     6
@@ -115,6 +130,9 @@ typedef struct
    */
   unsigned char      connectedBehavior;
 } BLE_Advert_Settings;
+
+typedef void (*displayStringFxn_t)(const char string[]);
+typedef void (*displayUIntFxn_t)(uint32_t num);
 
 /*******************************************************************************
  * See the SNP API guide for documentation on these typedefs.

@@ -30,9 +30,17 @@ class BLE : public Stream
     BLE_Conn_Params usedConnParams;
     uint8_t bleAddr[6];
 
+    bool authKeySet;
+    uint32_t authKey;
+
+    /* Call when using security and a display methd besides serial */
+    displayStringFxn_t displayStringFxn;
+    displayUIntFxn_t displayUIntFxn;
+
     BLE(byte portType=BLE_PORT_UART);
 
     int begin(void);
+    int handleEvents(void);
     int end(void);
     int terminateConn(void);
 
@@ -86,6 +94,12 @@ class BLE : public Stream
     char* readValue_string(BLE_Char *bleChar);
     String readValue_String(BLE_Char *bleChar);
 
+    int setPairingMode(uint8_t param);
+    int setIoCapabilities(uint8_t param);
+    int useBonding(uint8_t param);
+    int eraseAllBonds(void);
+    int replaceLruBond(uint8_t param);
+    int sendSecurityRequest(void);
 
     unsigned int getRand(void);
     void getRevision(BLE_Get_Revision_Rsp *getRevisionRsp);

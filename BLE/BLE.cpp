@@ -40,6 +40,7 @@
 #define AP_EVT_CONN_PARAMS_UPDATED           Event_Id_08     // Connection Parameters Updated
 #define AP_EVT_CONN_PARAMS_CNF               Event_Id_09     // Connection Parameters Request Confirmation
 #define AP_EVT_NOTIF_IND_RSP                 Event_Id_10     // Notification/Indication Response
+#define AP_EVT_HANDLE_AUTH_EVT               Event_Id_11     // Set Authentication Data Request
 #define AP_ERROR                             Event_Id_31     // Error
 
 #define PIN6_7 35
@@ -49,6 +50,7 @@
 
 Event_Handle apEvent = NULL;
 uint8_t *asyncRspData = NULL;
+snpEventParam_t eventHandlerData;
 uint16_t _connHandle = -1;
 bool connected;
 bool advertising;
@@ -144,6 +146,8 @@ BLE::BLE(byte portType)
   _portType = portType;
   uint8_t idx;
   for (idx = 0; idx < MAX_ADVERT_IDX; idx++) {advertDataArr[idx] = NULL;}
+  displayStringFxn = NULL;
+  displayUIntFxn = NULL;
   resetPublicMembers();
 }
 
@@ -282,6 +286,8 @@ int BLE::resetPublicMembers(void)
   opcode = 0;
   memset(&usedConnParams, 0, sizeof(usedConnParams));
   memset(&bleAddr, 0, sizeof(bleAddr));
+  authKeySet = false;
+  authKey = 0;
   return BLE_SUCCESS;
 }
 
@@ -817,9 +823,55 @@ String BLE::readValue_String(BLE_Char *bleChar)
   return str;
 }
 
+int BLE::setPairingMode(uint8_t param)
+{
+  if (isError(SAP_setParam(SAP_PARAM_SECURITY, SAP_SECURITY_BEHAVIOR, 1, &param)))
+  {
+    return BLE_CHECK_ERROR;
+  }
+  return BLE_SUCCESS;
+}
 
+int BLE::setIoCapabilities(uint8_t param)
+{
+  if (isError(SAP_setParam(SAP_PARAM_SECURITY, SAP_SECURITY_IOCAPS, 1, &param)))
+  {
+    return BLE_CHECK_ERROR;
+  }
+  return BLE_SUCCESS;
+}
 
+int BLE::useBonding(uint8_t param)
+{
+  if (isError(SAP_setParam(SAP_PARAM_SECURITY, SAP_SECURITY_BONDING, 1, &param)))
+  {
+    return BLE_CHECK_ERROR;
+  }
+  return BLE_SUCCESS;
+}
 
+int BLE::eraseAllBonds(void)
+{
+  if (isError(SAP_setParam(SAP_PARAM_SECURITY, SAP_ERASE_ALL_BONDS, 0, NULL)))
+  {
+    return BLE_CHECK_ERROR;
+  }
+  return BLE_SUCCESS;
+}
+
+int BLE::replaceLruBond(uint8_t param)
+{
+  if (isError(SAP_setParam(SAP_PARAM_SECURITY, SAP_ERASE_LRU_BOND, 1, &param)))
+  {
+    return BLE_CHECK_ERROR;
+  }
+  return BLE_SUCCESS;
+}
+
+int BLE::sendSecurityRequest(void)
+{
+  return SAP_sendSecurityRequest();
+}
 
 unsigned int BLE::getRand(void)
 {
@@ -891,6 +943,48 @@ size_t BLE::write(const uint8_t *buffer, size_t size)
     return size;
   }
   return 0;
+}
+
+int BLE::handleEvents(void)
+{
+  uint32_t postedEvent = Event_pend(apEvent, AP_NONE, AP_EVT_HANDLE_AUTH_EVT, 1);
+  if (postedEvent & AP_EVT_HANDLE_AUTH_EVT)
+  {
+    snpAuthenticationEvt_t *evt = (snpAuthenticationEvt_t *) &eventHandlerData;
+    if (evt->display || evt->input)
+    {
+      authKey = getRand() % 1000000;
+      authKeySet = true;
+      if (evt->display)
+      {
+        if (displayStringFxn && displayUIntFxn)
+        {
+          displayStringFxn("Auth key:");
+          displayUIntFxn(authKey);
+        }
+        else if (Serial)
+        {
+          Serial.print("Auth key:");
+          Serial.println(authKey);
+        }
+      }
+      SAP_setAuthenticationRsp(authKey);
+    }
+    if (evt->numCmp)
+    {
+      // TODO
+      if (displayStringFxn && displayUIntFxn)
+      {
+        displayStringFxn("Left btn if eql; right else");
+        displayUIntFxn(evt->numCmp);
+      }
+      else if (Serial)
+      {
+        Serial.print("Left btn if eql; right else");
+        Serial.println(evt->numCmp);
+      }
+    }
+  }
 }
 
 /*
@@ -1066,9 +1160,11 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
     // case SNP_SECURITY_EVT:
     // {
     // } break;
-    // case SNP_AUTHENTICATION_EVT:
-    // {
-    // } break;
+    case SNP_AUTHENTICATION_EVT:
+    {
+      memcpy(&eventHandlerData, param, sizeof(eventHandlerData));
+      Event_post(apEvent, AP_EVT_HANDLE_AUTH_EVT);
+    } break;
     case SNP_ERROR_EVT:
     {
       snpErrorEvt_t *evt = (snpErrorEvt_t *) param;
