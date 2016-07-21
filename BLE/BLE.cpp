@@ -140,6 +140,7 @@ static uint8_t writeNotifInd(BLE_Char *bleChar);
 static uint8_t readValueValidateSize(BLE_Char *bleChar, size_t size);
 static void processSNPEventCB(uint16_t event, snpEventParam_t *param);
 static bool apEventPend(uint32_t event);
+static inline void apPostError(uint8_t status);
 static bool isError(uint8_t status);
 
 BLE::BLE(byte portType)
@@ -1023,8 +1024,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           }
           else
           {
-            ble.error = hciRsp->status;
-            Event_post(apEvent, AP_ERROR);
+            apPostError(hciRsp->status);
           }
         } break;
         case SNP_TEST_RSP:
@@ -1050,8 +1050,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           }
           else
           {
-            ble.error = advDataRsp->status;
-            Event_post(apEvent, AP_ERROR);
+            apPostError(advDataRsp->status);
           }
         } break;
         // Just a confirmation that the request update was sent.
@@ -1065,8 +1064,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           }
           else
           {
-            ble.error = connRsp->status;
-            Event_post(apEvent, AP_ERROR);
+            apPostError(connRsp->status);
           }
         } break;
         case SNP_SEND_AUTHENTICATION_DATA_RSP:
@@ -1078,8 +1076,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           }
           else
           {
-            ble.error = authRsp->status;
-            Event_post(apEvent, AP_ERROR);
+            apPostError(authRsp->status);
           }
         }
         default:
@@ -1099,8 +1096,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           }
           else
           {
-            ble.error = notifIndRsp->status;
-            Event_post(apEvent, AP_ERROR);
+            apPostError(notifIndRsp->status);
           }
         } break;
         default:
@@ -1145,7 +1141,6 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
     case SNP_ADV_STARTED_EVT:
     {
       snpAdvStatusEvt_t *evt = (snpAdvStatusEvt_t *) param;
-      evt->status = SNP_SUCCESS;
       if (evt->status == SNP_SUCCESS)
       {
         advertising = true;
@@ -1153,7 +1148,7 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
       }
       else
       {
-        Event_post(apEvent, AP_ERROR);
+        apPostError(evt->status);
       }
     } break;
     case SNP_ADV_ENDED_EVT:
@@ -1165,7 +1160,7 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
       }
       else
       {
-        Event_post(apEvent, AP_ERROR);
+        apPostError(evt->status);
       }
     } break;
     /*
@@ -1187,8 +1182,7 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
     {
       snpErrorEvt_t *evt = (snpErrorEvt_t *) param;
       ble.opcode = evt->opcode;
-      ble.error = evt->status;
-      Event_post(apEvent, AP_ERROR);
+      apPostError(evt->status);
     } break;
   }
 }
@@ -1223,6 +1217,12 @@ static bool apEventPend(uint32_t event)
     status = false;
   }
   return status;
+}
+
+static inline void apPostError(uint8_t status)
+{
+  ble.error = status;
+  Event_post(apEvent, AP_ERROR);
 }
 
 /*
