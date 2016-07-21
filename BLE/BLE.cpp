@@ -45,6 +45,7 @@
 #define AP_EVT_SECURITY_STATE                Event_Id_13     // Security State Changed
 #define AP_EVT_SECURITY_PARAM_RSP            Event_Id_14     // Set Security Param Response
 #define AP_EVT_WHITE_LIST_RSP                Event_Id_15     // Set White List Policy Response
+#define AP_EVT_COPIED_ASYNC_DATA             Event_Id_30     // Copied Data From asyncRspData
 #define AP_ERROR                             Event_Id_31     // Error
 
 #define PIN6_7 35
@@ -53,7 +54,7 @@
 #define B_ADDR_LEN 6
 
 Event_Handle apEvent = NULL;
-uint8_t *asyncRspData = NULL;
+snp_msg_t *asyncRspData = NULL;
 snpEventParam_t eventHandlerData;
 uint16_t _connHandle = -1;
 bool connected;
@@ -471,7 +472,10 @@ uint8_t *hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData)
   {
     return NULL;
   }
-  return asyncRspData;
+  snpHciCmdRsp_t hciCmdRsp;
+  memcpy(&hciCmdRsp, asyncRspData, sizeof(hciCmdRsp));
+  Event_post(apEvent, AP_EVT_COPIED_ASYNC_DATA);
+  return hciCmdRsp->pData; // TODO: does this get deallocated in NPI task?
 }
 
 /*
@@ -896,9 +900,16 @@ void BLE::getStatus(BLE_Get_Status_Rsp *getStatusRsp)
   SAP_getStatus(getStatusRsp);
 }
 
-void BLE::testCommand(BLE_Test_Command_Rsp *testCommandRsp)
+int BLE::testCommand(BLE_Test_Command_Rsp *testRsp)
 {
-  SAP_testCommand();
+  SAP_testCommand(); // void function
+  if (!apEventPend(AP_EVT_TEST_RSP))
+  {
+    return BLE_CHECK_ERROR;
+  }
+  memcpy(testRsp, asyncRspData, sizeof(testRsp));
+  Event_post(apEvent, AP_EVT_COPIED_ASYNC_DATA);
+  return BLE_SUCCESS;
 }
 
 int BLE::serial(void)
@@ -994,6 +1005,7 @@ int BLE::handleEvents(void)
       return BLE_CHECK_ERROR;
     }
   }
+  return BLE_SUCCESS;
 }
 
 /*
@@ -1022,8 +1034,10 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           ble.opcode = hciRsp->opcode;
           if (hciRsp->status == SNP_SUCCESS)
           {
-            asyncRspData = hciRsp->pData;
+            asyncRspData = hciRsp;
             Event_post(apEvent, AP_EVT_HCI_RSP);
+            Event_pend(apEvent, AP_NONE, AP_EVT_COPIED_ASYNC_DATA,
+                       AP_EVENT_PEND_TIMEOUT);
           }
           else
           {
@@ -1033,8 +1047,11 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
         case SNP_TEST_RSP:
         {
           snpTestCmdRsp_t *testRsp = (snpTestCmdRsp_t *) pParams;
-          asyncRspData = (uint8_t *) testRsp;
+          asyncRspData = testRsp;
           Event_post(apEvent, AP_EVT_TEST_RSP);
+          Event_pend(apEvent, AP_NONE, AP_EVT_COPIED_ASYNC_DATA,
+                     AP_EVENT_PEND_TIMEOUT);
+          // No status code in response
         } break;
         default:
           break;

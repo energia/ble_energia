@@ -107,7 +107,7 @@ class BLE : public Stream
     unsigned int getRand(void);
     void getRevision(BLE_Get_Revision_Rsp *getRevisionRsp);
     void getStatus(BLE_Get_Status_Rsp *getStatusRsp);
-    void testCommand(BLE_Test_Command_Rsp *testCommandRsp);
+    int testCommand(BLE_Test_Command_Rsp *testRsp);
 
     int serial(void);
     virtual int available(void);
