@@ -32,6 +32,7 @@ class BLE : public Stream
 
     bool authKeySet;
     uint32_t authKey;
+    int securityState;
 
     /* Call when using security and a display methd besides serial */
     displayStringFxn_t displayStringFxn;

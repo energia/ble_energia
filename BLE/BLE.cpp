@@ -42,6 +42,7 @@
 #define AP_EVT_NOTIF_IND_RSP                 Event_Id_10     // Notification/Indication Response
 #define AP_EVT_HANDLE_AUTH_EVT               Event_Id_11     // Set Authentication Data Request
 #define AP_EVT_AUTH_RSP                      Event_Id_12     // Set Authentication Data Response
+#define AP_EVT_SECURITY_STATE                Event_Id_13     // Set Authentication Data Response
 #define AP_ERROR                             Event_Id_31     // Error
 
 #define PIN6_7 35
@@ -1170,9 +1171,18 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
     // case SNP_ATT_MTU_EVT:
     // {
     // } break;
-    // case SNP_SECURITY_EVT:
-    // {
-    // } break;
+    case SNP_SECURITY_EVT:
+    {
+      snpSecurityEvt_t *evt = (snpSecurityEvt_t *) param;
+      ble.securityState = evt->state;
+      if (evt->status == SNP_SUCCESS) {
+        Event_post(apEvent, AP_EVT_SECURITY_STATE);
+      }
+      else
+      {
+        apPostError(evt->status);
+      }
+    } break;
     case SNP_AUTHENTICATION_EVT:
     {
       memcpy(&eventHandlerData, param, sizeof(eventHandlerData));
