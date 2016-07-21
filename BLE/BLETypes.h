@@ -76,6 +76,11 @@
 #define BLE_NO_INPUT_NO_OUTPUT                SAP_NO_INPUT_NO_OUTPUT // No Display or Input Device
 #define BLE_KEYBOARD_DISPLAY                  SAP_KEYBOARD_DISPLAY   // Both Keyboard and Display Capable
 
+/* Security States */
+#define BLE_SECURITY_STATE_COMPLETE   SNP_GAPBOND_PAIRING_STATE_COMPLETE   // Pairing complete
+#define BLE_SECURITY_STATE_BONDED     SNP_GAPBOND_PAIRING_STATE_BONDED     // Devices bonded
+#define BLE_SECURITY_STATE_BOND_SAVED SNP_GAPBOND_PAIRING_STATE_BOND_SAVED // Bonding record saved in NV
+
 // Minimum connection interval (units of 1.25ms, 6=7.5ms) if automatic
 // parameter update request is enabled
 #define BLE_DEF_DESIRED_MIN_CONN_INT     6
