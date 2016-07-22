@@ -475,7 +475,7 @@ uint8_t *hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData)
   snpHciCmdRsp_t hciCmdRsp;
   memcpy(&hciCmdRsp, asyncRspData, sizeof(hciCmdRsp));
   Event_post(apEvent, AP_EVT_COPIED_ASYNC_DATA);
-  return hciCmdRsp->pData; // TODO: does this get deallocated in NPI task?
+  return hciCmdRsp.pData; // TODO: does this get deallocated in NPI task?
 }
 
 /*
@@ -907,7 +907,7 @@ int BLE::testCommand(BLE_Test_Command_Rsp *testRsp)
   {
     return BLE_CHECK_ERROR;
   }
-  memcpy(testRsp, asyncRspData, sizeof(testRsp));
+  memcpy(testRsp, asyncRspData, sizeof(*testRsp));
   Event_post(apEvent, AP_EVT_COPIED_ASYNC_DATA);
   return BLE_SUCCESS;
 }
@@ -1034,7 +1034,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           ble.opcode = hciRsp->opcode;
           if (hciRsp->status == SNP_SUCCESS)
           {
-            asyncRspData = hciRsp;
+            asyncRspData = (snp_msg_t *) hciRsp;
             Event_post(apEvent, AP_EVT_HCI_RSP);
             Event_pend(apEvent, AP_NONE, AP_EVT_COPIED_ASYNC_DATA,
                        AP_EVENT_PEND_TIMEOUT);
@@ -1047,7 +1047,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
         case SNP_TEST_RSP:
         {
           snpTestCmdRsp_t *testRsp = (snpTestCmdRsp_t *) pParams;
-          asyncRspData = testRsp;
+          asyncRspData = (snp_msg_t *) testRsp;
           Event_post(apEvent, AP_EVT_TEST_RSP);
           Event_pend(apEvent, AP_NONE, AP_EVT_COPIED_ASYNC_DATA,
                      AP_EVENT_PEND_TIMEOUT);
