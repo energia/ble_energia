@@ -19,7 +19,7 @@
 #include "BLESerial.h"
 #include "BLEServiceList.h"
 #include "BLEServices.h"
-#include "Flags.h"
+#include "Debug.h"
 
 /*
  * Event_pend timeout set in units of ticks. Tick period is microseconds,
@@ -52,6 +52,28 @@
 
 // From bcomdef.h in the BLE SDK
 #define B_ADDR_LEN 6
+
+
+/* Macro abuse for setting up many pins for debug */
+#define DEBUG_FXN(pin, pinNum) \
+int isOutput##pin = 0; \
+void ping##pin(void) \
+{ \
+ if (!isOutput##pin) \
+ { \
+   pinMode(pinNum, OUTPUT); \
+   isOutput##pin = 1; \
+ } \
+ ping(pinNum); \
+}
+static void ping(int pin)
+{
+ digitalWrite(pin, HIGH);
+ digitalWrite(pin, LOW);
+}
+DEBUG_PINS_LIST
+#undef DEBUG_FXN
+/* End abuse */
 
 Event_Handle apEvent = NULL;
 snp_msg_t *asyncRspData = NULL;
