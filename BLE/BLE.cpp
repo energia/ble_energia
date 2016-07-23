@@ -49,6 +49,8 @@
 #define AP_ERROR                             Event_Id_31     // Error
 
 #define PIN6_7 35
+#define BLE_Board_MRDY 2  // Pin 6.0
+#define BLE_Board_SRDY 19 // Pin 2.5
 
 // From bcomdef.h in the BLE SDK
 #define B_ADDR_LEN 6
@@ -206,7 +208,9 @@ int BLE::begin(void)
 
   SAP_Params sapParams;
   SAP_initParams(_portType, &sapParams);
-  sapParams.port.remote.boardID = 1;
+  sapParams.port.remote.boardID = 1; // USB Serial is index 0
+  sapParams.port.remote.mrdyPinID = BLE_Board_MRDY;
+  sapParams.port.remote.srdyPinID = BLE_Board_SRDY;
   if (isError(SAP_open(&sapParams)))
   {
     SAP_close();
