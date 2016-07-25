@@ -250,12 +250,6 @@ int BLE::begin(void)
     }
   }
 
-  /*
-   * Events XORed with full mask are not sent from the SNP to the AP.
-   * This SAP API always returns success.
-   */
-  SAP_setSNPEventMask(SNP_ATT_MTU_EVT);
-
   return BLE_SUCCESS;
 }
 
@@ -312,6 +306,7 @@ int BLE::resetPublicMembers(void)
   memset(&bleAddr, 0, sizeof(bleAddr));
   authKeySet = false;
   authKey = 0;
+  mtu = 20;
   return BLE_SUCCESS;
 }
 
@@ -556,7 +551,6 @@ static uint8_t writeNotifInd(BLE_Char *bleChar)
     localReq.connHandle = _connHandle;
     localReq.attrHandle = bleChar->_handle;
     localReq.authenticate = 0;
-    localReq.pData = (uint8_t *) bleChar->_value;
     if (bleChar->_CCCD & SNP_GATT_CLIENT_CFG_NOTIFY)
     {
       localReq.type = SNP_SEND_NOTIFICATION;
@@ -565,16 +559,23 @@ static uint8_t writeNotifInd(BLE_Char *bleChar)
     {
       localReq.type = SNP_SEND_INDICATION;
     }
-    if (isError(SNP_RPC_sendNotifInd(&localReq, bleChar->_valueLen)))
+    uint16_t sent = 0;
+    while (sent < bleChar->_valueLen)
     {
-      return BLE_CHECK_ERROR;
-    }
-    // Only pend for confirmation of indication
-    else if ((bleChar->_CCCD & SNP_GATT_CLIENT_CFG_INDICATE) &&
-             !apEventPend(AP_EVT_NOTIF_IND_RSP))
-
-    {
-      return BLE_CHECK_ERROR;
+      /* Send at most ble.mtu per packet. */
+      uint16_t size = MIN(bleChar->_valueLen - sent, ble.mtu);
+      localReq.pData = ((uint8_t *) bleChar->_value) + sent;
+      if (isError(SNP_RPC_sendNotifInd(&localReq, size)))
+      {
+        return BLE_CHECK_ERROR;
+      }
+      // Only pend for confirmation of indication
+      else if ((bleChar->_CCCD & SNP_GATT_CLIENT_CFG_INDICATE) &&
+               !apEventPend(AP_EVT_NOTIF_IND_RSP))
+      {
+        return BLE_CHECK_ERROR;
+      }
+      sent += size;
     }
   }
   return BLE_SUCCESS;
@@ -670,7 +671,7 @@ int BLE::writeValue(BLE_Char *bleChar, int len, const char *str)
   {
     return BLE_CHECK_ERROR;
   }
-  strcpy((char *) bleChar->_value, str);
+  strcpy((char *) bleChar->_value, str); // includes null byte
   return writeNotifInd(bleChar);
 }
 
@@ -1223,13 +1224,11 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
         apPostError(evt->status);
       }
     } break;
-    /*
-     * Unused because value size handling in this library is agnostic of
-     * MTU (maximum transmission unit) size.
-     */
-    // case SNP_ATT_MTU_EVT:
-    // {
-    // } break;
+    case SNP_ATT_MTU_EVT:
+    {
+      snpATTMTUSizeEvt_t *evt = (snpATTMTUSizeEvt_t *) param;
+      ble.mtu = evt->attMtuSize - 3; // -3 for non-user data
+    } break;
     case SNP_SECURITY_EVT:
     {
       snpSecurityEvt_t *evt = (snpSecurityEvt_t *) param;
