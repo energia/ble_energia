@@ -82,14 +82,42 @@ void BLESerial_flush(void)
 /* Called in the NPI task when the GATT client writes data. */
 void BLESerial_clientWrite(uint16_t len, uint8_t *pData)
 {
-  // if the read index will be overwritten
-  if (rxWriteIndex < rxReadIndex && rxReadIndex < rxWriteIndex + len)
+  /* If larger than buffer only write the last part. */
+  if (BLE_SERIAL_BUFFER_SIZE < len)
   {
-    rxReadIndex = (rxWriteIndex + len) % BLE_SERIAL_BUFFER_SIZE;
+    pData += len - BLE_SERIAL_BUFFER_SIZE;
+    len = BLE_SERIAL_BUFFER_SIZE;
   }
-  for (uint8_t idx = 0; idx < len; idx++)
+
+  bool overwritesReadIdx = false;
+  /* Fits in buffer without wrapping. */
+  if (len < BLE_SERIAL_BUFFER_SIZE - rxWriteIndex)
   {
-    rxBuffer[rxWriteIndex] = pData[idx];
-    rxWriteIndex = (rxWriteIndex + 1) % BLE_SERIAL_BUFFER_SIZE;
+    memcpy(&rxBuffer[rxWriteIndex], pData, len);
+    /* If the read index was overwritten, move past end of
+       write to earliest valid data. */
+    if (rxWriteIndex < rxReadIndex && rxReadIndex < rxWriteIndex + len)
+    {
+      overwritesReadIdx = true;
+    }
+    rxWriteIndex += len;
+  }
+  /* Wraps end of buffer */
+  else
+  {
+    uint16_t firstLen = BLE_SERIAL_BUFFER_SIZE - rxWriteIndex;
+    uint16_t lastLen = (len - BLE_SERIAL_BUFFER_SIZE)
+    memcpy(&rxBuffer[rxWriteIndex], pData, firstLen);
+    memcpy(&rxBuffer[0], pData + firstLen, lastLen)
+    /* If the read index was overwritten, move past end of
+       write to earliest valid data. */
+    if (rxReadIndex < lastLen || rxWriteIndex < rxReadIndex)
+    {
+      overwritesReadIdx = true;
+    }
+  }
+  if (overwritesReadIdx)
+  {
+    rxReadIndex = (rxWriteIndex + len + 1) % BLE_SERIAL_BUFFER_SIZE;
   }
 }
