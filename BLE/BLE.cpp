@@ -666,7 +666,6 @@ int BLE::writeValue(BLE_Char *bleChar, double value)
  */
 int BLE::writeValue(BLE_Char *bleChar, int len, const char *str)
 {
-  bleChar->_resizable = true;
   if (isError(BLE_charValueInit(bleChar, (len+1)*sizeof(*str))))
   {
     return BLE_CHECK_ERROR;

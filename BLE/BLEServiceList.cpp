@@ -77,18 +77,10 @@ void BLE_resetCCCD(void)
 
 uint8_t BLE_charValueInit(BLE_Char *bleChar, size_t size)
 {
-  // Only go here when the value has been defined!
   if (bleChar->_valueLen != size && bleChar->_value)
   {
-    if (bleChar->_resizable)
-    {
-      free(bleChar->_value);
-      bleChar->_value = NULL;
-    }
-    else
-    {
-      return BLE_INVALID_PARAMETERS;
-    }
+    free(bleChar->_value);
+    bleChar->_value = NULL;
   }
   if (bleChar->_value == NULL)
   {
@@ -179,7 +171,7 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
   bleChar->_valueLen = 0;
   bleChar->_CCCD = 0;
   bleChar->_CCCDHandle = 0;
-  bleChar->_resizable = false;
+
   sapChar->UUID.len    = getUUIDLen(bleChar->UUID);
   sapChar->UUID.pUUID  = bleChar->UUID;
   sapChar->properties  = bleChar->properties;

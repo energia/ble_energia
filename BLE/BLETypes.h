@@ -116,7 +116,6 @@ typedef struct
   uint16_t          _valueLen;
   uint8_t           _CCCD;
   uint16_t          _CCCDHandle;
-  bool              _resizable;
 } BLE_Char;
 
 typedef struct
