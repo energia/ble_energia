@@ -155,13 +155,6 @@ static uint8_t aDIdxToType[] =
   BLE_ADV_DATA_SCANRSP
 };
 
-int flag0 = 0;
-int flag1 = 0;
-int flag2 = 0;
-int flag3 = 0;
-int flag4 = 0;
-int flag5 = 0;
-
 static uint8_t advertIndex(uint8_t advertType);
 static void AP_asyncCB(uint8_t cmd1, void *pParams);
 static uint8_t writeNotifInd(BLE_Char *bleChar);

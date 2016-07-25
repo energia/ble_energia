@@ -1,6 +1,5 @@
 
 #include <BLE.h>
-#define LED RED_LED
 
 byte char1Value = 0;
 int char2Value = 0;
@@ -53,15 +52,10 @@ void setup() {
   ble.writeValue(&char4, char4Value);
   ble.setAdvertName("Simple Profile");
   ble.startAdvert();
-  pinMode(LED, OUTPUT);
 }
 
 // the loop routine runs over and over again forever as a task.
 void loop() {
-  digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(500);               // wait for 100 ms
-  digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
-  delay(500);               // wait for 100 ms
   char1Value = ble.readValue_byte(&char1);
   Serial.print("char1Value=");Serial.println(char1Value);
   char2Value = ble.readValue_int(&char2);

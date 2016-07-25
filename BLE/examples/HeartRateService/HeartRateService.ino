@@ -1,6 +1,5 @@
 
 #include <BLE.h>
-#define LED RED_LED
 
 int heartRateMeasurement = 0;
 
@@ -26,15 +25,19 @@ void setup() {
   ble.writeValue(&heartRateChar, heartRateMeasurement);
   ble.setAdvertName("HeartRateService");
   ble.startAdvert();
-  pinMode(LED, OUTPUT);
 }
 
 void loop() {
-  digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(500);               // wait for 100 ms
-  digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
-  delay(500);               // wait for 100 ms
-  heartRateMeasurement += 1;
+  /* Handle any messages received from the communication layer. */
+  ble.handleEvents();
+
+  /* Update the measurement every second. */
+  if (millis() % 1000 == 0)
+  {
+    heartRateMeasurement += 1; // A little unrealistic
+  }
+
+  /* Register the new value with the BLE layer. */
   ble.writeValue(&heartRateChar, heartRateMeasurement);
   heartRateMeasurement = ble.readValue_int(&heartRateChar);
   Serial.print("heartRateMeasurement=");Serial.println(heartRateMeasurement);
