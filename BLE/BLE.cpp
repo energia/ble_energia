@@ -369,15 +369,17 @@ int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
 
   uint16_t reqSize;
   uint8_t *pData;
+  /* Declare these outside the if statements so they're in-scope
+     for SAP_setParam. */
+  uint8_t enableAdv = SAP_ADV_STATE_ENABLE;
+  snpStartAdvReq_t lReq;
   if (advertSettings == NULL)
   {
-    uint8_t enableAdv = SAP_ADV_STATE_ENABLE;
     reqSize = 1;
     pData = &enableAdv;
   }
   else
   {
-    snpStartAdvReq_t lReq;
     lReq.type = advertSettings->advertMode;
     lReq.timeout = advertSettings->timeout;
     lReq.interval = advertSettings->interval;
