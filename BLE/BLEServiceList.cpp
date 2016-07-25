@@ -35,10 +35,10 @@ int BLE_registerService(BLE_Service *bleService)
   constructService(service, bleService);
   int status = SAP_registerService(service);
   if (status != SNP_FAILURE) {
-    bleService->handle = service->serviceHandle;
+    bleService->_handle = service->serviceHandle;
     for (uint8_t i = 0; i < bleService->numChars; i++)
     {
-      bleService->chars[i]->handle = service->charAttrHandles[i].valueHandle;
+      bleService->chars[i]->_handle = service->charAttrHandles[i].valueHandle;
       bleService->chars[i]->_CCCDHandle = service->charAttrHandles[i].cccdHandle;
       if (service->charTable[i].pUserDesc)
       {
@@ -111,7 +111,7 @@ static BLE_Char* getChar(uint16_t handle)
   BLE_Service *service = getServiceWithChar(handle);
   for (uint8_t i = 0; i < service->numChars; i++)
   {
-    if (service->chars[i]->handle == handle)
+    if (service->chars[i]->_handle == handle)
     {
       return service->chars[i];
     }
@@ -135,16 +135,16 @@ static BLE_Char* getCCCD(uint16_t handle)
 static BLE_Service* getServiceWithChar(uint16_t handle)
 {
   BLE_Service_Node *curr = bleServiceListHead;
-  while (curr->next && curr->next->service->handle <= handle)
+  while (curr->next && curr->next->service->_handle <= handle)
   {
     curr = curr->next;
-  } // At end of loop, curr->service->handle <= handle < curr-next->service->handle
+  } // At end of loop, curr->service->_handle <= handle < curr-next->service->_handle
   return curr->service;
 }
 
 static void constructService(SAP_Service_t *service, BLE_Service *bleService)
 {
-  bleService->handle = 0;
+  bleService->_handle = 0;
   service->serviceUUID.len    = getUUIDLen(bleService->UUID);
   service->serviceUUID.pUUID  = bleService->UUID;
   service->serviceType        = SNP_PRIMARY_SERVICE;

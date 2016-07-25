@@ -111,7 +111,8 @@ typedef struct
   const char        *charDesc;
   unsigned char     valueFormat;
   unsigned char     valueExponent; // only used with integer formats, e.g. value = storedValue*10^valueExponent
-  unsigned int      handle;
+  /* Energia user should never need to touch these. */
+  uint16_t          _handle;
   void              *_value;
   uint16_t          _valueLen;
   uint8_t           _CCCD;
@@ -123,7 +124,8 @@ typedef struct
   unsigned char     UUID[16]; // array of UUID bytes
   unsigned int      numChars;
   BLE_Char          **chars;
-  uint16_t          handle;
+  /* Energia user should never need to touch these. */
+  uint16_t          _handle;
 } BLE_Service;
 
 typedef struct

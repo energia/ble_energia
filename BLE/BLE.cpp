@@ -554,7 +554,7 @@ static uint8_t writeNotifInd(BLE_Char *bleChar)
   {
     snpNotifIndReq_t localReq;
     localReq.connHandle = _connHandle;
-    localReq.attrHandle = bleChar->handle;
+    localReq.attrHandle = bleChar->_handle;
     localReq.authenticate = 0;
     localReq.pData = (uint8_t *) bleChar->_value;
     if (bleChar->_CCCD & SNP_GATT_CLIENT_CFG_NOTIFY)
