@@ -3,6 +3,7 @@
 #define BLE_TYPES_H
 
 #include <sap.h>
+#include "hal_defs.h"
 
 #include <Energia.h>
 

@@ -256,7 +256,7 @@ static uint8_t serviceReadAttrCB(void *context,
   {
     uint8_t *src = (uint8_t *) bleChar->_value + offset;
     uint16_t remaining = bleChar->_valueLen - offset;
-    *len = remaining < maxSize ? remaining : maxSize;
+    *len = MIN(remaining, maxSize);
     memcpy(pData, src, *len);
   }
   return status;
