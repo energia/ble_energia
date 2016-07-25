@@ -342,7 +342,7 @@ uint8_t BLE::advertDataInit(void)
 {
   for (uint8_t idx = 0; idx < MAX_ADVERT_IDX; idx++)
   {
-    if (advertDataArr[idx] == NULL && defADArr[idx] != NULL)
+    if (advertDataArr[idx] == NULL && defADArr[idx] != NULL && defADSizes[idx])
     {
       if (isError(setAdvertData(aDIdxToType[idx], defADSizes[idx],
                                 defADArr[idx])))
