@@ -166,10 +166,17 @@ static void constructService(SAP_Service_t *service, BLE_Service *bleService)
 
 static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
 {
-  bleChar->valueFormat = 0; // TO DO REMOVE THIS
-  bleChar->_value = NULL;
-  bleChar->_valueLen = 0;
+  /* TODO remove this. Bug in BLE stack makes this fail otherwise. */
+  bleChar->valueFormat = 0;
+
+  /* Initialize characteristic to have one byte with a value of 0.
+     Override by calling writeValue in the main sketch. */
+  bleChar->_value = calloc(1, 1);
+  bleChar->_valueLen = 1;
+
+  /* Default to no notifications or indications. */
   bleChar->_CCCD = 0;
+
   bleChar->_CCCDHandle = 0;
 
   sapChar->UUID.len    = getUUIDLen(bleChar->UUID);
