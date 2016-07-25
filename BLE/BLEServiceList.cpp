@@ -35,7 +35,7 @@ int BLE_registerService(BLE_Service *bleService)
   SAP_Service_t *service = (SAP_Service_t *) malloc(sizeof(*service));
   constructService(service, bleService);
   int status = SAP_registerService(service);
-  if (status != SNP_FAILURE && service->serviceHandle != 0) {
+  if (status != SNP_FAILURE) {
     bleService->handle = service->serviceHandle;
     for (uint8_t i = 0; i < bleService->numChars; i++)
     {
