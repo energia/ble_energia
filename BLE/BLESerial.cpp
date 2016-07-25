@@ -106,9 +106,9 @@ void BLESerial_clientWrite(uint16_t len, uint8_t *pData)
   else
   {
     uint16_t firstLen = BLE_SERIAL_BUFFER_SIZE - rxWriteIndex;
-    uint16_t lastLen = (len - BLE_SERIAL_BUFFER_SIZE)
+    uint16_t lastLen = (len - BLE_SERIAL_BUFFER_SIZE);
     memcpy(&rxBuffer[rxWriteIndex], pData, firstLen);
-    memcpy(&rxBuffer[0], pData + firstLen, lastLen)
+    memcpy(&rxBuffer[0], pData + firstLen, lastLen);
     /* If the read index was overwritten, move past end of
        write to earliest valid data. */
     if (rxReadIndex < lastLen || rxWriteIndex < rxReadIndex)
