@@ -37,8 +37,7 @@ int BLE_registerService(BLE_Service *bleService)
   int status = SAP_registerService(service);
   if (status != SNP_FAILURE && service->serviceHandle != 0) {
     bleService->handle = service->serviceHandle;
-    uint8_t i;
-    for (i = 0; i < bleService->numChars; i++)
+    for (uint8_t i = 0; i < bleService->numChars; i++)
     {
       bleService->chars[i]->handle = service->charAttrHandles[i].valueHandle;
       bleService->chars[i]->_CCCDHandle = service->charAttrHandles[i].cccdHandle;
@@ -68,8 +67,7 @@ void BLE_resetCCCD(void)
   BLE_Service_Node *curr = bleServiceListHead;
   while (curr)
   {
-    uint8_t i;
-    for (i = 0; i < curr->service->numChars; i++)
+    for (uint8_t i = 0; i < curr->service->numChars; i++)
     {
       curr->service->chars[i]->_CCCD = 0;
     }
@@ -120,8 +118,7 @@ static void addServiceNode(BLE_Service *service)
 static BLE_Char* getChar(uint16_t handle)
 {
   BLE_Service *service = getServiceWithChar(handle);
-  uint8_t i;
-  for (i = 0; i < service->numChars; i++)
+  for (uint8_t i = 0; i < service->numChars; i++)
   {
     if (service->chars[i]->handle == handle)
     {
@@ -134,8 +131,7 @@ static BLE_Char* getChar(uint16_t handle)
 static BLE_Char* getCCCD(uint16_t handle)
 {
   BLE_Service *service = getServiceWithChar(handle);
-  uint8_t i;
-  for (i = 0; i < service->numChars; i++)
+  for (uint8_t i = 0; i < service->numChars; i++)
   {
     if (service->chars[i]->_CCCDHandle == handle)
     {
@@ -170,8 +166,7 @@ static void constructService(SAP_Service_t *service, BLE_Service *bleService)
   service->cccdIndCallback    = serviceCCCDIndCB;
   service->charAttrHandles    = (SAP_CharHandle_t *) malloc(service->charTableLen *
                                                             sizeof(*service->charAttrHandles));
-  uint8_t i;
-  for (i = 0; i < bleService->numChars; i++)
+  for (uint8_t i = 0; i < bleService->numChars; i++)
   {
     constructChar(&service->charTable[i], bleService->chars[i]);
   }
@@ -228,8 +223,7 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
 
 static uint8_t getUUIDLen(uint8_t *UUID)
 {
-  uint8_t i;
-  for (i = SNP_16BIT_UUID_SIZE; i < SNP_128BIT_UUID_SIZE; i++)
+  for (uint8_t i = SNP_16BIT_UUID_SIZE; i < SNP_128BIT_UUID_SIZE; i++)
   {
     if (UUID[i] != 0)
     {
@@ -293,8 +287,7 @@ static uint8_t serviceWriteAttrCB(void *context,
     {
       rxReadIndex = (rxWriteIndex + len) % BLE_SERIAL_BUFFER_SIZE;
     }
-    uint8_t idx;
-    for (idx = 0; idx < len; idx++)
+    for (uint8_t idx = 0; idx < len; idx++)
     {
       rxBuffer[rxWriteIndex] = pData[idx];
       rxWriteIndex = (rxWriteIndex + 1) % BLE_SERIAL_BUFFER_SIZE;

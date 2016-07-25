@@ -167,8 +167,7 @@ static bool isError(uint8_t status);
 BLE::BLE(byte portType)
 {
   _portType = portType;
-  uint8_t idx;
-  for (idx = 0; idx < MAX_ADVERT_IDX; idx++) {advertDataArr[idx] = NULL;}
+  for (uint8_t idx = 0; idx < MAX_ADVERT_IDX; idx++) {advertDataArr[idx] = NULL;}
   displayStringFxn = NULL;
   displayUIntFxn = NULL;
   resetPublicMembers();
@@ -341,8 +340,7 @@ static uint8_t advertIndex(uint8_t advertType)
 
 uint8_t BLE::advertDataInit(void)
 {
-  uint8_t idx;
-  for (idx = 0; idx < MAX_ADVERT_IDX; idx++)
+  for (uint8_t idx = 0; idx < MAX_ADVERT_IDX; idx++)
   {
     if (advertDataArr[idx] == NULL && defADArr[idx] != NULL)
     {
