@@ -10,13 +10,13 @@ void setup() {
 }
 
 void loop() {
-  Serial.println(1);
   if (Serial.available())
   {
     ble.print(Serial.readString());
   }
   if (ble.available())
   {
+    /* All the Serial functions are available with BLE serial. */
     Serial.println(ble.readString());
   }
 }

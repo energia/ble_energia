@@ -34,12 +34,19 @@ BLE_Char char4 =
   "Characteristic 4"
 };
 
-BLE_Char *simpleServiceChars[] = {&char1, &char2, &char3, &char4};
+BLE_Char char5 =
+{
+  {0xF5, 0xFF},
+  BLE_READABLE,
+  "Characteristic 5"
+};
+
+BLE_Char *simpleServiceChars[] = {&char1, &char2, &char3, &char4, &char5};
 
 BLE_Service simpleService =
 {
   {0xF0, 0xFF},
-  4, simpleServiceChars
+  5, simpleServiceChars
 };
 
 void setup() {
