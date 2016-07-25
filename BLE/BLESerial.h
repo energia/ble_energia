@@ -2,18 +2,16 @@
 #ifndef BLESERIAL_H
 #define BLESERIAL_H
 
-#include <stddef.h>
-#include <stdint.h>
+#include "BLETypes.h"
 
-#define BLE_SERIAL_BUFFER_SIZE 128
-
-extern uint8_t rxBuffer[BLE_SERIAL_BUFFER_SIZE];
-extern volatile uint16_t rxWriteIndex;
-extern volatile uint16_t rxReadIndex;
+extern BLE_Char txChar;
+extern BLE_Char rxChar;
+extern BLE_Service serialService;
 
 int BLESerial_available(void);
 int BLESerial_read(void);
 int BLESerial_peek(void);
 void BLESerial_flush(void);
+void BLESerial_clientWrite(uint16_t len, uint8_t *pData);
 
 #endif

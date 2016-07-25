@@ -1,9 +1,38 @@
 
 #include "BLESerial.h"
 
+#define BLE_SERIAL_BUFFER_SIZE 128
+
 uint8_t rxBuffer[BLE_SERIAL_BUFFER_SIZE] = {0};
 volatile uint16_t rxWriteIndex = 0;
 volatile uint16_t rxReadIndex = 0;
+
+/* Nordic Semiconductor's UART Service */
+
+BLE_Char txChar =
+{
+  {0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0,
+   0x93, 0xF3, 0xA3, 0xB5, 0x03, 0x00, 0x40, 0x6E},
+  BLE_READABLE | BLE_NOTIFIABLE,
+  "Client RX"
+};
+
+BLE_Char rxChar =
+{
+  {0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0,
+   0x93, 0xF3, 0xA3, 0xB5, 0x02, 0x00, 0x40, 0x6E},
+  BLE_WRITABLE,
+  "Client TX"
+};
+
+BLE_Char *serialServiceChars[] = {&txChar, &rxChar};
+
+BLE_Service serialService =
+{
+  {0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0,
+   0x93, 0xF3, 0xA3, 0xB5, 0x01, 0x00, 0x40, 0x6E},
+  2, serialServiceChars
+};
 
 int BLESerial_available(void)
 {
@@ -48,4 +77,19 @@ void BLESerial_flush(void)
    */
   rxReadIndex = rxWriteIndex;
   return;
+}
+
+/* Called in the NPI task when the GATT client writes data. */
+void BLESerial_clientWrite(uint16_t len, uint8_t *pData)
+{
+  // if the read index will be overwritten
+  if (rxWriteIndex < rxReadIndex && rxReadIndex < rxWriteIndex + len)
+  {
+    rxReadIndex = (rxWriteIndex + len) % BLE_SERIAL_BUFFER_SIZE;
+  }
+  for (uint8_t idx = 0; idx < len; idx++)
+  {
+    rxBuffer[rxWriteIndex] = pData[idx];
+    rxWriteIndex = (rxWriteIndex + 1) % BLE_SERIAL_BUFFER_SIZE;
+  }
 }

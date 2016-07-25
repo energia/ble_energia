@@ -4,7 +4,6 @@
 
 #include "BLESerial.h"
 #include "BLEServiceList.h"
-#include "BLEServices.h"
 
 BLE_Service_Node *bleServiceListHead = NULL;
 BLE_Service_Node *bleServiceListTail = NULL;
@@ -181,11 +180,13 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
 
   sapChar->UUID.len    = getUUIDLen(bleChar->UUID);
   sapChar->UUID.pUUID  = bleChar->UUID;
+
   sapChar->properties  = bleChar->properties;
   sapChar->permissions = ((sapChar->properties & BLE_READABLE)
                             ? SNP_GATT_PERMIT_READ : 0)
                        | ((sapChar->properties & (BLE_WRITABLE_NORSP | BLE_WRITABLE))
                             ? SNP_GATT_PERMIT_WRITE : 0);
+
   if (bleChar->charDesc)
   {
     sapChar->pUserDesc = (SAP_UserDescAttr_t *) malloc(sizeof(*sapChar->pUserDesc));
@@ -281,16 +282,7 @@ static uint8_t serviceWriteAttrCB(void *context,
   }
   if (bleChar == &rxChar)
   {
-    // if the read index will be written over
-    if (rxWriteIndex < rxReadIndex && rxReadIndex < rxWriteIndex + len)
-    {
-      rxReadIndex = (rxWriteIndex + len) % BLE_SERIAL_BUFFER_SIZE;
-    }
-    for (uint8_t idx = 0; idx < len; idx++)
-    {
-      rxBuffer[rxWriteIndex] = pData[idx];
-      rxWriteIndex = (rxWriteIndex + 1) % BLE_SERIAL_BUFFER_SIZE;
-    }
+    BLESerial_clientWrite(len, pData);
   }
   return status;
 }

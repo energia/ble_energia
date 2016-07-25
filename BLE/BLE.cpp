@@ -932,9 +932,7 @@ int BLE::testCommand(BLE_Test_Command_Rsp *testRsp)
 
 int BLE::serial(void)
 {
-  if (isError(addService(&serialService)) ||
-      isError(writeValue(&txChar, "")) ||
-      isError(writeValue(&rxChar, "")))
+  if (isError(addService(&serialService)))
   {
     return BLE_CHECK_ERROR;
   }
