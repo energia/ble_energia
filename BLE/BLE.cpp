@@ -1013,17 +1013,22 @@ int BLE::handleEvents(void)
   return BLE_SUCCESS;
 }
 
+const char authKeyStr[] = "Auth key:";
+const char checkIfEqlStr[] = "Check if equal:";
+const char pressBtnStr[] = "Press button1 if equal, button2 if not.";
+
 int BLE::handleAuthKey(snpAuthenticationEvt_t *evt)
 {
   authKey = getRand() % 1000000;
   if (displayStringFxn && displayUIntFxn)
   {
-    displayStringFxn("Auth key:");
+    displayStringFxn(authKeyStr);
     displayUIntFxn(authKey);
+    displayStringFxn("\n");
   }
   else if (Serial)
   {
-    Serial.print("Auth key:");
+    Serial.print(authKeyStr);
     Serial.println(authKey);
   }
   if (evt->input)
@@ -1041,23 +1046,25 @@ void BLE::handleNumCmp(snpAuthenticationEvt_t *evt)
 {
   if (displayStringFxn && displayUIntFxn)
   {
-    displayStringFxn("Check if equal:");
+    displayStringFxn(checkIfEqlStr);
     displayUIntFxn(evt->numCmp);
+    displayStringFxn("\n");
   }
   else if (Serial)
   {
-    Serial.print("Check if equal:");
+    Serial.print(checkIfEqlStr);
     Serial.println(evt->numCmp);
   }
   if (evt->input)
   {
     if (displayStringFxn && displayUIntFxn)
     {
-      displayStringFxn("Press button1 if equal, button2 if not.");
+      displayStringFxn(pressBtnStr);
+      displayStringFxn("\n");
     }
     else if (Serial)
     {
-      Serial.print("Press button1 if equal, button2 if not.");
+      Serial.println(pressBtnStr);
     }
     pinMode(PUSH1, INPUT_PULLUP);
     attachInterrupt(PUSH1, numCmpInterrupt1, FALLING);
