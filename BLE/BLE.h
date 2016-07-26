@@ -11,7 +11,6 @@ class BLE : public Stream
   private:
     uint8_t _portType; // UART or SPI connection with network processor
     uint8_t *advertDataArr[MAX_ADVERT_IDX];
-    uint8_t logLevel;
 
     int resetPublicMembers(void);
     uint8_t advertDataInit(void);
@@ -115,13 +114,6 @@ class BLE : public Stream
     int testCommand(BLE_Test_Command_Rsp *testRsp);
 
     void setLogLevel(uint8_t newLogLevel);
-    void logError(const char msg[]);
-    void logRPC(const char msg[]);
-    void logAsync(const char name[], uint8_t cmd1);
-    void logAsyncParam(const char name[], int value);
-    void logSync(uint8_t cmd1);
-    void logChar(const char msg[]);
-    void logState(const char msg[]);
 
     int serial(void);
     virtual int available(void);
