@@ -482,7 +482,7 @@ int BLE::getGapParam(uint16_t paramId, uint16_t *value)
                       sizeof(*value), (uint8_t *) value);
 }
 
-uint8_t *hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData)
+uint8_t *BLE::hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData)
 {
   if (isError(SAP_getParam(SAP_PARAM_HCI, opcode, len, pData)) ||
       !apEventPend(AP_EVT_HCI_RSP))
