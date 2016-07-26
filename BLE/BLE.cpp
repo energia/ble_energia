@@ -1095,14 +1095,17 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
       {
         case SNP_POWER_UP_IND:
         {
+          ble.logAsync("SNP_POWER_UP_IND", cmd1);
           // Notify state machine of Power Up Indication
           // Log_info0("Got PowerUp indication from NP");
           Event_post(apEvent, AP_EVT_PUI);
         } break;
         case SNP_HCI_CMD_RSP:
         {
+          ble.logAsync("SNP_HCI_CMD_RSP", cmd1);
           snpHciCmdRsp_t *hciRsp = (snpHciCmdRsp_t *) pParams;
           ble.opcode = hciRsp->opcode;
+          ble.logAsyncParam("opcode", hciRsp->opcode);
           if (hciRsp->status == SNP_SUCCESS)
           {
             asyncRspData = (snp_msg_t *) hciRsp;
@@ -1117,8 +1120,12 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
         } break;
         case SNP_TEST_RSP:
         {
+          ble.logAsync("SNP_TEST_RSP", cmd1);
           snpTestCmdRsp_t *testRsp = (snpTestCmdRsp_t *) pParams;
           asyncRspData = (snp_msg_t *) testRsp;
+          ble.logAsyncParam("memAlo", testRsp->memAlo);
+          ble.logAsyncParam("memMax", testRsp->memMax);
+          ble.logAsyncParam("memSize", testRsp->memSize);
           Event_post(apEvent, AP_EVT_TEST_RSP);
           Event_pend(apEvent, AP_NONE, AP_EVT_COPIED_ASYNC_DATA,
                      AP_EVENT_PEND_TIMEOUT);
@@ -1134,6 +1141,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
       {
         case SNP_SET_ADV_DATA_CNF:
         {
+          ble.logAsync("SNP_SET_ADV_DATA_CNF", cmd1);
           snpSetAdvDataCnf_t *advDataRsp = (snpSetAdvDataCnf_t *) pParams;
           if (advDataRsp->status == SNP_SUCCESS)
           {
@@ -1147,6 +1155,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
         // Just a confirmation that the request update was sent.
         case SNP_UPDATE_CONN_PARAM_CNF:
         {
+          ble.logAsync("SNP_UPDATE_CONN_PARAM_CNF", cmd1);
           snpUpdateConnParamCnf_t *connRsp =
             (snpUpdateConnParamCnf_t *) pParams;
           if (connRsp->status == SNP_SUCCESS)
@@ -1160,6 +1169,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
         } break;
         case SNP_SET_SECURITY_PARAM_RSP:
         {
+          ble.logAsync("SNP_SET_SECURITY_PARAM_RSP", cmd1);
           snpSetSecParamRsp_t *securityParamRsp = (snpSetSecParamRsp_t *) pParams;
           if (securityParamRsp->status == SNP_SUCCESS)
           {
@@ -1172,6 +1182,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
         } break;
         case SNP_SEND_AUTHENTICATION_DATA_RSP:
         {
+          ble.logAsync("SNP_SEND_AUTHENTICATION_DATA_RSP", cmd1);
           snpSetAuthDataRsp_t *authRsp = (snpSetAuthDataRsp_t *) pParams;
           if (authRsp->status == SNP_SUCCESS)
           {
@@ -1184,6 +1195,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
         }
         case SNP_SET_WHITE_LIST_POLICY_RSP:
         {
+          ble.logAsync("SNP_SET_WHITE_LIST_POLICY_RSP", cmd1);
           snpSetWhiteListRsp_t *whiteListRsp = (snpSetWhiteListRsp_t *) pParams;
           if (whiteListRsp->status == SNP_SUCCESS)
           {
@@ -1204,6 +1216,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
       {
         case SNP_SEND_NOTIF_IND_CNF:
         {
+          ble.logAsync("SNP_SEND_NOTIF_IND_CNF", cmd1);
           snpNotifIndCnf_t *notifIndRsp = (snpNotifIndCnf_t *) pParams;
           if (notifIndRsp->status == SNP_SUCCESS)
           {
@@ -1223,31 +1236,49 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
   }
 }
 
-static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
+static void processSNPEventCB(uint16_t cmd1, snpEventParam_t *param)
 {
   ble.error = BLE_SUCCESS;
-  switch (event)
+  switch (cmd1)
   {
     case SNP_CONN_EST_EVT:
     {
+      ble.logAsync("SNP_CONN_EST_EVT", cmd1);
       snpConnEstEvt_t *evt = (snpConnEstEvt_t *) param;
       _connHandle                           = evt->connHandle;
       ble.usedConnParams.connInterval       = evt->connInterval;
       ble.usedConnParams.slaveLatency       = evt->slaveLatency;
       ble.usedConnParams.supervisionTimeout = evt->supervisionTimeout;
+      ble.logAsyncParam("connInterval", evt->connInterval);
+      ble.logAsyncParam("slaveLatency", evt->slaveLatency);
+      ble.logAsyncParam("supervisionTimeout", evt->supervisionTimeout);
       memcpy(&ble.bleAddr, &(evt->pAddr), sizeof(evt->pAddr));
       connected = true;
       Event_post(apEvent, AP_EVT_CONN_EST);
     } break;
     case SNP_CONN_TERM_EVT:
     {
+      ble.logAsync("SNP_CONN_TERM_EVT", cmd1);
       connected = false;
       Event_post(apEvent, AP_EVT_CONN_TERM);
       BLE_resetCCCD();
     } break;
     case SNP_CONN_PARAM_UPDATED_EVT:
     {
+      ble.logAsync("SNP_CONN_PARAM_UPDATED_EVT", cmd1);
       snpUpdateConnParamEvt_t *evt = (snpUpdateConnParamEvt_t *) param;
+      if (ble.usedConnParams.connInterval != evt->connInterval)
+      {
+        ble.logAsyncParam("connInterval", evt->connInterval);
+      }
+      if (ble.usedConnParams.slaveLatency != evt->slaveLatency)
+      {
+        ble.logAsyncParam("slaveLatency", evt->slaveLatency);
+      }
+      if (ble.usedConnParams.supervisionTimeout != evt->supervisionTimeout)
+      {
+        ble.logAsyncParam("supervisionTimeout", evt->supervisionTimeout);
+      }
       ble.usedConnParams.connInterval       = evt->connInterval;
       ble.usedConnParams.slaveLatency       = evt->slaveLatency;
       ble.usedConnParams.supervisionTimeout = evt->supervisionTimeout;
@@ -1255,6 +1286,7 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
     } break;
     case SNP_ADV_STARTED_EVT:
     {
+      ble.logAsync("SNP_ADV_STARTED_EVT", cmd1);
       snpAdvStatusEvt_t *evt = (snpAdvStatusEvt_t *) param;
       if (evt->status == SNP_SUCCESS)
       {
@@ -1268,6 +1300,7 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
     } break;
     case SNP_ADV_ENDED_EVT:
     {
+      ble.logAsync("SNP_ADV_ENDED_EVT", cmd1);
       snpAdvStatusEvt_t *evt = (snpAdvStatusEvt_t *) param;
       if (evt->status == SNP_SUCCESS) {
         advertising = false;
@@ -1280,13 +1313,17 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
     } break;
     case SNP_ATT_MTU_EVT:
     {
+      ble.logAsync("SNP_ATT_MTU_EVT", cmd1);
       snpATTMTUSizeEvt_t *evt = (snpATTMTUSizeEvt_t *) param;
       ble.mtu = evt->attMtuSize - 3; // -3 for non-user data
+      ble.logAsyncParam("mtu", ble.mtu);
     } break;
     case SNP_SECURITY_EVT:
     {
+      ble.logAsync("SNP_SECURITY_EVT", cmd1);
       snpSecurityEvt_t *evt = (snpSecurityEvt_t *) param;
       ble.securityState = evt->state;
+      ble.logAsyncParam("state", evt->state);
       if (evt->status == SNP_SUCCESS) {
         Event_post(apEvent, AP_EVT_SECURITY_STATE);
       }
@@ -1297,11 +1334,13 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param)
     } break;
     case SNP_AUTHENTICATION_EVT:
     {
+      ble.logAsync("SNP_AUTHENTICATION_EVT", cmd1);
       memcpy(&eventHandlerData, param, sizeof(eventHandlerData));
       Event_post(apEvent, AP_EVT_HANDLE_AUTH_EVT);
     } break;
     case SNP_ERROR_EVT:
     {
+      ble.logAsync("SNP_ERROR_EVT", cmd1);
       snpErrorEvt_t *evt = (snpErrorEvt_t *) param;
       ble.opcode = evt->opcode;
       apPostError(evt->status);
@@ -1363,4 +1402,78 @@ static bool isError(uint8_t status)
     return true;
   }
   return false;
+}
+
+void BLE::setLogLevel(uint8_t newLogLevel)
+{
+  logLevel = newLogLevel;
+}
+
+void BLE::logError(const char msg[])
+{
+  if (ble.logLevel & BLE_LOG_ERRORS)
+  {
+
+  }
+}
+
+void BLE::logRPC(const char msg[])
+{
+  if (ble.logLevel & BLE_LOG_SENT_MSGS)
+  {
+
+  }
+}
+
+void BLE::logAsync(const char name[], uint8_t cmd1)
+{
+  if (ble.logLevel & BLE_LOG_REC_MSGS)
+  {
+    Serial.print("Rec msg 0x");
+    if (cmd1 < 0x10)
+    {
+      Serial.print("0");
+    }
+    Serial.print(cmd1, HEX);
+    Serial.print(":");
+    Serial.println(name);
+    if (cmd1 == SNP_SET_ADV_DATA_CNF)
+    {
+      Serial.println("Bug->double evt");
+    }
+  }
+}
+
+void BLE::logAsyncParam(const char name[], int value)
+{
+  if (ble.logLevel & BLE_LOG_REC_MSGS)
+  {
+    Serial.print("  ");
+    Serial.print(name);
+    Serial.print(":");
+    Serial.println(value);
+  }
+}
+
+void BLE::logSync(uint8_t cmd1)
+{
+  if (ble.logLevel & BLE_LOG_REC_MSGS)
+  {
+  }
+}
+
+void BLE::logChar(const char msg[])
+{
+  if (ble.logLevel & BLE_LOG_CHARACTERISTICS)
+  {
+
+  }
+}
+
+void BLE::logState(const char msg[])
+{
+  if (ble.logLevel & BLE_LOG_STATE)
+  {
+
+  }
 }

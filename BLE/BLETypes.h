@@ -21,6 +21,17 @@
 #define BLE_TIMEOUT                    0x54
 #define BLE_CHECK_ERROR                0x55
 
+/* Log Levels */
+#define BLE_LOG_NONE                   0x00
+#define BLE_LOG_ERRORS                 0x01
+#define BLE_LOG_SENT_MSGS              0x02
+#define BLE_LOG_REC_MSGS               0x04
+#define BLE_LOG_SYNC_CMDS              0x08
+#define BLE_LOG_MSGS (BLE_LOG_SENT_MSGS | BLE_LOG_REC_MSGS | BLE_LOG_SYNC_CMDS)
+#define BLE_LOG_CHARACTERISTICS        0x10
+#define BLE_LOG_STATE                  0x20
+#define BLE_LOG_ALL                    0xFF
+
 /* Type of connection between the user application's
    processor and the bluetooth chip */
 #define BLE_PORT_LOCAL                 SAP_PORT_LOCAL // unsupported
@@ -64,10 +75,10 @@
 /*
  * Security Parameters
  */
-/* Security Mode */
-#define BLE_SECURITY_NONE                      SAP_SECURITY_NONE
-#define BLE_SECURITY_WAIT_FOR_REQUEST          SAP_SECURITY_WAIT_FOR_REQUEST
-#define BLE_SECURITY_INITIATE_UPON_CONNECTION  SAP_SECURITY_INITIATE_UPON_CONNECTION
+/* Security Pairing Modes */
+#define BLE_SECURITY_NONE                      SAP_SECURITY_NONE                     // 0x00
+#define BLE_SECURITY_WAIT_FOR_REQUEST          SAP_SECURITY_WAIT_FOR_REQUEST         // 0x01
+#define BLE_SECURITY_INITIATE_UPON_CONNECTION  SAP_SECURITY_INITIATE_UPON_CONNECTION // 0x02
 
 /* Security IO Capabilities */
 #define BLE_DISPLAY_ONLY               SAP_DISPLAY_ONLY       // Display Only Device
@@ -81,7 +92,7 @@
 #define BLE_SECURITY_STATE_BONDED      SNP_GAPBOND_PAIRING_STATE_BONDED     // Devices bonded
 #define BLE_SECURITY_STATE_BOND_SAVED  SNP_GAPBOND_PAIRING_STATE_BOND_SAVED // Bonding record saved in NV
 
-/* Whitelist Parameters */
+/* Whitelist Policy, parameters set with HCI commands */
 #define BLE_WHITELIST_DISABLE          SAP_WHITELIST_DISABLE // Enable White List usage
 #define BLE_WHITELIST_ENABLE           SAP_WHITELIST_ENABLE  // Disable White List usage
 

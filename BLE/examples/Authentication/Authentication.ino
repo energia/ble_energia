@@ -20,6 +20,7 @@ BLE_Service heartRateService =
 
 void setup() {
   Serial.begin(115200);
+  ble.setLogLevel(BLE_LOG_ALL);
   ble.begin();
   ble.addService(&heartRateService);
   ble.writeValue(&heartRateChar, heartRateMeasurement);
