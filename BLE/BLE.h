@@ -103,9 +103,9 @@ class BLE : public Stream
 
     int setPairingMode(uint8_t param);
     int setIoCapabilities(uint8_t param);
-    int useBonding(uint8_t param);
+    int useBonding(bool param);
     int eraseAllBonds(void);
-    int replaceLruBond(uint8_t param);
+    int replaceLruBond(bool param);
     int sendSecurityRequest(void);
     int setWhiteListPolicy(uint8_t policy);
 

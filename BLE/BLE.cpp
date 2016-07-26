@@ -874,9 +874,9 @@ int BLE::setIoCapabilities(uint8_t param)
   return setSecurityParam(SAP_SECURITY_IOCAPS, 1, &param);
 }
 
-int BLE::useBonding(uint8_t param)
+int BLE::useBonding(bool param)
 {
-  return setSecurityParam(SAP_SECURITY_BONDING, 1, &param);
+  return setSecurityParam(SAP_SECURITY_BONDING, 1, (uint8_t*) &param);
 }
 
 int BLE::eraseAllBonds(void)
@@ -884,9 +884,9 @@ int BLE::eraseAllBonds(void)
   return setSecurityParam(SAP_ERASE_ALL_BONDS, 0, NULL);
 }
 
-int BLE::replaceLruBond(uint8_t param)
+int BLE::replaceLruBond(bool param)
 {
-  return setSecurityParam(SAP_ERASE_LRU_BOND, 1, &param);
+  return setSecurityParam(SAP_ERASE_LRU_BOND, 1, (uint8_t*) &param);
 }
 
 int BLE::sendSecurityRequest(void)
