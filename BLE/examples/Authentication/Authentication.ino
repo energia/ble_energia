@@ -26,7 +26,7 @@ void setup() {
   ble.setAdvertName("Energia BLE");
   ble.startAdvert();
   ble.setPairingMode(BLE_SECURITY_WAIT_FOR_REQUEST);
-  ble.setIoCapabilities(BLE_DISPLAY_ONLY);
+  ble.setIoCapabilities(BLE_DISPLAY_YES_NO);
   ble.useBonding(true);
 }
 

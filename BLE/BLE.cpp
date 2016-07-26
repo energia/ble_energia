@@ -44,6 +44,7 @@
 #define AP_EVT_SECURITY_STATE                Event_Id_13     // Security State Changed
 #define AP_EVT_SECURITY_PARAM_RSP            Event_Id_14     // Set Security Param Response
 #define AP_EVT_WHITE_LIST_RSP                Event_Id_15     // Set White List Policy Response
+#define AP_EVT_NUM_CMP_BTN                   Event_Id_16     // Numeric Comparison Button Press
 #define AP_EVT_COPIED_ASYNC_DATA             Event_Id_30     // Copied Data From asyncRspData
 #define AP_ERROR                             Event_Id_31     // Error
 
@@ -161,6 +162,8 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams);
 static uint8_t writeNotifInd(BLE_Char *bleChar);
 static uint8_t readValueValidateSize(BLE_Char *bleChar, size_t size);
 static void processSNPEventCB(uint16_t event, snpEventParam_t *param);
+static void numCmpInterrupt1(void);
+static void numCmpInterrupt2(void);
 static bool apEventPend(uint32_t event);
 static inline void apPostError(uint8_t status);
 static bool isError(uint8_t status);
@@ -308,18 +311,6 @@ bool BLE::isConnected(void)
 bool BLE::isAdvertising(void)
 {
   return advertising;
-}
-
-int BLE::resetPublicMembers(void)
-{
-  error = BLE_SUCCESS;
-  opcode = 0;
-  memset(&usedConnParams, 0, sizeof(usedConnParams));
-  memset(&bleAddr, 0, sizeof(bleAddr));
-  authKeySet = false;
-  authKey = 0;
-  mtu = 20;
-  return BLE_SUCCESS;
 }
 
 int BLE::addService(BLE_Service *bleService)
@@ -992,42 +983,27 @@ size_t BLE::write(const uint8_t *buffer, size_t size)
 
 int BLE::handleEvents(void)
 {
-  uint32_t postedEvent = Event_pend(apEvent, AP_NONE, AP_EVT_HANDLE_AUTH_EVT, 1);
-  if (postedEvent & AP_EVT_HANDLE_AUTH_EVT)
+  uint32_t events = AP_EVT_HANDLE_AUTH_EVT | AP_EVT_NUM_CMP_BTN;
+  uint32_t opcode = Event_pend(apEvent, AP_NONE, events, 1);
+  if (opcode & AP_EVT_HANDLE_AUTH_EVT)
   {
     snpAuthenticationEvt_t *evt = (snpAuthenticationEvt_t *) &eventHandlerData;
-    if (evt->display || evt->input)
+    if (evt->numCmp)
     {
-      authKey = getRand() % 1000000;
-      authKeySet = true;
-      if (evt->display)
+      handleNumCmp(evt);
+    }
+    else if (evt->display)
+    {
+      if (isError(handleAuthKey(evt)))
       {
-        if (displayStringFxn && displayUIntFxn)
-        {
-          displayStringFxn("Auth key:");
-          displayUIntFxn(authKey);
-        }
-        else if (Serial)
-        {
-          Serial.print("Auth key:");
-          Serial.println(authKey);
-        }
+        return BLE_CHECK_ERROR;
       }
     }
-    else if (evt->numCmp)
-    {
-      // TODO
-      if (displayStringFxn && displayUIntFxn)
-      {
-        displayStringFxn("Left btn if eql; right else");
-        displayUIntFxn(evt->numCmp);
-      }
-      else if (Serial)
-      {
-        Serial.print("Left btn if eql; right else");
-        Serial.println(evt->numCmp);
-      }
-    }
+  }
+  if (opcode & AP_EVT_NUM_CMP_BTN)
+  {
+    detachInterrupt(PUSH1);
+    detachInterrupt(PUSH2);
     if (isError(SAP_setAuthenticationRsp(authKey)) ||
         !apEventPend(AP_EVT_AUTH_RSP))
     {
@@ -1035,6 +1011,72 @@ int BLE::handleEvents(void)
     }
   }
   return BLE_SUCCESS;
+}
+
+int BLE::handleAuthKey(snpAuthenticationEvt_t *evt)
+{
+  authKey = getRand() % 1000000;
+  if (displayStringFxn && displayUIntFxn)
+  {
+    displayStringFxn("Auth key:");
+    displayUIntFxn(authKey);
+  }
+  else if (Serial)
+  {
+    Serial.print("Auth key:");
+    Serial.println(authKey);
+  }
+  if (evt->input)
+  {
+    if (isError(SAP_setAuthenticationRsp(authKey)) ||
+      !apEventPend(AP_EVT_AUTH_RSP))
+    {
+      return BLE_CHECK_ERROR;
+    }
+  }
+  return BLE_SUCCESS;
+}
+
+void BLE::handleNumCmp(snpAuthenticationEvt_t *evt)
+{
+  if (displayStringFxn && displayUIntFxn)
+  {
+    displayStringFxn("Check if equal:");
+    displayUIntFxn(evt->numCmp);
+  }
+  else if (Serial)
+  {
+    Serial.print("Check if equal:");
+    Serial.println(evt->numCmp);
+  }
+  if (evt->input)
+  {
+    if (displayStringFxn && displayUIntFxn)
+    {
+      displayStringFxn("Press button1 if equal, button2 if not.");
+    }
+    else if (Serial)
+    {
+      Serial.print("Press button1 if equal, button2 if not.");
+    }
+    pinMode(PUSH1, INPUT_PULLUP);
+    attachInterrupt(PUSH1, numCmpInterrupt1, FALLING);
+    pinMode(PUSH2, INPUT_PULLUP);
+    attachInterrupt(PUSH2, numCmpInterrupt2, FALLING);
+  }
+}
+
+/* Send true if numbers are equal, false if different */
+static void numCmpInterrupt1(void)
+{
+  ble.authKey = 1;
+  Event_post(apEvent, AP_EVT_NUM_CMP_BTN);
+}
+
+static void numCmpInterrupt2(void)
+{
+  ble.authKey = 0;
+  Event_post(apEvent, AP_EVT_NUM_CMP_BTN);
 }
 
 /*

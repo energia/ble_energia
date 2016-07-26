@@ -19,6 +19,8 @@ class BLE : public Stream
     int writeValue(BLE_Char *bleChar, int len, const char *str);
     int writeValue(BLE_Char *bleChar, const uint8_t *str);
     int setSecurityParam(uint16_t paramID, uint16_t len, uint8_t *pData);
+    int handleAuthKey(snpAuthenticationEvt_t *evt);
+    void handleNumCmp(snpAuthenticationEvt_t *evt);
 
   public:
     int error; // Set to BLE_SUCCESS before conditionally setting
@@ -31,7 +33,6 @@ class BLE : public Stream
     BLE_Conn_Params usedConnParams;
     uint8_t bleAddr[6];
 
-    bool authKeySet;
     uint32_t authKey;
     int securityState;
 
