@@ -84,8 +84,8 @@ snpEventParam_t eventHandlerData;
 
 /* Here instead of private class members so static callbacks can write them */
 uint16_t _connHandle = -1;
-bool connected;
-bool advertising;
+bool connected = false;
+bool advertising = false;
 
 BLE ble = BLE();
 
