@@ -8,7 +8,6 @@
 #include <sap.h>
 #include <snp.h>
 #include <snp_rpc.h>
-#include <hal_defs.h>
 /*
  * This is strictly to force the build system to compile npi into
  * its own object files for the linker to link. It isn't used here.
@@ -80,6 +79,8 @@ DEBUG_PINS_LIST
 Event_Handle apEvent = NULL;
 snp_msg_t *asyncRspData = NULL;
 snpEventParam_t eventHandlerData;
+
+/* Here instead of private class members so static callbacks can write them */
 uint16_t _connHandle = -1;
 bool connected;
 bool advertising;
@@ -274,6 +275,17 @@ int BLE::end(void)
   // SAP_reset();
   // SAP_close();
   return BLE_NOT_IMPLEMENTED;
+}
+
+int BLE::resetPublicMembers(void)
+{
+  error = BLE_SUCCESS;
+  opcode = 0;
+  memset(&usedConnParams, 0, sizeof(usedConnParams));
+  memset(&bleAddr, 0, sizeof(bleAddr));
+  authKey = 0;
+  mtu = 20;
+  return BLE_SUCCESS;
 }
 
 int BLE::terminateConn(void)
