@@ -3,9 +3,11 @@
 #define BLE_LOG_H
 
 #include "BLETypes.h"
+#include <ti/sysbios/knl/Task.h>
 
 extern uint8_t logLevel;
-extern uint8_t logLast;
+extern bool apLogLock; // AP owns logging if true
+extern Task_Handle apTask;
 
 void logParam(const char name[], int value);
 void logParam(const char name[], int value, int base);

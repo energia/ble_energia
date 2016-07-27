@@ -191,6 +191,7 @@ int BLE::begin(void)
 
   /* AP_init() in simple_ap.c */
   apEvent = Event_create(NULL, NULL);
+  apTask = Task_self();
 
   /*
    * Use this to do something at the application level on a write or
@@ -1009,8 +1010,10 @@ size_t BLE::write(const uint8_t *buffer, size_t size)
 
 int BLE::handleEvents(void)
 {
+  apLogLock = false;
   uint32_t events = AP_EVT_HANDLE_AUTH_EVT | AP_EVT_NUM_CMP_BTN;
-  uint32_t opcode = Event_pend(apEvent, AP_NONE, events, 1);
+  opcode = Event_pend(apEvent, AP_NONE, events, 1);
+  int status = BLE_SUCCESS;
   if (opcode & AP_EVT_HANDLE_AUTH_EVT)
   {
     snpAuthenticationEvt_t *evt = (snpAuthenticationEvt_t *) &eventHandlerData;
@@ -1022,7 +1025,7 @@ int BLE::handleEvents(void)
     {
       if (isError(handleAuthKey(evt)))
       {
-        return BLE_CHECK_ERROR;
+        status = BLE_CHECK_ERROR;
       }
     }
   }
@@ -1033,10 +1036,11 @@ int BLE::handleEvents(void)
     if (isError(SAP_setAuthenticationRsp(authKey)) ||
         !apEventPend(AP_EVT_AUTH_RSP))
     {
-      return BLE_CHECK_ERROR;
+      status = BLE_CHECK_ERROR;
     }
   }
-  return BLE_SUCCESS;
+  apLogLock = true;
+  return status;
 }
 
 const char authKeyStr[] = "Auth key:";

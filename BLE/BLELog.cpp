@@ -1,14 +1,26 @@
 
 #include "BLELog.h"
 
-#include <ti/sysbios/knl/Task.h>
+#define ACQUIRE_TIMEOUT 50 // ms
 
-#define ACQUIRE_TIMEOUT 100 // ms
-
+/* Bit mask that determines what is logged. */
 uint8_t logLevel = 0;
-uint8_t logLast = 0;
 
+/* Prevents competition with the Energia user's Serial calls */
+bool apLogLock = false;
+
+/* Used to determine if caller is the Energia sketch task. */
+Task_Handle apTask = NULL;
+
+/* Prevents simultaneous logging, but not other Serial calls. */
 uint8_t logLock = 0;
+
+/* Indicates when another task wants to log. If set when logRelease
+   is called, yields to another task. */
+bool logLockReq = false;
+
+/* The last log mode called; used for followup calls. */
+uint8_t logLast = 0x00;
 
 static void logAcquire(void);
 static void logRelease(void);
@@ -130,9 +142,23 @@ void logState(const char msg[])
 static void logAcquire(void)
 {
   uint32_t startTime = millis();
-  while (logLock && (millis() - startTime < ACQUIRE_TIMEOUT))
+  if (Task_self() == apTask)
   {
-    Task_yield();
+    while (logLock &&
+           (millis() - startTime < ACQUIRE_TIMEOUT))
+    {
+      Task_yield();
+    }
+  }
+  else // NPI Task
+  {
+    while ((apLogLock || logLock) &&
+           (millis() - startTime < ACQUIRE_TIMEOUT))
+    {
+      logLockReq = true;
+      Task_yield();
+      logLockReq = false;
+    }
   }
   logLock++;
 }
@@ -140,4 +166,11 @@ static void logAcquire(void)
 static void logRelease(void)
 {
   logLock--;
+  while (logLockReq)
+  {
+    bool apLogLockSaved = apLogLock;
+    apLogLock = false;
+    Task_yield();
+    apLogLock = apLogLockSaved;
+  }
 }
