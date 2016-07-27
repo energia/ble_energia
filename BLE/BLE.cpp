@@ -464,11 +464,7 @@ int BLE::setAdvertName(const char *advertString)
 int BLE::setAdvertName(String *advertString)
 {
   uint8_t len = (*advertString).length();
-  char *buf = (char *) malloc((len+1)*sizeof(*buf));
-  (*advertString).toCharArray(buf, len);
-  uint8_t status = setAdvertName(len, buf);
-  free(buf);
-  return status;
+  return setAdvertName(len, (*advertString).c_str());
 }
 
 int BLE::setGattParam(uint8_t serviceId, uint8_t charId,
@@ -695,11 +691,21 @@ int BLE::writeValue(BLE_Char *bleChar, double value)
   return writeNotifInd(bleChar);
 }
 
+int BLE::writeValue(BLE_Char *bleChar, const uint8_t *buf, int len)
+{
+  if (isError(BLE_charValueInit(bleChar, (len)*sizeof(*buf))))
+  {
+    return BLE_CHECK_ERROR;
+  }
+  memcpy((uint8_t *) bleChar->_value, buf, len); // includes null byte
+  return writeNotifInd(bleChar);
+}
+
 /*
  * Use buffer of size len+1 so the null-termination is stored. This way the
  * stored strings match the functionality of strcpy, which copies it.
  */
-int BLE::writeValue(BLE_Char *bleChar, int len, const char *str)
+int BLE::writeValue(BLE_Char *bleChar, const char *str, int len)
 {
   if (isError(BLE_charValueInit(bleChar, (len+1)*sizeof(*str))))
   {
@@ -711,22 +717,13 @@ int BLE::writeValue(BLE_Char *bleChar, int len, const char *str)
 
 int BLE::writeValue(BLE_Char *bleChar, const char *str)
 {
-  return writeValue(bleChar, strlen(str), str);
-}
-
-int BLE::writeValue(BLE_Char *bleChar, const uint8_t *str)
-{
-  return writeValue(bleChar, (char *) str);
+  return writeValue(bleChar, str, strlen(str));
 }
 
 int BLE::writeValue(BLE_Char *bleChar, String str)
 {
   int len = str.length();
-  char *buf = (char *) malloc((len+1)*sizeof(*buf));
-  str.toCharArray(buf, len+1);
-  uint8_t status = writeValue(bleChar, len, buf);
-  free(buf);
-  return status;
+  return writeValue(bleChar, str.c_str(), len);
 }
 
 static uint8_t readValueValidateSize(BLE_Char *bleChar, size_t size)
@@ -846,6 +843,16 @@ double BLE::readValue_double(BLE_Char *bleChar)
     return *(double *) bleChar->_value;
   }
   return 0;
+}
+
+uint8_t* BLE::readValue_uint8_t(BLE_Char *bleChar, int *len)
+{
+  if (error == BLE_SUCCESS)
+  {
+    *len = bleChar->_valueLen;
+    return (uint8_t *) bleChar->_value;
+  }
+  return NULL;
 }
 
 char* BLE::readValue_string(BLE_Char *bleChar)
@@ -1005,7 +1012,7 @@ size_t BLE::write(uint8_t c)
 
 size_t BLE::write(const uint8_t *buffer, size_t size)
 {
-  if (writeValue(&txChar, buffer) == BLE_SUCCESS)
+  if (writeValue(&txChar, buffer, size) == BLE_SUCCESS)
   {
     return size;
   }

@@ -16,8 +16,7 @@ class BLE : public Stream
     uint8_t advertDataInit(void);
     int setAdvertName(uint8_t advertStringLen, const char *advertString);
     int setSingleConnParam(size_t offset, uint16_t value);
-    int writeValue(BLE_Char *bleChar, int len, const char *str);
-    int writeValue(BLE_Char *bleChar, const uint8_t *str);
+    int writeValue(BLE_Char *bleChar, const char *str, int len);
     int setSecurityParam(uint16_t paramID, uint16_t len, uint8_t *pData);
     int handleAuthKey(snpAuthenticationEvt_t *evt);
     void handleNumCmp(snpAuthenticationEvt_t *evt);
@@ -84,6 +83,7 @@ class BLE : public Stream
     int writeValue(BLE_Char *bleChar, unsigned long value);
     int writeValue(BLE_Char *bleChar, float value);
     int writeValue(BLE_Char *bleChar, double value);
+    int writeValue(BLE_Char *bleChar, const uint8_t *buf, int len);
     int writeValue(BLE_Char *bleChar, const char *str); // Char array
     int writeValue(BLE_Char *bleChar, String str); // Object, calls fxn for char array
     boolean readValue_boolean(BLE_Char *bleChar);
@@ -97,6 +97,7 @@ class BLE : public Stream
     unsigned long readValue_ulong(BLE_Char *bleChar);
     float readValue_float(BLE_Char *bleChar);
     double readValue_double(BLE_Char *bleChar);
+    uint8_t* readValue_uint8_t(BLE_Char *bleChar, int *len);
     char* readValue_string(BLE_Char *bleChar);
     String readValue_String(BLE_Char *bleChar);
 
