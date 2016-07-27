@@ -191,7 +191,7 @@ int BLE::begin(void)
 
   /* AP_init() in simple_ap.c */
   apEvent = Event_create(NULL, NULL);
-  apTask = Task_self();
+  logSetMainTask(Task_self());
 
   /*
    * Use this to do something at the application level on a write or
@@ -584,17 +584,21 @@ static uint8_t writeNotifInd(BLE_Char *bleChar)
     if (bleChar->_CCCD & SNP_GATT_CLIENT_CFG_NOTIFY)
     {
       localReq.type = SNP_SEND_NOTIFICATION;
+      logRPC("Sending notif");
     }
     else if (bleChar->_CCCD & SNP_GATT_CLIENT_CFG_INDICATE)
     {
       localReq.type = SNP_SEND_INDICATION;
+      logRPC("Sending ind");
     }
+    logParam("Total bytes", bleChar->_valueLen);
     uint16_t sent = 0;
     while (sent < bleChar->_valueLen)
     {
       /* Send at most ble.mtu per packet. */
       uint16_t size = MIN(bleChar->_valueLen - sent, ble.mtu);
       localReq.pData = ((uint8_t *) bleChar->_value) + sent;
+      logParam("Sending", size);
       if (isError(SNP_RPC_sendNotifInd(&localReq, size)))
       {
         return BLE_CHECK_ERROR;

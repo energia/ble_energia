@@ -20,14 +20,22 @@ uint8_t logLock = 0;
 bool logLockReq = false;
 
 /* The last log mode called; used for followup calls. */
-uint8_t logLast = 0x00;
+uint8_t apLogLast = 0x00;
+uint8_t otherLogLast = 0x00;
+#define GET_LOG_LAST ((apTask == Task_self()) ? apLogLast : otherLogLast)
 
+static bool logAllowed(uint8_t mode);
 static void logAcquire(void);
 static void logRelease(void);
 
+void logSetMainTask(Task_Handle mainTask)
+{
+  apTask = mainTask;
+}
+
 void logParam(const char name[], int value, int base)
 {
-  if (logLevel & logLast)
+  if (logLevel & GET_LOG_LAST)
   {
     logAcquire();
     Serial.print("  ");
@@ -45,7 +53,7 @@ void logParam(const char name[], int value)
 
 void logParam(const char value[])
 {
-  if (logLevel & logLast)
+  if (logLevel & GET_LOG_LAST)
   {
     logAcquire();
     Serial.print("  ");
@@ -56,8 +64,7 @@ void logParam(const char value[])
 
 void logError(const char msg[])
 {
-  logLast = BLE_LOG_ERRORS;
-  if (logLevel & BLE_LOG_ERRORS)
+  if (logAllowed(BLE_LOG_ERRORS))
   {
     logAcquire();
 
@@ -67,8 +74,7 @@ void logError(const char msg[])
 
 void logRPC(const char msg[])
 {
-  logLast = BLE_LOG_SENT_MSGS;
-  if (logLevel & BLE_LOG_SENT_MSGS)
+  if (logAllowed(BLE_LOG_SENT_MSGS))
   {
     logAcquire();
     Serial.print("RPC:");
@@ -79,8 +85,7 @@ void logRPC(const char msg[])
 
 void logAsync(const char name[], uint8_t cmd1)
 {
-  logLast = BLE_LOG_REC_MSGS;
-  if (logLevel & BLE_LOG_REC_MSGS)
+  if (logAllowed(BLE_LOG_REC_MSGS))
   {
     logAcquire();
     Serial.print("Rec msg 0x");
@@ -99,20 +104,9 @@ void logAsync(const char name[], uint8_t cmd1)
   }
 }
 
-void logSync(uint8_t cmd1)
-{
-  logLast = BLE_LOG_REC_MSGS;
-  if (logLevel & BLE_LOG_REC_MSGS)
-  {
-    logAcquire();
-    logRelease();
-  }
-}
-
 void logChar(const char msg[])
 {
-  logLast = BLE_LOG_CHARACTERISTICS;
-  if (logLevel & BLE_LOG_CHARACTERISTICS)
+  if (logAllowed(BLE_LOG_CHARACTERISTICS))
   {
     logAcquire();
 
@@ -122,13 +116,25 @@ void logChar(const char msg[])
 
 void logState(const char msg[])
 {
-  logLast = BLE_LOG_STATE;
-  if (logLevel & BLE_LOG_STATE)
+  if (logAllowed(BLE_LOG_STATE))
   {
     logAcquire();
 
     logRelease();
   }
+}
+
+static bool logAllowed(uint8_t mode)
+{
+  if (Task_self() == apTask)
+  {
+    apLogLast = mode;
+  }
+  else
+  {
+    otherLogLast = mode;
+  }
+  return logLevel & mode;
 }
 
 /*
@@ -144,7 +150,7 @@ static void logAcquire(void)
   uint32_t startTime = millis();
   if (Task_self() == apTask)
   {
-    while (logLock &&
+    while ((logLock) &&
            (millis() - startTime < ACQUIRE_TIMEOUT))
     {
       Task_yield();
@@ -166,7 +172,8 @@ static void logAcquire(void)
 static void logRelease(void)
 {
   logLock--;
-  while (logLockReq)
+  uint32_t startTime = millis();
+  while (logLockReq && (millis() - startTime < ACQUIRE_TIMEOUT))
   {
     bool apLogLockSaved = apLogLock;
     apLogLock = false;
