@@ -24,12 +24,11 @@
 /* Log Levels */
 #define BLE_LOG_NONE                   0x00
 #define BLE_LOG_ERRORS                 0x01
-#define BLE_LOG_SENT_MSGS              0x02
+#define BLE_LOG_RPCS                   0x02
 #define BLE_LOG_REC_MSGS               0x04
-#define BLE_LOG_SYNC_CMDS              0x08
-#define BLE_LOG_MSGS (BLE_LOG_SENT_MSGS | BLE_LOG_REC_MSGS | BLE_LOG_SYNC_CMDS)
-#define BLE_LOG_CHARACTERISTICS        0x10
-#define BLE_LOG_STATE                  0x20
+#define BLE_LOG_MSGS (BLE_LOG_RPCS | BLE_LOG_REC_MSGS)
+#define BLE_LOG_CHARACTERISTICS        0x08
+#define BLE_LOG_STATE                  0x10
 #define BLE_LOG_ALL                    0xFF
 
 /* Type of connection between the user application's

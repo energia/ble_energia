@@ -74,7 +74,7 @@ void logError(const char msg[])
 
 void logRPC(const char msg[])
 {
-  if (logAllowed(BLE_LOG_SENT_MSGS))
+  if (logAllowed(BLE_LOG_RPCS))
   {
     logAcquire();
     Serial.print("RPC:");
