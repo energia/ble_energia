@@ -365,6 +365,7 @@ int BLE::startAdvert(void)
 
 int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
 {
+  logRPC("Start adv");
   if ((advertising && isError(BLE_ALREADY_ADVERTISING)) ||
       isError(advertDataInit()))
   {
@@ -391,7 +392,6 @@ int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
     reqSize = (uint16_t) sizeof(lReq);
     pData = (uint8_t *) &lReq;
   }
-  logRPC("Start adv");
   if (isError(SAP_setParam(SAP_PARAM_ADV, SAP_ADV_STATE, reqSize, pData)) ||
       !apEventPend(AP_EVT_ADV_ENB))
   {
@@ -416,6 +416,7 @@ int BLE::stopAdvert(void)
 int BLE::setAdvertData(uint8_t advertType, uint8_t len, uint8_t *advertData)
 {
   logRPC("Set adv data");
+  logParam("Type", advertType);
   if (isError(SAP_setParam(SAP_PARAM_ADV, advertType, len, advertData)) ||
       !apEventPend(AP_EVT_ADV_DATA_RSP))
   {
@@ -449,6 +450,8 @@ int BLE::setAdvertName(uint8_t advertStringLen, const char *advertString)
   uint8_t *srcAfterStr = defScanRspData + 1 + defScanRspData[0];
   uint8_t afterStrLen = sizeof(defScanRspData) - 1 - defScanRspData[0];
   memcpy(destAfterStr, srcAfterStr, afterStrLen);
+  logRPC("Set adv name");
+  logParam(advertString);
   return setAdvertData(BLE_ADV_DATA_SCANRSP, newSize, newData);
 }
 
@@ -470,29 +473,38 @@ int BLE::setAdvertName(String *advertString)
 int BLE::setGattParam(uint8_t serviceId, uint8_t charId,
                       uint16_t len, uint8_t *pData)
 {
+  logRPC("Set GATT param");
   return SAP_setServiceParam(serviceId, charId, len, pData);
 }
 
 int BLE::getGattParam(uint8_t serviceId, uint8_t charId,
                       uint16_t *len, uint8_t *pData)
 {
+  logRPC("Get GATT param");
   return SAP_getServiceParam(serviceId, charId, len, pData);
 }
 
 int BLE::setGapParam(uint16_t paramId, uint16_t value)
 {
+  logRPC("Set GAP param");
+  logParam("Param ID", paramId);
+  logParam("Value", value);
   return SAP_setParam(SAP_PARAM_GAP, paramId,
                       sizeof(value), (uint8_t *) &value);
 }
 
 int BLE::getGapParam(uint16_t paramId, uint16_t *value)
 {
+  logRPC("Get GAP param");
+  logParam("Param ID", paramId);
   return SAP_setParam(SAP_PARAM_GAP, paramId,
                       sizeof(*value), (uint8_t *) value);
 }
 
 uint8_t *BLE::hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData)
 {
+  logRPC("HCI cmd");
+  logParam("Opcode", opcode);
   if (isError(SAP_getParam(SAP_PARAM_HCI, opcode, len, pData)) ||
       !apEventPend(AP_EVT_HCI_RSP))
   {
@@ -509,6 +521,11 @@ uint8_t *BLE::hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData)
  */
 int BLE::setConnParams(BLE_Conn_Params_Update_Req *connParams)
 {
+  logRPC("Conn params req");
+  logParam("intervalMin", connParams->intervalMin);
+  logParam("intervalMax", connParams->intervalMax);
+  logParam("slaveLatency", connParams->slaveLatency);
+  logParam("supervisionTimeout", connParams->supervisionTimeout);
   if ((!connected && isError(BLE_NOT_CONNECTED)) ||
       isError(SAP_setParam(SAP_PARAM_CONN, SAP_CONN_PARAM,
                            sizeof(*connParams), (uint8_t *) connParams)) ||

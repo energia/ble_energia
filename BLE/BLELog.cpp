@@ -31,13 +31,13 @@ void logParam(const char name[], int value)
   logParam(name, value, DEC);
 }
 
-void logParam(const char *value)
+void logParam(const char value[])
 {
   if (logLevel & logLast)
   {
     logAcquire();
     Serial.print("  ");
-    Serial.print(value);
+    Serial.println(value);
     logRelease();
   }
 }
