@@ -15,53 +15,62 @@ static void logRelease(void);
 
 void logParam(const char name[], int value, int base)
 {
-  logAcquire();
   if (logLevel & logLast)
   {
+    logAcquire();
     Serial.print("  ");
     Serial.print(name);
     Serial.print(":");
     Serial.println(value, base);
+    logRelease();
   }
-  logRelease();
 }
 
 void logParam(const char name[], int value)
 {
-  logAcquire();
   logParam(name, value, DEC);
-  logRelease();
+}
+
+void logParam(const char *value)
+{
+  if (logLevel & logLast)
+  {
+    logAcquire();
+    Serial.print("  ");
+    Serial.print(value);
+    logRelease();
+  }
 }
 
 void logError(const char msg[])
 {
-  logAcquire();
   logLast = BLE_LOG_ERRORS;
   if (logLevel & BLE_LOG_ERRORS)
   {
+    logAcquire();
 
+    logRelease();
   }
-  logRelease();
 }
 
 void logRPC(const char msg[])
 {
-  logAcquire();
   logLast = BLE_LOG_SENT_MSGS;
   if (logLevel & BLE_LOG_SENT_MSGS)
   {
+    logAcquire();
     Serial.print("RPC:");
     Serial.println(msg);
+    logRelease();
   }
-  logRelease();
 }
 
 void logAsync(const char name[], uint8_t cmd1)
 {
-  logAcquire();
   logLast = BLE_LOG_REC_MSGS;
   if (logLevel & BLE_LOG_REC_MSGS)
   {
+    logAcquire();
     Serial.print("Rec msg 0x");
     if (cmd1 < 0x10)
     {
@@ -74,40 +83,40 @@ void logAsync(const char name[], uint8_t cmd1)
     {
       Serial.println("Bug->double evt");
     }
+    logRelease();
   }
-  logRelease();
 }
 
 void logSync(uint8_t cmd1)
 {
-  logAcquire();
   logLast = BLE_LOG_REC_MSGS;
   if (logLevel & BLE_LOG_REC_MSGS)
   {
+    logAcquire();
+    logRelease();
   }
-  logRelease();
 }
 
 void logChar(const char msg[])
 {
-  logAcquire();
   logLast = BLE_LOG_CHARACTERISTICS;
   if (logLevel & BLE_LOG_CHARACTERISTICS)
   {
+    logAcquire();
 
+    logRelease();
   }
-  logRelease();
 }
 
 void logState(const char msg[])
 {
-  logAcquire();
   logLast = BLE_LOG_STATE;
   if (logLevel & BLE_LOG_STATE)
   {
+    logAcquire();
 
+    logRelease();
   }
-  logRelease();
 }
 
 /*
