@@ -10,6 +10,7 @@ void setup() {
 }
 
 void loop() {
+  ble.handleEvents();
   if (Serial.available())
   {
     ble.print(Serial.readString());

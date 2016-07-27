@@ -110,6 +110,7 @@ void setup() {
 
 // the loop routine runs over and over again forever as a task.
 void loop() {
+  ble.handleEvents();
   if (millis() % 1000 == 0)
   {
     heartRateMeasurement += 1;

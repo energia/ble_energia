@@ -63,6 +63,7 @@ void setup() {
 
 // the loop routine runs over and over again forever as a task.
 void loop() {
+  ble.handleEvents();
   char1Value = ble.readValue_byte(&char1);
   Serial.print("char1Value=");Serial.println(char1Value);
   char2Value = ble.readValue_int(&char2);
