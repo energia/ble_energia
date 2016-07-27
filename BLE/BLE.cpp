@@ -589,7 +589,8 @@ static uint8_t writeNotifInd(BLE_Char *bleChar)
     }
     logParam("Total bytes", bleChar->_valueLen);
     uint16_t sent = 0;
-    while (sent < bleChar->_valueLen)
+    /* Send at least one notification, in case data is 0 length. */
+    do
     {
       /* Send at most ble.mtu per packet. */
       uint16_t size = MIN(bleChar->_valueLen - sent, ble.mtu);
@@ -600,13 +601,13 @@ static uint8_t writeNotifInd(BLE_Char *bleChar)
         return BLE_CHECK_ERROR;
       }
       // Only pend for confirmation of indication
-      else if ((bleChar->_CCCD & SNP_GATT_CLIENT_CFG_INDICATE) &&
+      if ((bleChar->_CCCD & SNP_GATT_CLIENT_CFG_INDICATE) &&
                !apEventPend(AP_EVT_NOTIF_IND_RSP))
       {
         return BLE_CHECK_ERROR;
       }
       sent += size;
-    }
+    } while (sent < bleChar->_valueLen);
   }
   return BLE_SUCCESS;
 }
