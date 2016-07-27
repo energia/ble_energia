@@ -893,9 +893,11 @@ String BLE::readValue_String(BLE_Char *bleChar)
   return str;
 }
 
-int BLE::setSecurityParam(uint16_t paramID, uint16_t len, uint8_t *pData)
+int BLE::setSecurityParam(uint16_t paramId, uint16_t len, uint8_t *pData)
 {
-  if (isError(SAP_setParam(SAP_PARAM_SECURITY, paramID, len, pData)) ||
+  logRPC("Set sec param");
+  logParam("ParamId", paramId, len);
+  if (isError(SAP_setParam(SAP_PARAM_SECURITY, paramId, len, pData)) ||
       !apEventPend(AP_EVT_SECURITY_PARAM_RSP))
   {
     return BLE_CHECK_ERROR;
@@ -930,11 +932,13 @@ int BLE::replaceLruBond(bool param)
 
 int BLE::sendSecurityRequest(void)
 {
+  logRPC("Send sec req");
   return SAP_sendSecurityRequest();
 }
 
 int BLE::setWhiteListPolicy(uint8_t policy)
 {
+  logRPC("Set whitelist policy");
   if (isError(SAP_setParam(SAP_PARAM_WHITELIST, 0, 0, &policy)) ||
       !apEventPend(AP_EVT_WHITE_LIST_RSP))
   {
@@ -953,16 +957,19 @@ unsigned int BLE::getRand(void)
  */
 void BLE::getRevision(BLE_Get_Revision_Rsp *getRevisionRsp)
 {
+  logRPC("Get revision");
   SAP_getRevision(getRevisionRsp);
 }
 
 void BLE::getStatus(BLE_Get_Status_Rsp *getStatusRsp)
 {
+  logRPC("Get status");
   SAP_getStatus(getStatusRsp);
 }
 
 int BLE::testCommand(BLE_Test_Command_Rsp *testRsp)
 {
+  logRPC("Test cmd");
   SAP_testCommand(); // void function
   if (!apEventPend(AP_EVT_TEST_RSP))
   {
@@ -1045,6 +1052,7 @@ int BLE::handleEvents(void)
   {
     detachInterrupt(PUSH1);
     detachInterrupt(PUSH2);
+    logRPC("Send num cmp rsp");
     if (isError(SAP_setAuthenticationRsp(authKey)) ||
         !apEventPend(AP_EVT_AUTH_RSP))
     {
@@ -1075,6 +1083,7 @@ int BLE::handleAuthKey(snpAuthenticationEvt_t *evt)
   }
   if (evt->input)
   {
+    logRPC("Send auth key");
     if (isError(SAP_setAuthenticationRsp(authKey)) ||
       !apEventPend(AP_EVT_AUTH_RSP))
     {

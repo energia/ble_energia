@@ -17,7 +17,7 @@ class BLE : public Stream
     int setAdvertName(uint8_t advertStringLen, const char *advertString);
     int setSingleConnParam(size_t offset, uint16_t value);
     int writeValue(BLE_Char *bleChar, const char *str, int len);
-    int setSecurityParam(uint16_t paramID, uint16_t len, uint8_t *pData);
+    int setSecurityParam(uint16_t paramId, uint16_t len, uint8_t *pData);
     int handleAuthKey(snpAuthenticationEvt_t *evt);
     void handleNumCmp(snpAuthenticationEvt_t *evt);
 

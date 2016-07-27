@@ -33,6 +33,30 @@ void logSetMainTask(Task_Handle mainTask)
   apTask = mainTask;
 }
 
+void logParam(const char name[], const uint8_t buf[], uint16_t len)
+{
+  if (logLevel & GET_LOG_LAST)
+  {
+    logAcquire();
+    Serial.print("  ");
+    Serial.print(name);
+    Serial.print(":0x");
+    if (len == 1)
+    {
+      Serial.println(buf[0], HEX);
+    }
+    else
+    {
+      for (uint16_t i = 0; i < len; i++)
+      {
+        Serial.print(buf[i], HEX);
+      }
+      Serial.println();
+    }
+    logRelease();
+  }
+}
+
 void logParam(const char name[], int value, int base)
 {
   if (logLevel & GET_LOG_LAST)
@@ -41,6 +65,14 @@ void logParam(const char name[], int value, int base)
     Serial.print("  ");
     Serial.print(name);
     Serial.print(":");
+    if (base == HEX)
+    {
+      Serial.print("0x");
+    }
+    else if (base == BIN)
+    {
+      Serial.print("0b");
+    }
     Serial.println(value, base);
     logRelease();
   }

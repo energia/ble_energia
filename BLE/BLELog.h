@@ -10,6 +10,7 @@ extern bool apLogLock; // AP owns logging if true
 
 void logSetMainTask(Task_Handle mainTask);
 
+void logParam(const char name[], const uint8_t buf[], uint16_t len);
 void logParam(const char name[], int value);
 void logParam(const char name[], int value, int base);
 void logParam(const char value[]);
