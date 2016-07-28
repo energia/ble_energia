@@ -119,7 +119,8 @@ void loop() {
     ble.writeValue(&char4, heartRateMeasurement*2);
     if (millis() % 5000 == 0)
     {
-      ble.writeValue(&char6, char6Value + 1);
+      char6Value += 1;
+      ble.writeValue(&char6, char6Value);
     }
     char1Value = ble.readValue_byte(&char1);
     Serial.print("char1Value=");Serial.println(char1Value);
