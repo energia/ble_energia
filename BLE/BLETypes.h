@@ -127,6 +127,7 @@ typedef struct
   uint16_t          _valueLen;
   uint8_t           _CCCD;
   uint16_t          _CCCDHandle;
+  uint8_t           _UUIDlen;
 } BLE_Char;
 
 typedef struct
@@ -136,6 +137,7 @@ typedef struct
   BLE_Char          **chars;
   /* Energia user should never need to touch these. */
   uint16_t          _handle;
+  uint8_t           _UUIDlen;
 } BLE_Service;
 
 typedef struct

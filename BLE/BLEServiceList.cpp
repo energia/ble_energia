@@ -15,7 +15,7 @@ static BLE_Char* getCCCD(uint16_t handle);
 static BLE_Service* getServiceWithChar(uint16_t handle);
 static void constructService(SAP_Service_t *service, BLE_Service *bleService);
 static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar);
-static uint8_t getUUIDLen(uint8_t *UUID);
+static uint8_t getUUIDLen(const uint8_t UUID[]);
 static uint8_t serviceReadAttrCB(void *context,
                                  uint16_t connectionHandle,
                                  uint16_t charHdl, uint16_t offset,
@@ -147,8 +147,9 @@ static BLE_Service* getServiceWithChar(uint16_t handle)
 
 static void constructService(SAP_Service_t *service, BLE_Service *bleService)
 {
-  bleService->_handle = 0;
-  service->serviceUUID.len    = getUUIDLen(bleService->UUID);
+  bleService->_handle         = 0;
+  bleService->_UUIDlen        = getUUIDLen(bleService->UUID);
+  service->serviceUUID.len    = bleService->_UUIDlen;
   service->serviceUUID.pUUID  = bleService->UUID;
   service->serviceType        = SNP_PRIMARY_SERVICE;
   service->charTableLen       = bleService->numChars; // sizeof with static array?
@@ -178,10 +179,10 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
 
   /* Default to no notifications or indications. */
   bleChar->_CCCD = 0;
-
   bleChar->_CCCDHandle = 0;
 
-  sapChar->UUID.len    = getUUIDLen(bleChar->UUID);
+  bleChar->_UUIDlen    = getUUIDLen(bleChar->UUID);
+  sapChar->UUID.len    = bleChar->_UUIDlen;
   sapChar->UUID.pUUID  = bleChar->UUID;
 
   sapChar->properties  = bleChar->properties;
@@ -224,7 +225,8 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
   sapChar->pLongUUID   = NULL;
 }
 
-static uint8_t getUUIDLen(uint8_t *UUID)
+/* Array guaranteed to have 16 bytes. */
+static uint8_t getUUIDLen(const uint8_t UUID[])
 {
   for (uint8_t i = SNP_16BIT_UUID_SIZE; i < SNP_128BIT_UUID_SIZE; i++)
   {
