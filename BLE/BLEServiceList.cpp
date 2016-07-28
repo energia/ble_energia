@@ -34,12 +34,18 @@ int BLE_registerService(BLE_Service *bleService)
 {
   SAP_Service_t *service = (SAP_Service_t *) malloc(sizeof(*service));
   constructService(service, bleService);
+  logRPC("Register service");
+  logUUID(bleService->UUID, bleService->_UUIDlen);
   int status = SAP_registerService(service);
   if (status != SNP_FAILURE) {
     bleService->_handle = service->serviceHandle;
+    logParam("Handle", bleService->_handle);
     for (uint8_t i = 0; i < bleService->numChars; i++)
     {
       bleService->chars[i]->_handle = service->charAttrHandles[i].valueHandle;
+      logParam("With characteristic");
+      logUUID(bleService->chars[i]->UUID, bleService->chars[i]->_UUIDlen);
+      logParam("Handle", bleService->chars[i]->_handle);
       bleService->chars[i]->_CCCDHandle = service->charAttrHandles[i].cccdHandle;
       if (service->charTable[i].pUserDesc)
       {
@@ -83,7 +89,7 @@ void BLE_charValueInit(BLE_Char *bleChar, size_t size)
     bleChar->_value = NULL;
   }
   logChar("Writing");
-  logUUID(bleChar->UUID);
+  logParam("Handle", bleChar->_handle);
   if (bleChar->_value == NULL)
   {
     logParam("New size in bytes", size);
@@ -257,7 +263,7 @@ static uint8_t serviceReadAttrCB(void *context,
   }
   else if (bleChar->_valueLen <= offset)
   {
-    logUUID(bleChar->UUID);
+    logParam("Handle", bleChar->_handle);
     logParam("Offset too big");
     logParam("Value len", bleChar->_valueLen);
     logParam("Offset", offset);
@@ -265,7 +271,7 @@ static uint8_t serviceReadAttrCB(void *context,
   }
   else
   {
-    logUUID(bleChar->UUID);
+    logParam("Handle", bleChar->_handle);
     logParam("Offset", offset);
     uint8_t *src = (uint8_t *) bleChar->_value + offset;
     uint16_t remaining = bleChar->_valueLen - offset;

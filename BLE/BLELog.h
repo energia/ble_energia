@@ -14,7 +14,7 @@ void logParam(const char name[], const uint8_t buf[], uint16_t len);
 void logParam(const char name[], int value);
 void logParam(const char name[], int value, int base);
 void logParam(const char value[]);
-void logUUID(const uint8_t UUID[]);
+void logUUID(const uint8_t UUID[], uint8_t len);
 void logError(uint8_t status);
 void logError(const char msg[], uint8_t status);
 void logRPC(const char msg[]);

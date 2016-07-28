@@ -320,8 +320,6 @@ bool BLE::isAdvertising(void)
 
 int BLE::addService(BLE_Service *bleService)
 {
-  logRPC("Register service");
-  logUUID(bleService->UUID);
   if (isError(BLE_registerService(bleService)))
   {
     return BLE_CHECK_ERROR;
@@ -699,14 +697,17 @@ int BLE::writeValue(BLE_Char *bleChar, String str)
 
 static uint8_t readValueValidateSize(BLE_Char *bleChar, size_t size)
 {
+  logChar("Reading");
+  logParam("Handle", bleChar->_handle);
   if (bleChar->_value == NULL || bleChar->_valueLen != size)
   {
+    logParam("Invalid size");
+    logParam("Have", bleChar->_valueLen);
+    logParam("Want", size);
     return BLE_UNDEFINED_VALUE;
   }
-  logChar("Reading");
-  logUUID(bleChar->UUID);
   logParam("Size in bytes", size);
-  logParam("Value", (const uint8_t *) bleChar->_value, bleChar->_valueLen);
+  logParam("Value", (const uint8_t *) bleChar->_value, size);
   return BLE_SUCCESS;
 }
 
@@ -822,33 +823,28 @@ double BLE::readValue_double(BLE_Char *bleChar)
 
 uint8_t* BLE::readValue_uint8_t(BLE_Char *bleChar, int *len)
 {
-  if (error == BLE_SUCCESS)
-  {
-    *len = bleChar->_valueLen;
-    return (uint8_t *) bleChar->_value;
-  }
-  return NULL;
+  *len = bleChar->_valueLen;
+  logChar("Reading");
+  logParam("Handle", bleChar->_handle);
+  logParam("Buffer length", *len);
+  logParam("Buffer contents", (const uint8_t *) bleChar->_value, *len);
+  return (uint8_t *) bleChar->_value;
 }
 
 char* BLE::readValue_string(BLE_Char *bleChar)
 {
-  error = BLE_SUCCESS;
-  if (bleChar->_value == NULL)
+  int len = bleChar->_valueLen;
+  logChar("Reading");
+  logParam("Handle", bleChar->_handle);
+  logParam("String length", len);
+  /* Convert value to null-termiated string, if not already */
+  if (((char *) bleChar->_value)[len-1] != '\0')
   {
-    error = BLE_UNDEFINED_VALUE;
+    bleChar->_value = realloc(bleChar->_value, (len+1)*sizeof(char));
+    ((char *) bleChar->_value)[len] = '\0';
   }
-  else if (error == BLE_SUCCESS)
-  {
-    int len = bleChar->_valueLen;
-    /* Convert value to null-termiated string, if not already */
-    if (((char *) bleChar->_value)[len-1] != '\0')
-    {
-      bleChar->_value = realloc(bleChar->_value, (len+1)*sizeof(char));
-      ((char *) bleChar->_value)[len] = '\0';
-    }
-    return (char *) bleChar->_value;
-  }
-  return NULL;
+  logParam((const char *) bleChar->_value);
+  return (char *) bleChar->_value;
 }
 
 // TO-DO: Return pointer instead? Not sure if ok for Energia.

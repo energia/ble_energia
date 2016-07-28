@@ -25,7 +25,8 @@ uint8_t otherLogLast = 0x00;
 #define SHOULD_LOG_PARAM (logLevel & ((apTask == Task_self()) ? apLogLast : otherLogLast))
 
 static void hexPrint(int num);
-static void hexPrintln(int num);
+static void hexPrintBigEnd(const uint8_t buf[], uint16_t len);
+static void hexPrintLitEnd(const uint8_t buf[], uint16_t len);
 static bool logAllowed(uint8_t mode);
 static void logAcquire(void);
 static void logRelease(void);
@@ -42,12 +43,8 @@ void logParam(const char name[], const uint8_t buf[], uint16_t len)
     logAcquire();
     Serial.print("  ");
     Serial.print(name);
-    Serial.print(":");
-    for (uint16_t i = 0; i < len; i++)
-    {
-      hexPrint(buf[i]);
-      Serial.print(" ");
-    }
+    Serial.print(":0x");
+    hexPrintBigEnd(buf, len);
     Serial.println();
     logRelease();
   }
@@ -63,7 +60,8 @@ void logParam(const char name[], int value, int base)
     Serial.print(":");
     if (base == HEX)
     {
-      hexPrintln(value);
+      hexPrint(value);
+      Serial.println();
     }
     else if (base == BIN)
     {
@@ -94,9 +92,32 @@ void logParam(const char value[])
   }
 }
 
-void logUUID(const uint8_t UUID[])
+/* Array guaranteed to have 16 bytes. */
+void logUUID(const uint8_t UUID[], uint8_t UUIDlen)
 {
-  logParam("UUID", UUID[0]+(UUID[1] << 8), HEX);
+  if (SHOULD_LOG_PARAM)
+  {
+    logAcquire();
+    Serial.print("  UUID:0x");
+    if (UUIDlen == SNP_128BIT_UUID_SIZE)
+    {
+      hexPrintLitEnd(&UUID[12], 4);
+      Serial.print("-");
+      hexPrintLitEnd(&UUID[10], 2);
+      Serial.print("-");
+      hexPrintLitEnd(&UUID[8], 2);
+      Serial.print("-");
+      hexPrintLitEnd(&UUID[6], 2);
+      Serial.print("-");
+      hexPrintLitEnd(&UUID[0], 6);
+    }
+    else if (UUIDlen == SNP_16BIT_UUID_SIZE)
+    {
+      hexPrintLitEnd(&UUID[0], 2);
+    }
+    Serial.println();
+    logRelease();
+  }
 }
 
 void logError(uint8_t status)
@@ -105,7 +126,8 @@ void logError(uint8_t status)
   {
     logAcquire();
     Serial.print("ERR ");
-    hexPrintln(status);
+    hexPrint(status);
+    Serial.println();
     logRelease();
   }
 }
@@ -182,10 +204,29 @@ static void hexPrint(int num)
   Serial.print(num, HEX);
 }
 
-static void hexPrintln(int num)
+static void hexPrintBigEnd(const uint8_t buf[], uint16_t len)
 {
-  hexPrint(num);
-  Serial.println();
+  for (uint16_t i = 0; i < len; i++)
+  {
+    if (buf[i] < 0x10)
+    {
+      Serial.print("0");
+    }
+    Serial.print(buf[i], HEX);
+  }
+}
+
+static void hexPrintLitEnd(const uint8_t buf[], uint16_t len)
+{
+  /* Overflows from 0 to 65535 */
+  for (uint16_t i = len-1; i < len; i--)
+  {
+    if (buf[i] < 0x10)
+    {
+      Serial.print("0");
+    }
+    Serial.print(buf[i], HEX);
+  }
 }
 
 static bool logAllowed(uint8_t mode)
