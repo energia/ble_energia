@@ -7,17 +7,17 @@
 uint8_t logLevel = 0;
 
 /* Prevents competition with the Energia user's Serial calls */
-bool apLogLock = false;
+volatile bool apLogLock = false;
 
 /* Used to determine if caller is the Energia sketch task. */
 Task_Handle apTask = NULL;
 
 /* Prevents simultaneous logging, but not other Serial calls. */
-uint8_t logLock = 0;
+volatile uint8_t logLock = 0;
 
 /* Indicates when another task wants to log. If set when logRelease
    is called, yields to another task. */
-bool logLockReq = false;
+volatile bool logLockReq = false;
 
 /* The last log mode called; used for followup calls. */
 uint8_t apLogLast = 0x00;

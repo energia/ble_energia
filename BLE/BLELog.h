@@ -6,7 +6,7 @@
 #include <ti/sysbios/knl/Task.h>
 
 extern uint8_t logLevel;
-extern bool apLogLock; // AP owns logging if true
+volatile extern bool apLogLock; // AP owns logging if true
 
 void logSetMainTask(Task_Handle mainTask);
 
