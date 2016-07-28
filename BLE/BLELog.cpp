@@ -24,7 +24,8 @@ uint8_t apLogLast = 0x00;
 uint8_t otherLogLast = 0x00;
 #define GET_LOG_LAST ((apTask == Task_self()) ? apLogLast : otherLogLast)
 
-static void printHex(uint8_t num);
+static void hexPrint(int num);
+static void hexPrintln(int num);
 static bool logAllowed(uint8_t mode);
 static void logAcquire(void);
 static void logRelease(void);
@@ -42,19 +43,12 @@ void logParam(const char name[], const uint8_t buf[], uint16_t len)
     Serial.print("  ");
     Serial.print(name);
     Serial.print(":");
-    if (len == 1)
+    for (uint16_t i = 0; i < len; i++)
     {
-      printHex(buf[0]);
+      hexPrint(buf[i]);
+      Serial.print(" ");
     }
-    else
-    {
-      for (uint16_t i = 0; i < len; i++)
-      {
-        printHex(buf[i]);
-        Serial.print(" ");
-      }
-      Serial.println();
-    }
+    Serial.println();
     logRelease();
   }
 }
@@ -69,12 +63,16 @@ void logParam(const char name[], int value, int base)
     Serial.print(":");
     if (base == HEX)
     {
-      printHex(value);
+      hexPrintln(value);
     }
     else if (base == BIN)
     {
       Serial.print("0b");
       Serial.println(value, base);
+    }
+    else
+    {
+      Serial.println(value);
     }
     logRelease();
   }
@@ -96,13 +94,18 @@ void logParam(const char value[])
   }
 }
 
+void logUUID(const uint8_t UUID[])
+{
+  logParam("UUID", UUID[0]+(UUID[1] << 8), HEX);
+}
+
 void logError(uint8_t status)
 {
   if (logAllowed(BLE_LOG_ERRORS))
   {
     logAcquire();
     Serial.print("ERR ");
-    printHex(status);
+    hexPrintln(status);
     logRelease();
   }
 }
@@ -113,7 +116,7 @@ void logError(const char msg[], uint8_t status)
   {
     logAcquire();
     Serial.print("ERR ");
-    printHex(status);
+    hexPrint(status);
     Serial.print(":");
     Serial.println(msg);
     logRelease();
@@ -137,7 +140,7 @@ void logAsync(const char name[], uint8_t cmd1)
   {
     logAcquire();
     Serial.print("Rec msg ");
-    printHex(cmd1);
+    hexPrint(cmd1);
     Serial.print(":");
     Serial.println(name);
     if (cmd1 == SNP_SET_ADV_DATA_CNF)
@@ -148,12 +151,13 @@ void logAsync(const char name[], uint8_t cmd1)
   }
 }
 
-void logChar(const char msg[])
+void logChar(const char action[])
 {
   if (logAllowed(BLE_LOG_CHARACTERISTICS))
   {
     logAcquire();
-
+    Serial.print(action);
+    Serial.println(" char value");
     logRelease();
   }
 }
@@ -168,7 +172,7 @@ void logState(const char msg[])
   }
 }
 
-static void printHex(uint8_t num)
+static void hexPrint(int num)
 {
   Serial.print("0x");
   if (num < 0x10)
@@ -176,6 +180,12 @@ static void printHex(uint8_t num)
     Serial.print("0");
   }
   Serial.print(num, HEX);
+}
+
+static void hexPrintln(int num)
+{
+  hexPrint(num);
+  Serial.println();
 }
 
 static bool logAllowed(uint8_t mode)

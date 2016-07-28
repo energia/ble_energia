@@ -321,7 +321,7 @@ bool BLE::isAdvertising(void)
 int BLE::addService(BLE_Service *bleService)
 {
   logRPC("Register service");
-  logParam("UUID", bleService->UUID[0]+(bleService->UUID[1] << 8), HEX);
+  logUUID(bleService->UUID);
   if (isError(BLE_registerService(bleService)))
   {
     return BLE_CHECK_ERROR;
@@ -703,6 +703,10 @@ static uint8_t readValueValidateSize(BLE_Char *bleChar, size_t size)
   {
     return BLE_UNDEFINED_VALUE;
   }
+  logChar("Reading");
+  logUUID(bleChar->UUID);
+  logParam("Size in bytes", size);
+  logParam("Value", (const uint8_t *) bleChar->_value, bleChar->_valueLen);
   return BLE_SUCCESS;
 }
 

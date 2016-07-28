@@ -2,6 +2,7 @@
 #include <sap.h>
 #include <snp.h>
 
+#include "BLELog.h"
 #include "BLESerial.h"
 #include "BLEServiceList.h"
 
@@ -81,8 +82,11 @@ void BLE_charValueInit(BLE_Char *bleChar, size_t size)
     free(bleChar->_value);
     bleChar->_value = NULL;
   }
+  logChar("Writing");
+  logUUID(bleChar->UUID);
   if (bleChar->_value == NULL)
   {
+    logParam("New size in bytes", size);
     bleChar->_value = (void *) malloc(size);
     bleChar->_valueLen = size;
   }
@@ -241,21 +245,31 @@ static uint8_t serviceReadAttrCB(void *context,
   (void) context;
   (void) connectionHandle;
   uint8_t status = SNP_SUCCESS;
+  logChar("Client reading");
   BLE_Char *bleChar = getChar(charHdl);
   if (bleChar == NULL)
   {
     *len = 0;
     status = SNP_UNKNOWN_ATTRIBUTE;
+    logError("Unknown handle", connectionHandle);
   }
   else if (bleChar->_valueLen <= offset)
   {
+    logUUID(bleChar->UUID);
+    logParam("Offset too big");
+    logParam("Value len", bleChar->_valueLen);
+    logParam("Offset", offset);
     *len = 0;
   }
   else
   {
+    logUUID(bleChar->UUID);
+    logParam("Offset", offset);
     uint8_t *src = (uint8_t *) bleChar->_value + offset;
     uint16_t remaining = bleChar->_valueLen - offset;
     *len = MIN(remaining, maxSize);
+    logParam("Read length", *len);
+    logParam("Data", pData, *len);
     memcpy(pData, src, *len);
   }
   return status;
