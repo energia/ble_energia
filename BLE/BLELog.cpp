@@ -24,6 +24,7 @@ uint8_t apLogLast = 0x00;
 uint8_t otherLogLast = 0x00;
 #define GET_LOG_LAST ((apTask == Task_self()) ? apLogLast : otherLogLast)
 
+static void printHex(uint8_t num);
 static bool logAllowed(uint8_t mode);
 static void logAcquire(void);
 static void logRelease(void);
@@ -40,16 +41,17 @@ void logParam(const char name[], const uint8_t buf[], uint16_t len)
     logAcquire();
     Serial.print("  ");
     Serial.print(name);
-    Serial.print(":0x");
+    Serial.print(":");
     if (len == 1)
     {
-      Serial.println(buf[0], HEX);
+      printHex(buf[0]);
     }
     else
     {
       for (uint16_t i = 0; i < len; i++)
       {
-        Serial.print(buf[i], HEX);
+        printHex(buf[i]);
+        Serial.print(" ");
       }
       Serial.println();
     }
@@ -67,13 +69,13 @@ void logParam(const char name[], int value, int base)
     Serial.print(":");
     if (base == HEX)
     {
-      Serial.print("0x");
+      printHex(value);
     }
     else if (base == BIN)
     {
       Serial.print("0b");
+      Serial.println(value, base);
     }
-    Serial.println(value, base);
     logRelease();
   }
 }
@@ -99,12 +101,8 @@ void logError(uint8_t status)
   if (logAllowed(BLE_LOG_ERRORS))
   {
     logAcquire();
-    Serial.print("ERR 0x");
-    if (status < 0x10)
-    {
-      Serial.print("0");
-    }
-    Serial.println(status, HEX);
+    Serial.print("ERR ");
+    printHex(status);
     logRelease();
   }
 }
@@ -114,12 +112,8 @@ void logError(const char msg[], uint8_t status)
   if (logAllowed(BLE_LOG_ERRORS))
   {
     logAcquire();
-    Serial.print("ERR 0x");
-    if (status < 0x10)
-    {
-      Serial.print("0");
-    }
-    Serial.print(status, HEX);
+    Serial.print("ERR ");
+    printHex(status);
     Serial.print(":");
     Serial.println(msg);
     logRelease();
@@ -142,12 +136,8 @@ void logAsync(const char name[], uint8_t cmd1)
   if (logAllowed(BLE_LOG_REC_MSGS))
   {
     logAcquire();
-    Serial.print("Rec msg 0x");
-    if (cmd1 < 0x10)
-    {
-      Serial.print("0");
-    }
-    Serial.print(cmd1, HEX);
+    Serial.print("Rec msg ");
+    printHex(cmd1);
     Serial.print(":");
     Serial.println(name);
     if (cmd1 == SNP_SET_ADV_DATA_CNF)
@@ -176,6 +166,16 @@ void logState(const char msg[])
 
     logRelease();
   }
+}
+
+static void printHex(uint8_t num)
+{
+  Serial.print("0x");
+  if (num < 0x10)
+  {
+    Serial.print("0");
+  }
+  Serial.print(num, HEX);
 }
 
 static bool logAllowed(uint8_t mode)
