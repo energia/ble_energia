@@ -44,6 +44,7 @@ class BLE : public Stream
 
     BLE(byte portType=BLE_PORT_UART);
 
+    void init_board(void);
     int begin(void);
     int handleEvents(void);
     int end(void);

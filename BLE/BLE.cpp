@@ -4,6 +4,7 @@
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Event.h>
+#include <ti/drivers/UART.h>
 
 #include <sap.h>
 #include <snp.h>
@@ -20,6 +21,12 @@
 #include "BLEServiceList.h"
 #include "BLEServices.h"
 #include "Debug.h"
+
+/* Conditionally include headers for MSP432 LP init_board */
+#ifdef __MSP432P401R__
+#include <gpio.h>
+#include <rom_map.h>
+#endif //__MSP432P401R__
 
 /*
  * Event_pend timeout set in units of ticks. Tick period is microseconds,
@@ -178,7 +185,7 @@ BLE::BLE(byte portType)
   resetPublicMembers();
 }
 
-int BLE::begin(void)
+void BLE::init_board(void)
 {
   /*
    * When a MSP432 and a CC2650 are stacked, pin 6.7 of the MSP is
@@ -188,6 +195,24 @@ int BLE::begin(void)
    */
   pinMode(PIN6_7, OUTPUT);
   digitalWrite(PIN6_7, HIGH);
+
+#ifdef __MSP432P401R__
+  UART_init();
+  MAP_GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P3,
+                                                 GPIO_PIN2,
+                                                 GPIO_PRIMARY_MODULE_FUNCTION);
+
+  MAP_GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P3,
+                                                  GPIO_PIN3,
+                                                  GPIO_PRIMARY_MODULE_FUNCTION);
+#endif //__MSP432P401R__
+
+}
+
+int BLE::begin(void)
+{
+  /* Do board specific initializations */
+  init_board();
 
   /* AP_init() in simple_ap.c */
   apEvent = Event_create(NULL, NULL);
