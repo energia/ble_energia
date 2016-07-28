@@ -94,12 +94,34 @@ void logParam(const char value[])
   }
 }
 
-void logError(const char msg[])
+void logError(uint8_t status)
 {
   if (logAllowed(BLE_LOG_ERRORS))
   {
     logAcquire();
+    Serial.print("ERR 0x");
+    if (status < 0x10)
+    {
+      Serial.print("0");
+    }
+    Serial.println(status, HEX);
+    logRelease();
+  }
+}
 
+void logError(const char msg[], uint8_t status)
+{
+  if (logAllowed(BLE_LOG_ERRORS))
+  {
+    logAcquire();
+    Serial.print("ERR 0x");
+    if (status < 0x10)
+    {
+      Serial.print("0");
+    }
+    Serial.print(status, HEX);
+    Serial.print(":");
+    Serial.println(msg);
     logRelease();
   }
 }

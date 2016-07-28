@@ -166,7 +166,7 @@ static void processSNPEventCB(uint16_t event, snpEventParam_t *param);
 static void numCmpInterrupt1(void);
 static void numCmpInterrupt2(void);
 static bool apEventPend(uint32_t event);
-static inline void apPostError(uint8_t status);
+static inline void apPostError(uint8_t status, const char errMsg[]);
 static bool isError(uint8_t status);
 
 BLE::BLE(byte portType)
@@ -1169,7 +1169,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           }
           else
           {
-            apPostError(hciRsp->status);
+            apPostError(hciRsp->status, "SNP_HCI_CMD_RSP");
           }
         } break;
         case SNP_TEST_RSP:
@@ -1203,7 +1203,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           }
           else
           {
-            apPostError(advDataRsp->status);
+            apPostError(advDataRsp->status, "SNP_SET_ADV_DATA_CNF");
           }
         } break;
         // Just a confirmation that the request update was sent.
@@ -1218,7 +1218,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           }
           else
           {
-            apPostError(connRsp->status);
+            apPostError(connRsp->status, "SNP_UPDATE_CONN_PARAM_CNF");
           }
         } break;
         case SNP_SET_SECURITY_PARAM_RSP:
@@ -1231,7 +1231,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           }
           else
           {
-            apPostError(securityParamRsp->status);
+            apPostError(securityParamRsp->status, "SNP_SET_SECURITY_PARAM_RSP");
           }
         } break;
         case SNP_SEND_AUTHENTICATION_DATA_RSP:
@@ -1244,7 +1244,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           }
           else
           {
-            apPostError(authRsp->status);
+            apPostError(authRsp->status, "SNP_SEND_AUTHENTICATION_DATA_RSP");
           }
         }
         case SNP_SET_WHITE_LIST_POLICY_RSP:
@@ -1257,7 +1257,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           }
           else
           {
-            apPostError(whiteListRsp->status);
+            apPostError(whiteListRsp->status, "SNP_SET_WHITE_LIST_POLICY_RSP");
           }
         }
         default:
@@ -1278,7 +1278,7 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           }
           else
           {
-            apPostError(notifIndRsp->status);
+            apPostError(notifIndRsp->status, "SNP_SEND_NOTIF_IND_CNF");
           }
         } break;
         default:
@@ -1349,7 +1349,7 @@ static void processSNPEventCB(uint16_t cmd1, snpEventParam_t *param)
       }
       else
       {
-        apPostError(evt->status);
+        apPostError(evt->status, "SNP_ADV_STARTED_EVT");
       }
     } break;
     case SNP_ADV_ENDED_EVT:
@@ -1362,7 +1362,7 @@ static void processSNPEventCB(uint16_t cmd1, snpEventParam_t *param)
       }
       else
       {
-        apPostError(evt->status);
+        apPostError(evt->status, "SNP_ADV_ENDED_EVT");
       }
     } break;
     case SNP_ATT_MTU_EVT:
@@ -1383,7 +1383,7 @@ static void processSNPEventCB(uint16_t cmd1, snpEventParam_t *param)
       }
       else
       {
-        apPostError(evt->status);
+        apPostError(evt->status, "SNP_SECURITY_EVT");
       }
     } break;
     case SNP_AUTHENTICATION_EVT:
@@ -1397,7 +1397,8 @@ static void processSNPEventCB(uint16_t cmd1, snpEventParam_t *param)
       logAsync("SNP_ERROR_EVT", cmd1);
       snpErrorEvt_t *evt = (snpErrorEvt_t *) param;
       ble.opcode = evt->opcode;
-      apPostError(evt->status);
+      logParam("Opcode", evt->opcode);
+      apPostError(evt->status, "SNP_ERROR_EVT");
     } break;
   }
 }
@@ -1434,8 +1435,9 @@ static bool apEventPend(uint32_t event)
   return status;
 }
 
-static inline void apPostError(uint8_t status)
+static inline void apPostError(uint8_t status, const char errMsg[])
 {
+  logError(errMsg, status);
   ble.error = status;
   Event_post(apEvent, AP_ERROR);
 }
@@ -1453,6 +1455,7 @@ static bool isError(uint8_t status)
   }
   else if ((ble.error = status) != SNP_SUCCESS)
   {
+    logError(status);
     return true;
   }
   return false;

@@ -21,6 +21,7 @@ BLE_Service heartRateService =
 
 void setup() {
   Serial.begin(115200);
+  ble.setLogLevel(BLE_LOG_ALL);
 
   /* Start the BLE layer and connect to the network processor. */
   ble.begin();
@@ -44,15 +45,15 @@ void loop() {
   if (millis() % 1000 == 0)
   {
     heartRateMeasurement += 1; // A little unrealistic
+
+    /* Register the new value with the BLE layer. */
+    ble.writeValue(&heartRateChar, heartRateMeasurement);
+
+    /* This line isn't necessary for displaying the characteristic value,
+       but it demonstrates how to read from the BLE layer. */
+    heartRateMeasurement = ble.readValue_int(&heartRateChar);
+
+    /* Print the measurement. */
+    Serial.print("heartRateMeasurement=");Serial.println(heartRateMeasurement);
   }
-
-  /* Register the new value with the BLE layer. */
-  ble.writeValue(&heartRateChar, heartRateMeasurement);
-
-  /* This line isn't necessary for displaying the characteristic value,
-     but it demonstrates how to read from the BLE layer. */
-  heartRateMeasurement = ble.readValue_int(&heartRateChar);
-
-  /* Print the measurement. */
-  Serial.print("heartRateMeasurement=");Serial.println(heartRateMeasurement);
 }
