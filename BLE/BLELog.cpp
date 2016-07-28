@@ -22,7 +22,7 @@ volatile bool logLockReq = false;
 /* The last log mode called; used for followup calls. */
 uint8_t apLogLast = 0x00;
 uint8_t otherLogLast = 0x00;
-#define GET_LOG_LAST ((apTask == Task_self()) ? apLogLast : otherLogLast)
+#define SHOULD_LOG_PARAM (logLevel & ((apTask == Task_self()) ? apLogLast : otherLogLast))
 
 static void hexPrint(int num);
 static void hexPrintln(int num);
@@ -37,7 +37,7 @@ void logSetMainTask(Task_Handle mainTask)
 
 void logParam(const char name[], const uint8_t buf[], uint16_t len)
 {
-  if (logLevel & GET_LOG_LAST)
+  if (SHOULD_LOG_PARAM)
   {
     logAcquire();
     Serial.print("  ");
@@ -55,7 +55,7 @@ void logParam(const char name[], const uint8_t buf[], uint16_t len)
 
 void logParam(const char name[], int value, int base)
 {
-  if (logLevel & GET_LOG_LAST)
+  if (SHOULD_LOG_PARAM)
   {
     logAcquire();
     Serial.print("  ");
@@ -85,7 +85,7 @@ void logParam(const char name[], int value)
 
 void logParam(const char value[])
 {
-  if (logLevel & GET_LOG_LAST)
+  if (SHOULD_LOG_PARAM)
   {
     logAcquire();
     Serial.print("  ");
