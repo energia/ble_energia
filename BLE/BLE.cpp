@@ -439,7 +439,7 @@ int BLE::setAdvertData(uint8_t advertType, uint8_t len, uint8_t *advertData)
  * SAP_GAP_ADTYPE_LOCAL_NAME_COMPLETE, and the third and so on are the
  * characters of the name.
  */
-int BLE::setAdvertName(uint8_t advertStringLen, const char *advertString)
+int BLE::setAdvertName(uint8_t advertStringLen, const char advertString[])
 {
   uint8_t newSize = sizeof(defScanRspData) - defScanRspData[0]
                   + 1 + advertStringLen;
@@ -456,7 +456,7 @@ int BLE::setAdvertName(uint8_t advertStringLen, const char *advertString)
   return setAdvertData(BLE_ADV_DATA_SCANRSP, newSize, newData);
 }
 
-int BLE::setAdvertName(const char *advertString)
+int BLE::setAdvertName(const char advertString[])
 {
   return setAdvertName(strlen(advertString), advertString);
 }
@@ -692,7 +692,7 @@ int BLE::writeValue(BLE_Char *bleChar, double value)
   return writeNotifInd(bleChar);
 }
 
-int BLE::writeValue(BLE_Char *bleChar, const uint8_t *buf, int len)
+int BLE::writeValue(BLE_Char *bleChar, const uint8_t buf[], int len)
 {
   if (isError(BLE_charValueInit(bleChar, (len)*sizeof(*buf))))
   {
@@ -706,7 +706,7 @@ int BLE::writeValue(BLE_Char *bleChar, const uint8_t *buf, int len)
  * Use buffer of size len+1 so the null-termination is stored. This way the
  * stored strings match the functionality of strcpy, which copies it.
  */
-int BLE::writeValue(BLE_Char *bleChar, const char *str, int len)
+int BLE::writeValue(BLE_Char *bleChar, const char str[], int len)
 {
   if (isError(BLE_charValueInit(bleChar, (len+1)*sizeof(*str))))
   {
@@ -716,7 +716,7 @@ int BLE::writeValue(BLE_Char *bleChar, const char *str, int len)
   return writeNotifInd(bleChar);
 }
 
-int BLE::writeValue(BLE_Char *bleChar, const char *str)
+int BLE::writeValue(BLE_Char *bleChar, const char str[])
 {
   return writeValue(bleChar, str, strlen(str));
 }
@@ -1018,7 +1018,7 @@ size_t BLE::write(uint8_t c)
   return 0;
 }
 
-size_t BLE::write(const uint8_t *buffer, size_t size)
+size_t BLE::write(const uint8_t buffer[], size_t size)
 {
   if (writeValue(&txChar, buffer, size) == BLE_SUCCESS)
   {
