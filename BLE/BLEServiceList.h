@@ -12,6 +12,6 @@ typedef struct BLE_Service_Node
 
 int BLE_registerService(BLE_Service *bleService);
 void BLE_resetCCCD(void);
-uint8_t BLE_charValueInit(BLE_Char *bleChar, size_t size);
+void BLE_charValueInit(BLE_Char *bleChar, size_t size);
 
 #endif

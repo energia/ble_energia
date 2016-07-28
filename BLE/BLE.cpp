@@ -614,90 +614,63 @@ static uint8_t writeNotifInd(BLE_Char *bleChar)
 
 int BLE::writeValue(BLE_Char *bleChar, char value)
 {
-  if (isError(BLE_charValueInit(bleChar, sizeof(value))))
-  {
-    return BLE_CHECK_ERROR;
-  }
+  BLE_charValueInit(bleChar, sizeof(value));
   *(char *) bleChar->_value = value;
   return writeNotifInd(bleChar);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, unsigned char value)
 {
-  if (isError(BLE_charValueInit(bleChar, sizeof(value))))
-  {
-    return BLE_CHECK_ERROR;
-  }
+  BLE_charValueInit(bleChar, sizeof(value));
   *(unsigned char *) bleChar->_value = value;
   return writeNotifInd(bleChar);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, int value)
 {
-  if (isError(BLE_charValueInit(bleChar, sizeof(value))))
-  {
-    return BLE_CHECK_ERROR;
-  }
+  BLE_charValueInit(bleChar, sizeof(value));
   *(int *) bleChar->_value = value;
   return writeNotifInd(bleChar);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, unsigned int value)
 {
-  if (isError(BLE_charValueInit(bleChar, sizeof(value))))
-  {
-    return BLE_CHECK_ERROR;
-  }
+  BLE_charValueInit(bleChar, sizeof(value));
   *(unsigned int *) bleChar->_value = value;
   return writeNotifInd(bleChar);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, long value)
 {
-  if (isError(BLE_charValueInit(bleChar, sizeof(value))))
-  {
-    return BLE_CHECK_ERROR;
-  }
+  BLE_charValueInit(bleChar, sizeof(value));
   *(long *) bleChar->_value = value;
   return writeNotifInd(bleChar);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, unsigned long value)
 {
-  if (isError(BLE_charValueInit(bleChar, sizeof(value))))
-  {
-    return BLE_CHECK_ERROR;
-  }
+  BLE_charValueInit(bleChar, sizeof(value));
   *(unsigned long *) bleChar->_value = value;
   return writeNotifInd(bleChar);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, float value)
 {
-  if (isError(BLE_charValueInit(bleChar, sizeof(value))))
-  {
-    return BLE_CHECK_ERROR;
-  }
+  BLE_charValueInit(bleChar, sizeof(value));
   *(float *) bleChar->_value = value;
   return writeNotifInd(bleChar);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, double value)
 {
-  if (isError(BLE_charValueInit(bleChar, sizeof(value))))
-  {
-    return BLE_CHECK_ERROR;
-  }
+  BLE_charValueInit(bleChar, sizeof(value));
   *(double *) bleChar->_value = value;
   return writeNotifInd(bleChar);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, const uint8_t buf[], int len)
 {
-  if (isError(BLE_charValueInit(bleChar, (len)*sizeof(*buf))))
-  {
-    return BLE_CHECK_ERROR;
-  }
+  BLE_charValueInit(bleChar, (len)*sizeof(*buf));
   memcpy((uint8_t *) bleChar->_value, buf, len); // includes null byte
   return writeNotifInd(bleChar);
 }
@@ -708,10 +681,7 @@ int BLE::writeValue(BLE_Char *bleChar, const uint8_t buf[], int len)
  */
 int BLE::writeValue(BLE_Char *bleChar, const char str[], int len)
 {
-  if (isError(BLE_charValueInit(bleChar, (len+1)*sizeof(*str))))
-  {
-    return BLE_CHECK_ERROR;
-  }
+  BLE_charValueInit(bleChar, (len+1)*sizeof(*str));
   strcpy((char *) bleChar->_value, str); // includes null byte
   return writeNotifInd(bleChar);
 }

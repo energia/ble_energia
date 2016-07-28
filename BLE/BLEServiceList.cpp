@@ -74,7 +74,7 @@ void BLE_resetCCCD(void)
   }
 }
 
-uint8_t BLE_charValueInit(BLE_Char *bleChar, size_t size)
+void BLE_charValueInit(BLE_Char *bleChar, size_t size)
 {
   if (bleChar->_valueLen != size && bleChar->_value)
   {
@@ -86,7 +86,6 @@ uint8_t BLE_charValueInit(BLE_Char *bleChar, size_t size)
     bleChar->_value = (void *) malloc(size);
     bleChar->_valueLen = size;
   }
-  return BLE_SUCCESS;
 }
 
 static void addServiceNode(BLE_Service *service)
@@ -275,11 +274,8 @@ static uint8_t serviceWriteAttrCB(void *context,
   {
     status = SNP_UNKNOWN_ATTRIBUTE;
   }
-  status = BLE_charValueInit(bleChar, len);
-  if (status == SNP_SUCCESS)
-  {
-    memcpy((uint8_t *) bleChar->_value, pData, len);
-  }
+  BLE_charValueInit(bleChar, len);
+  memcpy((uint8_t *) bleChar->_value, pData, len);
   if (bleChar == &rxChar)
   {
     BLESerial_clientWrite(len, pData);
