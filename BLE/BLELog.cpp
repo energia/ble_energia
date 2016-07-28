@@ -36,7 +36,8 @@ void logSetMainTask(Task_Handle mainTask)
   apTask = mainTask;
 }
 
-void logParam(const char name[], const uint8_t buf[], uint16_t len)
+void logParam(const char name[], const uint8_t buf[],
+              uint16_t len, bool isBigEnd)
 {
   if (SHOULD_LOG_PARAM)
   {
@@ -44,7 +45,14 @@ void logParam(const char name[], const uint8_t buf[], uint16_t len)
     Serial.print("  ");
     Serial.print(name);
     Serial.print(":0x");
-    hexPrintBigEnd(buf, len);
+    if (isBigEnd)
+    {
+      hexPrintBigEnd(buf, len);
+    }
+    else
+    {
+      hexPrintLitEnd(buf, len);
+    }
     Serial.println();
     logRelease();
   }
@@ -76,9 +84,17 @@ void logParam(const char name[], int value, int base)
   }
 }
 
-void logParam(const char name[], int value)
+void logParam(const char name[], const char value[])
 {
-  logParam(name, value, DEC);
+  if (SHOULD_LOG_PARAM)
+  {
+    logAcquire();
+    Serial.print("  ");
+    Serial.print(name);
+    Serial.print(":");
+    Serial.println(value);
+    logRelease();
+  }
 }
 
 void logParam(const char value[])

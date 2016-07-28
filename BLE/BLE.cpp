@@ -167,8 +167,6 @@ static uint8_t aDIdxToType[] =
 
 static uint8_t advertIndex(uint8_t advertType);
 static void AP_asyncCB(uint8_t cmd1, void *pParams);
-static uint8_t writeNotifInd(BLE_Char *bleChar);
-static uint8_t readValueValidateSize(BLE_Char *bleChar, size_t size);
 static void processSNPEventCB(uint16_t event, snpEventParam_t *param);
 static void numCmpInterrupt1(void);
 static void numCmpInterrupt2(void);
@@ -592,7 +590,15 @@ int BLE::setBleTimeout(uint16_t supervisionTimeout)
                             supervisionTimeout);
 }
 
-static uint8_t writeNotifInd(BLE_Char *bleChar)
+int BLE::apCharWriteValue(BLE_Char *bleChar, void *pData,
+                          size_t size, bool isBigEnd=true)
+{
+  logChar("App writing");
+  BLE_charWriteValue(bleChar, pData, size, isBigEnd);
+  return writeNotifInd(bleChar);
+}
+
+uint8_t BLE::writeNotifInd(BLE_Char *bleChar)
 {
   if (bleChar->_CCCD)
   {
@@ -616,7 +622,7 @@ static uint8_t writeNotifInd(BLE_Char *bleChar)
     do
     {
       /* Send at most ble.mtu per packet. */
-      uint16_t size = MIN(bleChar->_valueLen - sent, ble.mtu);
+      uint16_t size = MIN(bleChar->_valueLen - sent, mtu);
       localReq.pData = ((uint8_t *) bleChar->_value) + sent;
       logParam("Sending", size);
       if (isError(SNP_RPC_sendNotifInd(&localReq, size)))
@@ -637,65 +643,47 @@ static uint8_t writeNotifInd(BLE_Char *bleChar)
 
 int BLE::writeValue(BLE_Char *bleChar, char value)
 {
-  BLE_charValueInit(bleChar, sizeof(value));
-  *(char *) bleChar->_value = value;
-  return writeNotifInd(bleChar);
+  return apCharWriteValue(bleChar, (uint8_t *) &value, sizeof(value), false);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, unsigned char value)
 {
-  BLE_charValueInit(bleChar, sizeof(value));
-  *(unsigned char *) bleChar->_value = value;
-  return writeNotifInd(bleChar);
+  return apCharWriteValue(bleChar, (uint8_t *) &value, sizeof(value), false);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, int value)
 {
-  BLE_charValueInit(bleChar, sizeof(value));
-  *(int *) bleChar->_value = value;
-  return writeNotifInd(bleChar);
+  return apCharWriteValue(bleChar, (uint8_t *) &value, sizeof(value), false);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, unsigned int value)
 {
-  BLE_charValueInit(bleChar, sizeof(value));
-  *(unsigned int *) bleChar->_value = value;
-  return writeNotifInd(bleChar);
+  return apCharWriteValue(bleChar, (uint8_t *) &value, sizeof(value), false);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, long value)
 {
-  BLE_charValueInit(bleChar, sizeof(value));
-  *(long *) bleChar->_value = value;
-  return writeNotifInd(bleChar);
+  return apCharWriteValue(bleChar, (uint8_t *) &value, sizeof(value), false);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, unsigned long value)
 {
-  BLE_charValueInit(bleChar, sizeof(value));
-  *(unsigned long *) bleChar->_value = value;
-  return writeNotifInd(bleChar);
+  return apCharWriteValue(bleChar, (uint8_t *) &value, sizeof(value), false);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, float value)
 {
-  BLE_charValueInit(bleChar, sizeof(value));
-  *(float *) bleChar->_value = value;
-  return writeNotifInd(bleChar);
+  return apCharWriteValue(bleChar, (uint8_t *) &value, sizeof(value), true);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, double value)
 {
-  BLE_charValueInit(bleChar, sizeof(value));
-  *(double *) bleChar->_value = value;
-  return writeNotifInd(bleChar);
+  return apCharWriteValue(bleChar, (uint8_t *) &value, sizeof(value), true);
 }
 
 int BLE::writeValue(BLE_Char *bleChar, const uint8_t buf[], int len)
 {
-  BLE_charValueInit(bleChar, (len)*sizeof(*buf));
-  memcpy((uint8_t *) bleChar->_value, buf, len); // includes null byte
-  return writeNotifInd(bleChar);
+  return apCharWriteValue(bleChar, (uint8_t *) buf, (len)*sizeof(*buf), true);
 }
 
 /*
@@ -704,9 +692,9 @@ int BLE::writeValue(BLE_Char *bleChar, const uint8_t buf[], int len)
  */
 int BLE::writeValue(BLE_Char *bleChar, const char str[], int len)
 {
-  BLE_charValueInit(bleChar, (len+1)*sizeof(*str));
-  strcpy((char *) bleChar->_value, str); // includes null byte
-  return writeNotifInd(bleChar);
+  int ret = apCharWriteValue(bleChar, (uint8_t *) str, (len+1)*sizeof(*str), true);
+  logParam("As string", str);
+  return ret;
 }
 
 int BLE::writeValue(BLE_Char *bleChar, const char str[])
@@ -720,7 +708,7 @@ int BLE::writeValue(BLE_Char *bleChar, String str)
   return writeValue(bleChar, str.c_str(), len);
 }
 
-static uint8_t readValueValidateSize(BLE_Char *bleChar, size_t size)
+uint8_t BLE::readValueValidateSize(BLE_Char *bleChar, size_t size)
 {
   logChar("Reading");
   logParam("Handle", bleChar->_handle);
@@ -732,7 +720,7 @@ static uint8_t readValueValidateSize(BLE_Char *bleChar, size_t size)
     return BLE_UNDEFINED_VALUE;
   }
   logParam("Size in bytes", size);
-  logParam("Value", (const uint8_t *) bleChar->_value, size);
+  logParam("Value", (const uint8_t *) bleChar->_value, size, bleChar->_isBigEnd);
   return BLE_SUCCESS;
 }
 
@@ -852,7 +840,7 @@ uint8_t* BLE::readValue_uint8_t(BLE_Char *bleChar, int *len)
   logChar("Reading");
   logParam("Handle", bleChar->_handle);
   logParam("Buffer length", *len);
-  logParam("Buffer contents", (const uint8_t *) bleChar->_value, *len);
+  logParam("Buffer contents", (const uint8_t *) bleChar->_value, *len, true);
   return (uint8_t *) bleChar->_value;
 }
 
@@ -868,7 +856,7 @@ char* BLE::readValue_string(BLE_Char *bleChar)
     bleChar->_value = realloc(bleChar->_value, (len+1)*sizeof(char));
     ((char *) bleChar->_value)[len] = '\0';
   }
-  logParam((const char *) bleChar->_value);
+  logParam("As string", (const char *) bleChar->_value);
   return (char *) bleChar->_value;
 }
 

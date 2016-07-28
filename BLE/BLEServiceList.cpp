@@ -1,6 +1,7 @@
 
 #include <sap.h>
 #include <snp.h>
+#include <snp_rpc.h>
 
 #include "BLELog.h"
 #include "BLESerial.h"
@@ -81,21 +82,24 @@ void BLE_resetCCCD(void)
   }
 }
 
-void BLE_charValueInit(BLE_Char *bleChar, size_t size)
+void BLE_charWriteValue(BLE_Char *bleChar, void *pData, size_t size, bool isBigEnd)
 {
+  logParam("Handle", bleChar->_handle);
+  logParam("Size in bytes", bleChar->_valueLen);
   if (bleChar->_valueLen != size && bleChar->_value)
   {
     free(bleChar->_value);
     bleChar->_value = NULL;
   }
-  logChar("Writing");
-  logParam("Handle", bleChar->_handle);
   if (bleChar->_value == NULL)
   {
     logParam("New size in bytes", size);
     bleChar->_value = (void *) malloc(size);
+    bleChar->_isBigEnd = isBigEnd;
     bleChar->_valueLen = size;
   }
+  memcpy((uint8_t *) bleChar->_value, pData, size);
+  logParam("Value", (const uint8_t *) bleChar->_value, size, isBigEnd);
 }
 
 static void addServiceNode(BLE_Service *service)
@@ -181,6 +185,7 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
   /* Initialize characteristic to have one byte with a value of 0.
      Override by calling writeValue in the main sketch. */
   bleChar->_value = calloc(1, 1);
+  bleChar->_isBigEnd = false;
   bleChar->_valueLen = 1;
 
   /* Default to no notifications or indications. */
@@ -277,7 +282,7 @@ static uint8_t serviceReadAttrCB(void *context,
     uint16_t remaining = bleChar->_valueLen - offset;
     *len = MIN(remaining, maxSize);
     logParam("Read length", *len);
-    logParam("Data", pData, *len);
+    logParam("Data", pData, *len, bleChar->_isBigEnd);
     memcpy(pData, src, *len);
   }
   return status;
@@ -296,8 +301,8 @@ static uint8_t serviceWriteAttrCB(void *context,
   {
     status = SNP_UNKNOWN_ATTRIBUTE;
   }
-  BLE_charValueInit(bleChar, len);
-  memcpy((uint8_t *) bleChar->_value, pData, len);
+  logChar("Client writing");
+  BLE_charWriteValue(bleChar, pData, len, bleChar->_isBigEnd);
   if (bleChar == &rxChar)
   {
     BLESerial_clientWrite(len, pData);

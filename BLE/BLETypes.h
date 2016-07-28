@@ -124,6 +124,7 @@ typedef struct
   /* Energia user should never need to touch these. */
   uint16_t          _handle;
   void              *_value;
+  bool              _isBigEnd;
   uint16_t          _valueLen;
   uint8_t           _CCCD;
   uint16_t          _CCCDHandle;
