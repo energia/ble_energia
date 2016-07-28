@@ -20,6 +20,5 @@ void logError(const char msg[], uint8_t status);
 void logRPC(const char msg[]);
 void logAsync(const char name[], uint8_t cmd1);
 void logChar(const char action[]);
-void logState(const char msg[]);
 
 #endif

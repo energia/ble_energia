@@ -200,16 +200,6 @@ void logChar(const char action[])
   }
 }
 
-void logState(const char msg[])
-{
-  if (logAllowed(BLE_LOG_STATE))
-  {
-    logAcquire();
-
-    logRelease();
-  }
-}
-
 static void hexPrint(int num)
 {
   Serial.print("0x");
