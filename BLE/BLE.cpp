@@ -380,11 +380,6 @@ uint8_t BLE::advertDataInit(void)
   return BLE_SUCCESS;
 }
 
-int BLE::startAdvert(void)
-{
-  return startAdvert((BLE_Advert_Settings *) NULL);
-}
-
 int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
 {
   logRPC("Start adv");
@@ -1398,7 +1393,7 @@ static bool apEventPend(uint32_t event)
   /* Bug in NPI causes this specific event to get posted twice */
   if (event == AP_EVT_ADV_DATA_RSP)
   {
-    Event_pend(apEvent, AP_NONE, event | AP_ERROR, 1);
+    Event_pend(apEvent, AP_NONE, event | AP_ERROR, AP_EVENT_PEND_TIMEOUT);
   }
   bool status = false;
   if (postedEvent & event)
