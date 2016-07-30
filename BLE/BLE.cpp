@@ -5,7 +5,6 @@
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Event.h>
 #include <ti/drivers/UART.h>
-#include "Board.h"
 
 #include <sap.h>
 #include <snp.h>
@@ -17,7 +16,7 @@
 #include <npi_task.h>
 
 #include <BLE.h>
-#include "BLEBoardDefs.h"
+#include "BLEBoard.h"
 #include "BLELog.h"
 #include "BLESerial.h"
 #include "BLEServiceList.h"
@@ -57,13 +56,6 @@
 #define AP_EVT_NUM_CMP_BTN                   Event_Id_16     // Numeric Comparison Button Press
 #define AP_EVT_COPIED_ASYNC_DATA             Event_Id_30     // Copied Data From asyncRspData
 #define AP_ERROR                             Event_Id_31     // Error
-
-#ifdef __MSP432P401R__
-#define BLE_UART_ID Board_UARTA2 // =1, USB Serial is Board_UARTA0=0
-#define CC2650_RESET_PIN 35
-#define BLE_Board_MRDY 2  // Pin 6.0
-#define BLE_Board_SRDY 19 // Pin 2.5
-#endif //__MSP432P401R__
 
 // From bcomdef.h in the BLE SDK
 #define B_ADDR_LEN 6
