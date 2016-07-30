@@ -2,7 +2,7 @@
 #include <BLE.h>
 
 int heartRateMeasurement = 0;
-byte char1Value = 0;
+char char1Value = 0;
 int char2Value = 0;
 long char3Value = 0;
 int char4Value = 0;
@@ -122,7 +122,7 @@ void loop() {
       char6Value += 1;
       ble.writeValue(&char6, char6Value);
     }
-    char1Value = ble.readValue_byte(&char1);
+    char1Value = ble.readValue_char(&char1);
     Serial.print("char1Value=");Serial.println(char1Value);
     char2Value = ble.readValue_int(&char2);
     Serial.print("char2Value=");Serial.println(char2Value);

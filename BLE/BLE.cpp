@@ -633,6 +633,11 @@ uint8_t BLE::writeNotifInd(BLE_Char *bleChar)
   return BLE_SUCCESS;
 }
 
+int BLE::writeValue(BLE_Char *bleChar, bool value)
+{
+  return apCharWriteValue(bleChar, (uint8_t *) &value, sizeof(value), false);
+}
+
 int BLE::writeValue(BLE_Char *bleChar, char value)
 {
   return apCharWriteValue(bleChar, (uint8_t *) &value, sizeof(value), false);
@@ -716,12 +721,12 @@ uint8_t BLE::readValueValidateSize(BLE_Char *bleChar, size_t size)
   return BLE_SUCCESS;
 }
 
-boolean BLE::readValue_boolean(BLE_Char *bleChar)
+bool BLE::readValue_bool(BLE_Char *bleChar)
 {
-  error = readValueValidateSize(bleChar, sizeof(boolean));
+  error = readValueValidateSize(bleChar, sizeof(bool));
   if (error == BLE_SUCCESS)
   {
-    return *(boolean *) bleChar->_value;
+    return *(bool *) bleChar->_value;
   }
   return 0;
 }
@@ -746,16 +751,6 @@ unsigned char BLE::readValue_uchar(BLE_Char *bleChar)
   return 0;
 }
 
-byte BLE::readValue_byte(BLE_Char *bleChar)
-{
-  error = readValueValidateSize(bleChar, sizeof(byte));
-  if (error == BLE_SUCCESS)
-  {
-    return *(byte *) bleChar->_value;
-  }
-  return 0;
-}
-
 int BLE::readValue_int(BLE_Char *bleChar)
 {
   error = readValueValidateSize(bleChar, sizeof(int));
@@ -772,16 +767,6 @@ unsigned int BLE::readValue_uint(BLE_Char *bleChar)
   if (error == BLE_SUCCESS)
   {
     return *(unsigned int *) bleChar->_value;
-  }
-  return 0;
-}
-
-word BLE::readValue_word(BLE_Char *bleChar)
-{
-  error = readValueValidateSize(bleChar, sizeof(word));
-  if (error == BLE_SUCCESS)
-  {
-    return *(word *) bleChar->_value;
   }
   return 0;
 }

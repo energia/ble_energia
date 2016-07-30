@@ -34,6 +34,7 @@
 #define _HAL_TYPES_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /* ------------------------------------------------------------------------------------------------
  *                                               Types
@@ -51,7 +52,7 @@ typedef unsigned long   uint32;
 //typedef unsigned char   bool;
 
 typedef uint32          halDataAlign_t;
-#define bool            _Bool
+// #define bool            _Bool
 
 /* ------------------------------------------------------------------------------------------------
  *                                        Compiler Macros

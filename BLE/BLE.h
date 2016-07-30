@@ -79,24 +79,23 @@ class BLE : public Stream
     int setRespLatency(uint16_t slaveLatency); // Measured in number of connection intervals the slave can miss.
     int setBleTimeout(uint16_t supervisionTimeout);
 
-    int writeValue(BLE_Char *bleChar, char value);
-    int writeValue(BLE_Char *bleChar, unsigned char value);
-    int writeValue(BLE_Char *bleChar, int value);
-    int writeValue(BLE_Char *bleChar, unsigned int value);
-    int writeValue(BLE_Char *bleChar, long value);
-    int writeValue(BLE_Char *bleChar, unsigned long value);
-    int writeValue(BLE_Char *bleChar, float value);
-    int writeValue(BLE_Char *bleChar, double value);
-    int writeValue(BLE_Char *bleChar, const uint8_t *buf, int len);
-    int writeValue(BLE_Char *bleChar, const char *str); // Char array
-    int writeValue(BLE_Char *bleChar, String str); // Object, calls fxn for char array
-    boolean readValue_boolean(BLE_Char *bleChar);
+    int writeValue(BLE_Char *bleChar, bool value); //_bool
+    int writeValue(BLE_Char *bleChar, char value); //_char
+    int writeValue(BLE_Char *bleChar, unsigned char value); //_uchar
+    int writeValue(BLE_Char *bleChar, int value); //_int
+    int writeValue(BLE_Char *bleChar, unsigned int value); //_uint
+    int writeValue(BLE_Char *bleChar, long value); //_long
+    int writeValue(BLE_Char *bleChar, unsigned long value); //_ulong
+    int writeValue(BLE_Char *bleChar, float value); //_float
+    int writeValue(BLE_Char *bleChar, double value); //_double
+    int writeValue(BLE_Char *bleChar, const uint8_t *buf, int len); //_uint8_t
+    int writeValue(BLE_Char *bleChar, const char *str); // Char array //_string
+    int writeValue(BLE_Char *bleChar, String str); // Object, calls fxn for char array //_String
+    bool readValue_bool(BLE_Char *bleChar);
     char readValue_char(BLE_Char *bleChar);
     unsigned char readValue_uchar(BLE_Char *bleChar);
-    byte readValue_byte(BLE_Char *bleChar);
     int readValue_int(BLE_Char *bleChar);
     unsigned int readValue_uint(BLE_Char *bleChar);
-    word readValue_word(BLE_Char *bleChar);
     long readValue_long(BLE_Char *bleChar);
     unsigned long readValue_ulong(BLE_Char *bleChar);
     float readValue_float(BLE_Char *bleChar);
