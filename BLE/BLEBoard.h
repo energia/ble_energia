@@ -19,10 +19,11 @@
 #define CC2650_RESET_PIN   PIN6_7
 #define BLE_Board_MRDY     PIN6_0
 #define BLE_Board_SRDY     PIN2_5
-#define BLE_SBL_RESET_PIN  PIN6_1
 #define BLE_SBL_BL_PIN     PIN6_0
 
 #define BLE_UART_ID Board_UARTA2 // =1, USB Serial is Board_UARTA0=0
 #endif //__MSP432P401R__
+
+void initBoard(void);
 
 #endif
