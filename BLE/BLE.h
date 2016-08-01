@@ -48,11 +48,11 @@ class BLE : public Stream
 
     BLE(byte portType=BLE_PORT_UART);
 
-    void init_board(void);
     int begin(void);
+    void setLogLevel(uint8_t newLogLevel);
     int handleEvents(void);
-    int end(void);
     int terminateConn(void);
+    int end(void);
 
     bool isConnected(void);
     bool isAdvertising(void);
@@ -116,8 +116,6 @@ class BLE : public Stream
     void getRevision(BLE_Get_Revision_Rsp *getRevisionRsp);
     void getStatus(BLE_Get_Status_Rsp *getStatusRsp);
     int testCommand(BLE_Test_Command_Rsp *testRsp);
-
-    void setLogLevel(uint8_t newLogLevel);
 
     int serial(void);
     virtual int available(void);
