@@ -6,14 +6,14 @@
 #include <ti/sysbios/knl/Event.h>
 #include <ti/drivers/UART.h>
 
-#include "sap.h"
-#include "snp.h"
-#include "snp_rpc.h"
+#include "ti/sap/sap.h"
+#include "ti/sap/snp.h"
+#include "ti/sap/snp_rpc.h"
 /*
  * This is strictly to force the build system to compile npi into
  * its own object files for the linker to link. It isn't used here.
  */
-#include "npi_task.h"
+#include "ti/npi/npi_task.h"
 
 #include <BLE.h>
 #include "BLEBoard.h"

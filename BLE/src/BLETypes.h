@@ -2,8 +2,8 @@
 #ifndef BLE_TYPES_H
 #define BLE_TYPES_H
 
-#include "sap.h"
-#include "hal_defs.h"
+#include "ti/sap/sap.h"
+#include "ti/npi/hal_defs.h"
 
 #include <Energia.h>
 
