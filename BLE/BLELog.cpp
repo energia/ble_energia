@@ -172,8 +172,18 @@ void logRPC(const char msg[])
   }
 }
 
+bool advDataCnfPendedWorkaround = false;
 void logAsync(const char name[], uint8_t cmd1)
 {
+  if (cmd1 == SNP_SET_ADV_DATA_CNF)
+  {
+    advDataCnfPendedWorkaround = !advDataCnfPendedWorkaround;
+    // Log every other one of this type because it gets posted twice
+    if (!advDataCnfPendedWorkaround)
+    {
+      return;
+    }
+  }
   if (logAllowed(BLE_LOG_REC_MSGS))
   {
     logAcquire();
@@ -181,10 +191,6 @@ void logAsync(const char name[], uint8_t cmd1)
     hexPrint(cmd1);
     Serial.print(":");
     Serial.println(name);
-    if (cmd1 == SNP_SET_ADV_DATA_CNF)
-    {
-      Serial.println("Bug->double evt");
-    }
     logRelease();
   }
 }
