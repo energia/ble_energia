@@ -17,9 +17,8 @@
 #define BLE_INVALID_HANDLE             0x50
 #define BLE_UNDEFINED_VALUE            0x51
 #define BLE_NOT_IMPLEMENTED            0x52
-#define BLE_SERIAL_DISABLED            0x53
-#define BLE_TIMEOUT                    0x54
-#define BLE_CHECK_ERROR                0x55
+#define BLE_TIMEOUT                    0x53
+#define BLE_CHECK_ERROR                0x54
 
 /* Log Levels */
 #define BLE_LOG_NONE                   0x00
@@ -28,7 +27,6 @@
 #define BLE_LOG_REC_MSGS               0x04
 #define BLE_LOG_MSGS (BLE_LOG_RPCS | BLE_LOG_REC_MSGS)
 #define BLE_LOG_CHARACTERISTICS        0x08
-#define BLE_LOG_STATE                  0x10
 #define BLE_LOG_ALL                    0xFF
 
 /* Type of connection between the user application's

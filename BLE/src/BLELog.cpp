@@ -4,7 +4,7 @@
 #define ACQUIRE_TIMEOUT 50 // ms
 
 /* Bit mask that determines what is logged. */
-uint8_t logLevel = 0;
+uint8_t logLevel = BLE_LOG_NONE;
 
 /* Prevents competition with the Energia user's Serial calls */
 volatile bool apLogLock = false;

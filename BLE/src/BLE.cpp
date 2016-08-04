@@ -677,14 +677,15 @@ int BLE::writeValue(BLE_Char *bleChar, String str)
 
 uint8_t BLE::readValueValidateSize(BLE_Char *bleChar, size_t size)
 {
-  logChar("Reading");
+  logChar("App reading");
   logParam("Handle", bleChar->_handle);
   if (bleChar->_value == NULL || bleChar->_valueLen != size)
   {
     logParam("Invalid size");
     logParam("Have", bleChar->_valueLen);
     logParam("Want", size);
-    return BLE_UNDEFINED_VALUE;
+    error = BLE_UNDEFINED_VALUE;
+    return BLE_CHECK_ERROR;
   }
   logParam("Size in bytes", size);
   logParam("Value", (const uint8_t *) bleChar->_value, size, bleChar->_isBigEnd);
@@ -784,7 +785,7 @@ double BLE::readValue_double(BLE_Char *bleChar)
 uint8_t* BLE::readValue_uint8_t(BLE_Char *bleChar, int *len)
 {
   *len = bleChar->_valueLen;
-  logChar("Reading");
+  logChar("App reading");
   logParam("Handle", bleChar->_handle);
   logParam("Buffer length", *len);
   logParam("Buffer contents", (const uint8_t *) bleChar->_value, *len, true);
@@ -794,7 +795,7 @@ uint8_t* BLE::readValue_uint8_t(BLE_Char *bleChar, int *len)
 char* BLE::readValue_string(BLE_Char *bleChar)
 {
   int len = bleChar->_valueLen;
-  logChar("Reading");
+  logChar("App reading");
   logParam("Handle", bleChar->_handle);
   logParam("String length", len);
   /* Convert value to null-termiated string, if not already */
