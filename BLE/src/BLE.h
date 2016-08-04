@@ -48,23 +48,23 @@ class BLE : public Stream
 
     BLE(byte portType=BLE_PORT_UART);
 
+    /* BLE state */
     int begin(void);
     void setLogLevel(uint8_t newLogLevel);
     int handleEvents(void);
     int terminateConn(void);
     void end(void);
-
     bool isConnected(void);
     bool isAdvertising(void);
 
-    int addService(BLE_Service *bleService);
-
+    /* Advertising */
     int startAdvert(BLE_Advert_Settings *advertSettings=NULL);
     int stopAdvert(void);
     int setAdvertData(uint8_t advertType, uint8_t len, uint8_t *advertData);
     int setAdvertName(const char *advertString);
     int setAdvertName(String *advertString);
 
+    /* Advanced parameters */
     int setGattParam(uint8_t serviceID, uint8_t charID,
                      uint16_t len, uint8_t *pData);
     int getGattParam(uint8_t serviceID, uint8_t charID,
@@ -73,12 +73,15 @@ class BLE : public Stream
     int getGapParam(uint16_t paramId, uint16_t *Value);
     uint8_t *hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData);
 
+    /* Connection parameters */
     int setConnParams(BLE_Conn_Params_Update_Req *connParams);
     int setMinConnInt(uint16_t intervalMin); // Number of 1.25ms time slots
     int setMaxConnInt(uint16_t intervalMax); // Number of 1.25ms time slots
     int setRespLatency(uint16_t slaveLatency); // Measured in number of connection intervals the slave can miss.
     int setBleTimeout(uint16_t supervisionTimeout);
 
+    /* Services and characteristics */
+    int addService(BLE_Service *bleService);
     int writeValue(BLE_Char *bleChar, bool value); //_bool
     int writeValue(BLE_Char *bleChar, char value); //_char
     int writeValue(BLE_Char *bleChar, unsigned char value); //_uchar
@@ -104,6 +107,7 @@ class BLE : public Stream
     char* readValue_string(BLE_Char *bleChar);
     String readValue_String(BLE_Char *bleChar);
 
+    /* Security */
     int setPairingMode(uint8_t param);
     int setIoCapabilities(uint8_t param);
     int useBonding(bool param);
@@ -112,11 +116,13 @@ class BLE : public Stream
     int sendSecurityRequest(void);
     int setWhiteListPolicy(uint8_t policy);
 
+    /* Diagnostics */
     unsigned int getRand(void);
     void getRevision(BLE_Get_Revision_Rsp *getRevisionRsp);
     void getStatus(BLE_Get_Status_Rsp *getStatusRsp);
     int testCommand(BLE_Test_Command_Rsp *testRsp);
 
+    /* Serial over BLE */
     int serial(void);
     virtual int available(void);
     virtual int read(void);
