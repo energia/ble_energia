@@ -28,6 +28,9 @@ void setup() {
 
   /* Add the heart rate service. */
   ble.addService(&heartRateService);
+
+  /* Sets the characteristic value's type. Note that this can be changed by
+     calling writeValue with a differently typed variable. */
   ble.writeValue(&heartRateChar, heartRateMeasurement);
 
   /* Set the name that dislays when scanning for bluetooth devices. */
