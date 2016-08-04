@@ -1,7 +1,7 @@
 
 #include <BLE.h>
 
-byte char1Value = 0;
+char char1Value = 0;
 int char2Value = 0;
 long char3Value = 0;
 String char4Value = String("Hello, world!");
@@ -64,7 +64,7 @@ void setup() {
 // the loop routine runs over and over again forever as a task.
 void loop() {
   ble.handleEvents();
-  char1Value = ble.readValue_byte(&char1);
+  char1Value = ble.readValue_char(&char1);
   Serial.print("char1Value=");Serial.println(char1Value);
   char2Value = ble.readValue_int(&char2);
   Serial.print("char2Value=");Serial.println(char2Value);
