@@ -206,6 +206,17 @@ void logChar(const char action[])
   }
 }
 
+void logReset(void)
+{
+  logLevel = BLE_LOG_NONE;
+  apLogLock = false;
+  apTask = NULL;
+  logLock = 0;
+  logLockReq = false;
+  apLogLast = 0x00;
+  otherLogLast = 0x00;
+}
+
 static void hexPrint(int num)
 {
   Serial.print("0x");

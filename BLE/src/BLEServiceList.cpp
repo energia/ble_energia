@@ -343,3 +343,25 @@ static uint8_t serviceCCCDIndCB(void *context,
   }
   return status;
 }
+
+/*
+ * Iterate through list and free malloced data. Note that the BLE_Char's
+ * and BLE_Service's are statically allocated and are not freed.
+ */
+void BLE_clearServices(void)
+{
+  while (bleServiceListHead != NULL)
+  {
+    BLE_Service *service = bleServiceListHead->service;
+    for (uint8_t i = 0; i < service->numChars; i++)
+    {
+      free(service->chars[i]->_value);
+      service->chars[i]->_value = NULL;
+    }
+    bleServiceListTail = bleServiceListHead;
+    bleServiceListHead = bleServiceListHead->next;
+    free(bleServiceListTail);
+  }
+  bleServiceListHead = NULL;
+  bleServiceListTail = NULL;
+}

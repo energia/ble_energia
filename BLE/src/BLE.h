@@ -52,7 +52,7 @@ class BLE : public Stream
     void setLogLevel(uint8_t newLogLevel);
     int handleEvents(void);
     int terminateConn(void);
-    int end(void);
+    void end(void);
 
     bool isConnected(void);
     bool isAdvertising(void);

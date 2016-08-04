@@ -251,7 +251,7 @@ int BLE::begin(void)
   return BLE_SUCCESS;
 }
 
-int BLE::end(void)
+void BLE::end(void)
 {
   /* Reset private members of BLE.h */
   for (uint8_t idx = 0; idx < MAX_ADVERT_IDX; idx++) {advertDataArr[idx] = NULL;}
@@ -259,19 +259,17 @@ int BLE::end(void)
   /* Reset public members of BLE.h */
   resetPublicMembers();
 
-
-  // _connHandle = -1;
-  // txChar;
-  // rxChar;
-  // serialService;
-  // bleServiceListHead;
-  // bleServiceListTail;
-  // rxBuffer;
-  // rxWriteIndex;
-  // rxReadIndex;
-  // SAP_reset();
-  // SAP_close();
-  return BLE_NOT_IMPLEMENTED;
+  BLE_clearServices();
+  flush();
+  logReset();
+  Event_delete(&apEvent);
+  free(asyncRspData);
+  asyncRspData = NULL;
+  memset(&eventHandlerData, 0, sizeof(eventHandlerData));
+  _connHandle = -1;
+  connected = false;
+  advertising = false;
+  SAP_close();
 }
 
 int BLE::resetPublicMembers(void)
@@ -282,6 +280,8 @@ int BLE::resetPublicMembers(void)
   memset(&bleAddr, 0, sizeof(bleAddr));
   authKey = 0;
   mtu = 20;
+  displayStringFxn = NULL;
+  displayUIntFxn = NULL;
   return BLE_SUCCESS;
 }
 
