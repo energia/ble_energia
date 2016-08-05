@@ -106,6 +106,8 @@ class BLE : public Stream
     uint8_t* readValue_uint8_t(BLE_Char *bleChar, int *len);
     char* readValue_string(BLE_Char *bleChar);
     String readValue_String(BLE_Char *bleChar);
+    void setValueFormat(BLE_Char *bleChar, uint8_t valueFormat,
+                        int8_t valueExponent=0);
 
     /* Security */
     int setPairingMode(uint8_t param);

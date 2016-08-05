@@ -824,6 +824,13 @@ String BLE::readValue_String(BLE_Char *bleChar)
   return str;
 }
 
+void BLE::setValueFormat(BLE_Char *bleChar, uint8_t valueFormat,
+                         int8_t valueExponent)
+{
+  bleChar->_valueFormat = valueFormat;
+  bleChar->_valueExponent = valueExponent;
+}
+
 int BLE::setSecurityParam(uint16_t paramId, uint16_t len, uint8_t *pData)
 {
   logRPC("Set sec param");

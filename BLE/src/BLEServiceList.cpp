@@ -180,7 +180,7 @@ static void constructService(SAP_Service_t *service, BLE_Service *bleService)
 static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
 {
   /* TODO remove this. Bug in BLE stack makes this fail otherwise. */
-  bleChar->valueFormat = 0;
+  bleChar->_valueFormat = 0;
 
   /* Initialize characteristic to have one byte with a value of 0.
      Override by calling writeValue in the main sketch. */
@@ -209,8 +209,6 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
     uint16_t charStrLen = strlen(bleChar->charDesc);
     sapChar->pUserDesc->maxLen   = charStrLen;
     sapChar->pUserDesc->initLen  = charStrLen;
-    // sapChar->pUserDesc->pDesc    = (uint8_t *) malloc(charStrLen*sizeof(uint8_t));
-    // memcpy(sapChar->pUserDesc->pDesc, bleChar->charDesc, charStrLen);
     sapChar->pUserDesc->pDesc    = (uint8_t *) bleChar->charDesc;
   }
   else
@@ -219,11 +217,11 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
   }
   sapChar->pCccd = (SAP_UserCCCDAttr_t *) malloc(sizeof(*sapChar->pCccd));
   sapChar->pCccd->perms          = SNP_GATT_PERMIT_READ | SNP_GATT_PERMIT_WRITE;
-  if (bleChar->valueFormat)
+  if (bleChar->_valueFormat)
   {
     sapChar->pFormat = (SAP_FormatAttr_t *) malloc(sizeof(*sapChar->pFormat));
-    sapChar->pFormat->format     = bleChar->valueFormat;
-    sapChar->pFormat->exponent   = bleChar->valueExponent;
+    sapChar->pFormat->format     = bleChar->_valueFormat;
+    sapChar->pFormat->exponent   = bleChar->_valueExponent;
     sapChar->pFormat->unit       = 0;
     sapChar->pFormat->name_space = 0;
     sapChar->pFormat->desc       = 0;

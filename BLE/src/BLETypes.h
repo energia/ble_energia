@@ -117,9 +117,9 @@ typedef struct
   unsigned char     properties; // bitwise OR of macros: e.g. BLE_READABLE | BLE_WRITABLE
   // Null terminated; internally set permissions to read only so we don't have to worry about the length changing
   const char        *charDesc;
-  unsigned char     valueFormat;
-  unsigned char     valueExponent; // only used with integer formats, e.g. value = storedValue*10^valueExponent
   /* Energia user should never need to touch these. */
+  unsigned char     _valueFormat;
+  unsigned char     _valueExponent; // only used with integer formats, e.g. value = storedValue*10^valueExponent
   uint16_t          _handle;
   void              *_value;
   bool              _isBigEnd;
