@@ -669,10 +669,10 @@ int BLE::writeValue(BLE_Char *bleChar, const char str[])
   return writeValue(bleChar, str, strlen(str));
 }
 
-int BLE::writeValue(BLE_Char *bleChar, String str)
+int BLE::writeValue(BLE_Char *bleChar, String *str)
 {
-  int len = str.length();
-  return writeValue(bleChar, str.c_str(), len);
+  int len = (*str).length();
+  return writeValue(bleChar, (*str).c_str(), len);
 }
 
 uint8_t BLE::readValueValidateSize(BLE_Char *bleChar, size_t size)
@@ -808,7 +808,8 @@ char* BLE::readValue_string(BLE_Char *bleChar)
   return (char *) bleChar->_value;
 }
 
-// TO-DO: Return pointer instead? Not sure if ok for Energia.
+/* Returns object by value instead of reference so the Energia user
+   doesn't have to care about deallocating the object. */
 String BLE::readValue_String(BLE_Char *bleChar)
 {
   char *buf = readValue_string(bleChar);
