@@ -422,32 +422,32 @@ int BLE::setAdvertData(uint8_t advertType, uint8_t len, uint8_t *advertData)
  * SAP_GAP_ADTYPE_LOCAL_NAME_COMPLETE, and the third and so on are the
  * characters of the name.
  */
-int BLE::setAdvertName(uint8_t advertStringLen, const char advertString[])
+int BLE::setAdvertName(uint8_t advertNameLen, const char advertName[])
 {
   uint8_t newSize = sizeof(defScanRspData) - defScanRspData[0]
-                  + 1 + advertStringLen;
+                  + 1 + advertNameLen;
   uint8_t *newData = (uint8_t *) malloc(newSize * sizeof(*newData));
-  newData[0] = 1 + advertStringLen;
+  newData[0] = 1 + advertNameLen;
   newData[1] = defScanRspData[1];
-  strcpy((char *) &newData[2], advertString);
-  uint8_t *destAfterStr = newData + 2 + advertStringLen;
+  strcpy((char *) &newData[2], advertName);
+  uint8_t *destAfterStr = newData + 2 + advertNameLen;
   uint8_t *srcAfterStr = defScanRspData + 1 + defScanRspData[0];
   uint8_t afterStrLen = sizeof(defScanRspData) - 1 - defScanRspData[0];
   memcpy(destAfterStr, srcAfterStr, afterStrLen);
   logRPC("Set adv name");
-  logParam(advertString);
+  logParam(advertName);
   return setAdvertData(BLE_ADV_DATA_SCANRSP, newSize, newData);
 }
 
-int BLE::setAdvertName(const char advertString[])
+int BLE::setAdvertName(const char advertName[])
 {
-  return setAdvertName(strlen(advertString), advertString);
+  return setAdvertName(strlen(advertName), advertName);
 }
 
-int BLE::setAdvertName(String *advertString)
+int BLE::setAdvertName(String *advertName)
 {
-  uint8_t len = (*advertString).length();
-  return setAdvertName(len, (*advertString).c_str());
+  uint8_t len = (*advertName).length();
+  return setAdvertName(len, (*advertName).c_str());
 }
 
 int BLE::setGattParam(uint8_t serviceId, uint8_t charId,
