@@ -836,8 +836,7 @@ int BLE::setSecurityParam(uint16_t paramId, uint16_t len, uint8_t *pData)
 {
   logRPC("Set sec param");
   logParam("ParamId", paramId, len);
-  if (isError(SAP_setParam(SAP_PARAM_SECURITY, paramId, len, pData)) ||
-      !apEventPend(AP_EVT_SECURITY_PARAM_RSP))
+  if (isError(SAP_setParam(SAP_PARAM_SECURITY, paramId, len, pData)))
   {
     return BLE_CHECK_ERROR;
   }
@@ -1158,19 +1157,6 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
           else
           {
             apPostError(connRsp->status, "SNP_UPDATE_CONN_PARAM_CNF");
-          }
-        } break;
-        case SNP_SET_SECURITY_PARAM_RSP:
-        {
-          logAsync("SNP_SET_SECURITY_PARAM_RSP", cmd1);
-          snpSetSecParamRsp_t *securityParamRsp = (snpSetSecParamRsp_t *) pParams;
-          if (securityParamRsp->status == SNP_SUCCESS)
-          {
-            Event_post(apEvent, AP_EVT_SECURITY_PARAM_RSP);
-          }
-          else
-          {
-            apPostError(securityParamRsp->status, "SNP_SET_SECURITY_PARAM_RSP");
           }
         } break;
         case SNP_SEND_AUTHENTICATION_DATA_RSP:
