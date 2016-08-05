@@ -33,6 +33,9 @@ void setup() {
 
 void loop() {
   ble.handleEvents();
-  heartRateMeasurement += 1;
-  ble.writeValue(&heartRateChar, heartRateMeasurement);
+  if (millis() % 1000 == 0)
+  {
+    heartRateMeasurement += 1;
+    ble.writeValue(&heartRateChar, heartRateMeasurement);
+  }
 }
