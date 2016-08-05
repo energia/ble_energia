@@ -49,13 +49,13 @@
 
 /*
  * For startAdvert.
+ * Non-connectable undirected advertisement.
  * Connectable undirected adverisement.
  * Scannable undirected advertisement.
- * Non-connectable undirected advertisement.
  */
-#define BLE_ADV_MODE_CONN              SNP_ADV_TYPE_CONN
-#define BLE_ADV_MODE_SCANABLE          SNP_ADV_TYPE_SCANABLE
 #define BLE_ADV_MODE_NONCONN           SNP_ADV_TYPE_NONCONN
+#define BLE_ADV_MODE_CONN              SNP_ADV_TYPE_CONN
+#define BLE_ADV_MODE_SCANNABLE         SNP_ADV_TYPE_SCANABLE
 
 /* startAdvert connectedBehavior */
 #define BLE_ADV_STOP_ON_CONN           SNP_ADV_STOP_ON_CONN
