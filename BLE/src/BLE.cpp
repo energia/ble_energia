@@ -1078,7 +1078,6 @@ static void numCmpInterrupt2(void)
  */
 static void AP_asyncCB(uint8_t cmd1, void *pParams)
 {
-  ble.error = BLE_SUCCESS;
   switch (SNP_GET_OPCODE_HDR_CMD1(cmd1))
   {
     case SNP_DEVICE_GRP:
@@ -1217,7 +1216,6 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
 
 static void processSNPEventCB(uint16_t cmd1, snpEventParam_t *param)
 {
-  ble.error = BLE_SUCCESS;
   switch (cmd1)
   {
     case SNP_CONN_EST_EVT:
@@ -1370,7 +1368,9 @@ static inline void apPostError(uint8_t status, const char errMsg[])
 /*
  * Handles propogating errors through stack to Energia sketch. Use when
  * failure of the checked call requires immediate return (e.g. if the
- * next statements depend on it).
+ * next statements depend on it). This preserves ble.error when it already
+ * has been set to something besides BLE_SUCCESS, and otherwise sets it
+ * to status.
  */
 static bool isError(uint8_t status)
 {
