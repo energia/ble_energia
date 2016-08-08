@@ -325,7 +325,7 @@ static uint8_t serviceCCCDIndCB(void *context,
     status = SNP_UNKNOWN_ATTRIBUTE;
   }
   // Only 0, or either notify/indicate but not both, is valid.
-  else if (!(value == 0 || (!notify || !indicate)))
+  else if ((value != 0) && (notify == indicate))
   {
     status = SNP_INVALID_PARAMS;
   }
