@@ -176,20 +176,8 @@ int BLE::begin(void)
   /* Do board specific initializations */
   initBoard();
 
-  /* AP_init() in simple_ap.c */
   apEvent = Event_create(NULL, NULL);
   logSetMainTask(Task_self());
-
-  /*
-   * Use this to do something at the application level on a write or
-   * config change. In each SAP service struct, we set read, write, and
-   * config change callbacks. In simple_ap, the function below
-   * registers its parameters as functions called by the callbacks.
-   * In other words, this isn't actually necessary for SAPlib or BLE.
-   * It's just included for now for completeless with simple_ap.
-   */
-  // SimpleProfile_RegisterAppCB(AP_SPWriteCB, AP_SPcccdCB);
-  /* End AP_init() */
 
   SAP_Params sapParams;
   SAP_initParams(_portType, &sapParams);
