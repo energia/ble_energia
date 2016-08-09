@@ -42,7 +42,8 @@ class BLE : public Stream
     /* Maximum transmission unit */
     uint16_t mtu;
 
-    /* Call when using security and a display methd besides serial */
+    /* For security prompts when using a display method besides serial.
+       Manually set these in setup(). */
     displayStringFxn_t displayStringFxn;
     displayUIntFxn_t displayUIntFxn;
 
@@ -104,19 +105,19 @@ class BLE : public Stream
     float readValue_float(BLE_Char *bleChar);
     double readValue_double(BLE_Char *bleChar);
     uint8_t* readValue_uint8_t(BLE_Char *bleChar, int *len);
-    char* readValue_string(BLE_Char *bleChar);
+    char* readValue_charArr(BLE_Char *bleChar);
     String readValue_String(BLE_Char *bleChar);
     void setValueFormat(BLE_Char *bleChar, uint8_t valueFormat,
                         int8_t valueExponent=0);
 
     /* Security */
-    int setPairingMode(uint8_t param);
+    int setPairingMode(uint8_t pairingMode);
     int setIoCapabilities(uint8_t param);
     int useBonding(bool param);
     int eraseAllBonds(void);
     int replaceLruBond(bool param);
     int sendSecurityRequest(void);
-    int setWhiteListPolicy(uint8_t policy);
+    int useWhiteListPolicy(uint8_t policy);
 
     /* Diagnostics */
     unsigned int getRand(void);

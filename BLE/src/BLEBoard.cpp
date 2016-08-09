@@ -15,6 +15,7 @@ void initBoard(void)
 {
   if (!initCalled)
   {
+    initCalled = true;
     /*
      * When a MSP432 and a CC2650 are stacked, pin 6.7 of the MSP is
      * connected to the reset pin of the CC2650. By default Energia

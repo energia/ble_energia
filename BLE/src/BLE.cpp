@@ -91,9 +91,6 @@ BLE ble = BLE();
 // best kept short to conserve power while advertisting)
 static uint8_t defNotConnAD[] =
 {
-  // Flags; this sets the device to use limited discoverable
-  // mode (advertises for 30 seconds at a time) instead of general
-  // discoverable mode (advertises indefinitely)
   0x02,   // length of this data
   SAP_GAP_ADTYPE_FLAGS,
   SAP_GAP_ADTYPE_FLAGS_GENERAL | SAP_GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED,
@@ -679,7 +676,7 @@ uint8_t BLE::readValueValidateSize(BLE_Char *bleChar, size_t size)
 {
   logChar("App reading");
   logParam("Handle", bleChar->_handle);
-  if (bleChar->_value == NULL || bleChar->_valueLen != size)
+  if (bleChar->_valueLen != size)
   {
     logParam("Invalid size");
     logParam("Have", bleChar->_valueLen);
@@ -792,7 +789,7 @@ uint8_t* BLE::readValue_uint8_t(BLE_Char *bleChar, int *len)
   return (uint8_t *) bleChar->_value;
 }
 
-char* BLE::readValue_string(BLE_Char *bleChar)
+char* BLE::readValue_charArr(BLE_Char *bleChar)
 {
   int len = bleChar->_valueLen;
   logChar("App reading");
@@ -812,7 +809,7 @@ char* BLE::readValue_string(BLE_Char *bleChar)
    doesn't have to care about deallocating the object. */
 String BLE::readValue_String(BLE_Char *bleChar)
 {
-  char *buf = readValue_string(bleChar);
+  char *buf = readValue_charArr(bleChar);
   String str;
   if (buf)
   {
@@ -843,9 +840,9 @@ int BLE::setSecurityParam(uint16_t paramId, uint16_t len, uint8_t *pData)
   return BLE_SUCCESS;
 }
 
-int BLE::setPairingMode(uint8_t param)
+int BLE::setPairingMode(uint8_t pairingMode)
 {
-  return setSecurityParam(SAP_SECURITY_BEHAVIOR, 1, &param);
+  return setSecurityParam(SAP_SECURITY_BEHAVIOR, 1, &pairingMode);
 }
 
 int BLE::setIoCapabilities(uint8_t param)
@@ -874,9 +871,10 @@ int BLE::sendSecurityRequest(void)
   return SAP_sendSecurityRequest();
 }
 
-int BLE::setWhiteListPolicy(uint8_t policy)
+int BLE::useWhiteListPolicy(uint8_t policy)
 {
-  logRPC("Set whitelist policy");
+  logRPC("Use whitelist policy");
+  logParam("policy", policy);
   if (isError(SAP_setParam(SAP_PARAM_WHITELIST, 0, 0, &policy)) ||
       !apEventPend(AP_EVT_WHITE_LIST_RSP))
   {

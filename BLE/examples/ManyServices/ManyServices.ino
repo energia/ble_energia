@@ -132,7 +132,7 @@ void loop() {
     Serial.print("char4Value=");Serial.println(char4Value);
     char6Value = ble.readValue_int(&char6);
     Serial.print("char6Value=");Serial.println(char6Value);
-    char7Value = ble.readValue_string(&char7);
+    char7Value = ble.readValue_charArr(&char7);
     Serial.print("char7Value=");Serial.println(char7Value);
     char8Value = ble.readValue_String(&char8);
     Serial.print("char8Value=");Serial.println(char8Value);
