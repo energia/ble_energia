@@ -393,12 +393,24 @@ int BLE::setAdvertData(uint8_t advertType, uint8_t len, uint8_t *advertData)
   }
   // advertType validated by SAP_setParam
   uint8_t idx = advertIndex(advertType);
-  if (advertDataArr[idx] && advertDataArr[idx] != defADArr[idx])
-  {
-    free(advertDataArr[idx]);
-  }
   advertDataArr[idx] = advertData;
   return BLE_SUCCESS;
+}
+
+/* Used to free advertisement data malloced by the user. */
+uint8_t* BLE::getAdvertData(uint8_t advertType)
+{
+  ble.error = BLE_SUCCESS;
+  uint8_t idx = advertIndex(advertType);
+  if (idx < MAX_ADVERT_IDX && advertDataArr[idx] != defADArr[idx])
+  {
+    return advertDataArr[idx];
+  }
+  else
+  {
+    ble.error = idx;
+    return NULL;
+  }
 }
 
 /*
