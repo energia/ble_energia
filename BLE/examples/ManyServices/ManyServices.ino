@@ -123,7 +123,7 @@ void loop() {
       ble.writeValue(&char6, char6Value);
     }
     char1Value = ble.readValue_char(&char1);
-    Serial.print("char1Value=");Serial.println(char1Value);
+    Serial.print("char1Value=");Serial.println((int) char1Value);
     char2Value = ble.readValue_int(&char2);
     Serial.print("char2Value=");Serial.println(char2Value);
     char3Value = ble.readValue_long(&char3);
