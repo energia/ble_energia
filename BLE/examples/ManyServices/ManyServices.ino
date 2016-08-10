@@ -104,24 +104,29 @@ void setup() {
   ble.writeValue(&char4, char4Value);
   ble.writeValue(&char6, char6Value);
   ble.writeValue(&char7, char7Value);
-  ble.writeValue(&char8, char8Value);
+  ble.writeValue(&char8, &char8Value);
   ble.setAdvertName("Energia BLE");
   ble.startAdvert();
 }
 
+unsigned int timer = 0;
+int innerCounter = 0;
+
 // the loop routine runs over and over again forever as a task.
 void loop() {
   ble.handleEvents();
-  if (millis() % 1000 == 0)
+  if (millis() - timer >= 1000)
   {
+    timer = millis();
     heartRateMeasurement += 1;
     ble.writeValue(&heartRateChar, heartRateMeasurement);
     ble.writeValue(&char4, heartRateMeasurement*2);
-    if (millis() % 5000 == 0)
+    if (innerCounter == 0)
     {
       char6Value += 1;
       ble.writeValue(&char6, char6Value);
     }
+    innerCounter = (innerCounter + 1) % 5;
     char1Value = ble.readValue_char(&char1);
     Serial.print("char1Value=");Serial.println((int) char1Value);
     char2Value = ble.readValue_int(&char2);
