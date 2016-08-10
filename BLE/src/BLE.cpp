@@ -145,7 +145,7 @@ int BLE::begin(void)
   initBoard();
 
   apEvent = Event_create(NULL, NULL);
-  logSetMainTask(Task_self());
+  logSetAPTask(Task_self());
 
   SAP_Params sapParams;
   SAP_initParams(_portType, &sapParams);

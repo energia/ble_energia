@@ -30,9 +30,9 @@ static void hexPrintBigEnd(const uint8_t buf[], uint16_t len);
 static void hexPrintLitEnd(const uint8_t buf[], uint16_t len);
 static bool logAllowed(uint8_t mode);
 
-void logSetMainTask(Task_Handle mainTask)
+void logSetAPTask(Task_Handle _apTask)
 {
-  apTask = mainTask;
+  apTask = _apTask;
 }
 
 void logParam(const char name[], const uint8_t buf[],

@@ -8,7 +8,7 @@
 extern uint8_t logLevel;
 volatile extern bool apLogLock; // AP owns logging if true
 
-void logSetMainTask(Task_Handle mainTask);
+void logSetAPTask(Task_Handle apTask);
 
 void logParam(const char name[], const uint8_t buf[], uint16_t len, bool isBigEnd=true);
 void logParam(const char name[], int value, int base=DEC);
