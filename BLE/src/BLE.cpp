@@ -644,7 +644,8 @@ int BLE::writeValue(BLE_Char *bleChar, const uint8_t buf[], int len)
 int BLE::writeValue(BLE_Char *bleChar, const char str[], int len)
 {
   int ret = apCharWriteValue(bleChar, (uint8_t *) str, (len+1)*sizeof(*str), true);
-  logParam("As string", str);
+  logChar("  String");
+  logParam(str);
   logRelease();
   return ret;
 }
