@@ -63,38 +63,48 @@ void setup() {
   t3 = t1;
 }
 
-char serialData[BLE_SERIAL_BUFFER_SIZE
+/* +1 for null-terminator */
+char serialData[BLE_SERIAL_BUFFER_SIZE + 1];
 
 void loop() {
   ble.handleEvents();
 
-  // /* Forward BLE serial to Energia serial monitor. */
-
-  if (ble.available())
+  /* Forward Energia serial monitor to BLE serial. */
+  int numBytes = Serial.available();
+  if (numBytes)
   {
-     All the Serial functions are available with BLE serial.
-    char readStr[]
-    Serial.println(ble.readStringUntil('.'));
+    Serial.readBytes(serialData, numBytes);
+    serialData[numBytes] = '\0';
+    ble.print(serialData);
+  }
+
+  /* Forward BLE serial to Energia serial monitor. */
+  numBytes = ble.available();
+  if (numBytes)
+  {
+    ble.readBytes(serialData, numBytes);
+    serialData[numBytes] = '\0';
+    Serial.println(serialData);
   }
 
   /* Increment char2 every second. */
-  if (millis() - t1 == 1000)
+  if (millis() - t1 >= 1000)
   {
     char2Value++;
     ble.writeValue(&char2, char2Value);
-    t1 += 1000;
+    t1 = millis();
   }
 
   /* Increment char4 by 100 every 5 seconds. */
-  if (millis() - t2 == 5000)
+  if (millis() - t2 >= 5000)
   {
     char3Value += 100;
     ble.writeValue(&char3, char3Value);
-    t2 += 5000;
+    t2 = millis();
   }
 
   /* Print all characteristic values every second. */
-  if (millis() - t3 == 1000)
+  if (millis() - t3 >= 1000)
   {
     char1Value = ble.readValue_char(&char1);
     Serial.print("char1Value=");
@@ -113,7 +123,7 @@ void loop() {
     Serial.println(char4Value);
 
     Serial.print("\n\n\n");
-    t3 += 1000;
+    t3 = millis();
 
   }
 }

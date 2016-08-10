@@ -16,7 +16,7 @@ Task_Handle owner = NULL;
 /* Prevents simultaneous logging, but not other Serial calls. */
 volatile uint8_t logLock = 0;
 
-/* Indicates when another task wants to log. If set when logRelease
+/* Indicates when another task wants to log. If set when release
    is called, yields to another task. */
 volatile bool logLockReq = false;
 
