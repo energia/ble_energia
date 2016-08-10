@@ -15,7 +15,6 @@
 #include "BLELog.h"
 #include "BLESerial.h"
 #include "BLEServiceList.h"
-#include "BLEServices.h"
 
 /*
  * Event_pend timeout set in units of ticks. Tick period is microseconds,
