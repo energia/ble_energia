@@ -6,7 +6,6 @@
 #include <ti/sysbios/knl/Task.h>
 
 extern uint8_t logLevel;
-volatile extern bool apLogLock; // AP owns logging if true
 
 /* Set the task given ability to lock out the other. */
 void logSetAPTask(Task_Handle apTask);
@@ -25,6 +24,11 @@ void logParam(const char name[], const char value[]);
 void logParam(const char value[]);
 void logUUID(const uint8_t UUID[], uint8_t len);
 
+/*
+ * Wrap a set of logging calls in logAcquire and logRelease to ensure they
+ * are not interleaved with other logging calls. All of the main logging
+ * functions call these by default
+ */
 void logAcquire(void);
 void logRelease(void);
 

@@ -6,12 +6,16 @@
 /* Bit mask that determines what is logged. */
 uint8_t logLevel = BLE_LOG_NONE;
 
-/* Prevents competition with the Energia user's Serial calls from NPI. */
-volatile bool apLogLock = false;
-
 /* Used to determine if caller is the Energia sketch's task. */
 Task_Handle apTask = NULL;
-Task_Handle owner = NULL;
+
+/*
+ * Prevents the NPI task from logging while the AP task is logging or has
+ * locked logging (e.g. when the Energia user is able to use Serial calls.
+ * Prevents the AP task from logging while the NPI task is logging.
+ */
+uint8_t apIsLogging = false;
+uint8_t npiIsLogging = false;
 
 /* Prevents simultaneous logging, but not other Serial calls. */
 volatile uint8_t logLock = 0;
@@ -198,7 +202,8 @@ void logChar(const char action[])
 void logReset(void)
 {
   logLevel = BLE_LOG_NONE;
-  apLogLock = false;
+  apIsLogging = 0;
+  npiIsLogging = 0;
   apTask = NULL;
   logLock = 0;
   logLockReq = false;
@@ -258,61 +263,60 @@ static bool logAllowed(uint8_t mode)
 }
 
 /*
- * Not safe for real applications,
- * but here we just need to prevent overlapping serial writes.
- * After ACQUIRE_TIMEOUT ms it just prints anyway. We increment and
- * decrement logLock instead of setting equal to 1 and 0 in case of a
- * timeout. This way logLock will track the number of tasks and won't
- * be set to 0 while a task is still logging.
+ * Attempt to take ownership of logging for a set of log calls.
  */
 void logAcquire(void)
 {
   uint32_t startTime = millis();
-  if (Task_self() == owner)
+  /* If AP is already logging, don't try to acquire lock. */
+  if (Task_self() == apTask)
   {
-    // Task already owns. Nested log call.
-  }
-  else if (Task_self() == apTask)
-  {
-    while ((logLock) &&
+    /* Wait for NPI task to not be logging, or timeout. */
+    while ((npiIsLogging) &&
            (millis() - startTime < ACQUIRE_TIMEOUT))
     {
       Task_yield();
     }
+    apIsLogging = true;
   }
-  else // NPI Task
+  /* If NPI is already logging, don't try to acquire lock. */
+  else
   {
+    /* Indicate to AP that the NPI task wants to log. */
     logLockReq = true;
-    while ((apLogLock || logLock) &&
+    /*
+     * Wait for AP task to not be in a code section where the user can make
+     * Serial calls, either in ble.handleEvents() or when it calls release.
+     */
+    while ((apIsLogging) &&
            (millis() - startTime < ACQUIRE_TIMEOUT))
     {
       Task_yield();
     }
+    npiIsLogging = true;
   }
-  logLock++;
-  owner = Task_self();
 }
 
 void logRelease(void)
 {
-  logLock--;
-  if (Task_self() == owner)
-  {
-    owner = NULL;
-  }
   if (Task_self() == apTask)
   {
-    uint32_t startTime = millis();
-    while (logLockReq && (millis() - startTime < ACQUIRE_TIMEOUT))
+    apIsLogging = false;
+    if (logLockReq)
     {
-      bool apLogLockSaved = apLogLock;
-      apLogLock = false;
-      Task_yield();
-      apLogLock = apLogLockSaved;
+      uint32_t startTime = millis();
+      bool apIsLoggingSaved = apIsLogging;
+      while (logLockReq && (millis() - startTime < ACQUIRE_TIMEOUT))
+      {
+        apIsLogging = 0;
+        Task_yield();
+        apIsLogging = apIsLoggingSaved;
+      }
     }
   }
-  else // NPI Task
+  else
   {
+    npiIsLogging = false;
     logLockReq = false;
   }
 }

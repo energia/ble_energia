@@ -991,7 +991,7 @@ size_t BLE::write(const uint8_t buffer[], size_t size)
 
 int BLE::handleEvents(void)
 {
-  apLogLock = false;
+  logRelease();
   uint32_t events = AP_EVT_HANDLE_AUTH_EVT | AP_EVT_NUM_CMP_BTN;
   opcode = Event_pend(apEvent, AP_NONE, events, 1);
   int status = BLE_SUCCESS;
@@ -1023,7 +1023,7 @@ int BLE::handleEvents(void)
       status = BLE_CHECK_ERROR;
     }
   }
-  apLogLock = true;
+  logAcquire();
   return status;
 }
 
