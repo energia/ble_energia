@@ -4,4 +4,6 @@
 
 #include "BLETypes.h"
 
+/* Put predefined services here. */
+
 #endif

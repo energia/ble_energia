@@ -1,8 +1,6 @@
 
 #include "BLESerial.h"
 
-#define BLE_SERIAL_BUFFER_SIZE 128
-
 uint8_t rxBuffer[BLE_SERIAL_BUFFER_SIZE] = {0};
 volatile uint16_t rxWriteIndex = 0;
 volatile uint16_t rxReadIndex = 0;

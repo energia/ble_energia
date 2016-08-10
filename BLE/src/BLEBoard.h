@@ -3,6 +3,7 @@
 #define BLE_BOARD_H
 
 #ifdef __MSP432P401R__
+// Removes conflicts between drivers/bsp/Board.h and Energia's board.h
 #ifdef Board_WATCHDOG
 #undef Board_WATCHDOG
 #endif //Board_WATCHDOG

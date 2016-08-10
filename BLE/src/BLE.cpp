@@ -302,6 +302,7 @@ int BLE::addService(BLE_Service *bleService)
   return BLE_SUCCESS;
 }
 
+/* Converts advertisement type defines to indices for the array of data. */
 static uint8_t advertIndex(uint8_t advertType)
 {
   switch (advertType)

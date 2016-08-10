@@ -70,6 +70,11 @@
 #define BLE_INDICATABLE                SNP_GATT_PROP_INDICATION
 
 /*
+ * Serial Buffer Length
+ */
+#define BLE_SERIAL_BUFFER_SIZE 128
+
+/*
  * Security Parameters
  */
 /* Security Pairing Modes */
@@ -105,11 +110,6 @@
 #define TI_COMPANY_ID                  0x000D
 #define TI_ST_DEVICE_ID                0x03
 #define TI_ST_KEY_DATA_ID              0x00
-
-/*
- * Characteristic value formatting, Bluetooth spec Vol 3: Part G: 3.3.3.5.2
- */
-#define BLE_UINT                       0x06
 
 typedef struct
 {
