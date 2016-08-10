@@ -56,7 +56,6 @@ int t3;
 
 void setup() {
   Serial.begin(115200);
-  ble.setLogLevel(BLE_LOG_ALL);
   ble.begin();
   ble.addService(&simpleService);
   ble.writeValue(&char1, char1Value);
@@ -81,32 +80,23 @@ void loop() {
   ble.handleEvents();
 
   /* Forward Energia serial monitor to BLE serial. */
-  if (Serial.available())
+  while ((numBytes = Serial.available()))
   {
-    numBytes = Serial.available();
-    while (numBytes)
-    {
-      Serial.readBytes(serialData, numBytes);
-      Serial.print("Sending via serial:");
-      Serial.println(serialData);
-      serialData[numBytes] = '\0';
-      ble.print(serialData);
-      numBytes = Serial.available();
-    }
-}
+    Serial.readBytes(serialData, numBytes);
+    Serial.print("Sending via serial:");
+    Serial.println(serialData);
+    serialData[numBytes] = '\0';
+    ble.print(serialData);
+  }
 
   /* Forward BLE serial to Energia serial monitor. */
-  if (ble.available())
+  while ((numBytes = ble.available()))
   {
-    numBytes = ble.available();
-    while (numBytes)
-    {
-      ble.readBytes(serialData, numBytes);
-      serialData[numBytes] = '\0';
-      Serial.println(serialData);
-      numBytes = ble.available();
-    }
-}
+    ble.readBytes(serialData, numBytes);
+    serialData[numBytes] = '\0';
+    Serial.println(serialData);
+  }
+
 
   /* Increment char2 every second. */
   if (millis() - t1 >= 1000)
