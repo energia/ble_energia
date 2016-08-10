@@ -6,30 +6,40 @@
 /* Bit mask that determines what is logged. */
 uint8_t logLevel = BLE_LOG_NONE;
 
-/* Prevents competition with the Energia user's Serial calls */
+/* Prevents competition with the Energia user's Serial calls from NPI. */
 volatile bool apLogLock = false;
 
-/* Used to determine if caller is the Energia sketch task. */
+/* Used to determine if caller is the Energia sketch's task. */
 Task_Handle apTask = NULL;
 Task_Handle owner = NULL;
 
 /* Prevents simultaneous logging, but not other Serial calls. */
 volatile uint8_t logLock = 0;
 
-/* Indicates when another task wants to log. If set when release
-   is called, yields to another task. */
+/*
+ * Indicates when the NPI task wants to log. If set when release is called,
+ * yields to another task.
+ */
 volatile bool logLockReq = false;
 
 /* The last log mode called; used for followup calls. */
 uint8_t apLogLast = 0x00;
-uint8_t otherLogLast = 0x00;
-#define SHOULD_LOG_PARAM (logLevel & ((apTask == Task_self()) ? apLogLast : otherLogLast))
+uint8_t npiLogLast = 0x00;
 
+/* Determines whether  secondary log call matches log level of  main call. */
+#define SHOULD_LOG_PARAM (logLevel & ((apTask == Task_self()) ? apLogLast : npiLogLast))
+
+/*
+ * Local Functions Declarations
+ */
 static void hexPrint(int num);
 static void hexPrintBigEnd(const uint8_t buf[], uint16_t len);
 static void hexPrintLitEnd(const uint8_t buf[], uint16_t len);
 static bool logAllowed(uint8_t mode);
 
+/*
+ * Global Functions
+ */
 void logSetAPTask(Task_Handle _apTask)
 {
   apTask = _apTask;
@@ -193,9 +203,12 @@ void logReset(void)
   logLock = 0;
   logLockReq = false;
   apLogLast = 0x00;
-  otherLogLast = 0x00;
+  npiLogLast = 0x00;
 }
 
+/*
+ * Local Functions
+*/
 static void hexPrint(int num)
 {
   Serial.print("0x");
@@ -239,7 +252,7 @@ static bool logAllowed(uint8_t mode)
   }
   else
   {
-    otherLogLast = mode;
+    npiLogLast = mode;
   }
   return logLevel & mode;
 }
