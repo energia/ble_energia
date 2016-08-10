@@ -80,13 +80,17 @@ void loop() {
   ble.handleEvents();
 
   /* Forward Energia serial monitor to BLE serial. */
-  while ((numBytes = Serial.available()))
+  if (Serial.available())
   {
-    Serial.readBytes(serialData, numBytes);
-    serialData[numBytes] = '\0';
-    Serial.print("Sending via serial:");
-    Serial.println(serialData);
-    ble.print(serialData);
+    delay(5);
+    while ((numBytes = Serial.available()))
+    {
+      Serial.readBytes(serialData, numBytes);
+      serialData[numBytes] = '\0';
+      Serial.print("Sending via serial:");
+      Serial.println(serialData);
+      ble.print(serialData);
+    }
   }
 
   /* Forward BLE serial to Energia serial monitor. */
@@ -96,7 +100,6 @@ void loop() {
     serialData[numBytes] = '\0';
     Serial.println(serialData);
   }
-
 
   /* Increment char2 every second. */
   if (millis() - t1 >= 1000)
@@ -141,6 +144,5 @@ void loop() {
 
     Serial.print("\n\n\n");
     t3 = millis();
-
   }
 }
