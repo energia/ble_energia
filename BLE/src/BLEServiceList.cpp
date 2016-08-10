@@ -208,7 +208,7 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
   {
     sapChar->pUserDesc = (SAP_UserDescAttr_t *) malloc(sizeof(*sapChar->pUserDesc));
     sapChar->pUserDesc->perms    = SNP_GATT_PERMIT_READ;
-    uint16_t charStrLen = strlen(bleChar->charDesc);
+    uint16_t charStrLen = strlen(bleChar->charDesc) + 1; // +1 for null term
     sapChar->pUserDesc->maxLen   = charStrLen;
     sapChar->pUserDesc->initLen  = charStrLen;
     sapChar->pUserDesc->pDesc    = (uint8_t *) bleChar->charDesc;
