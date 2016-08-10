@@ -326,25 +326,36 @@ static uint8_t serviceCCCDIndCB(void *context,
   bool notify = (value == SNP_GATT_CLIENT_CFG_NOTIFY);
   bool indicate = (value == SNP_GATT_CLIENT_CFG_INDICATE);
   BLE_Char *bleChar = getCCCD(cccdHdl);
+  logAcquire();
+  logChar("Client writing CCCD");
   if (bleChar == NULL)
   {
     status = SNP_UNKNOWN_ATTRIBUTE;
+    logError("Unknown handle", connectionHandle);
   }
   // Only 0, or either notify/indicate but not both, is valid.
   else if ((value != 0) && (notify == indicate))
   {
+    logParam("Handle", bleChar->_handle);
+    logParam("Invalid CCCD", value);
+    logParam("Must be 0, 1, 2");
     status = SNP_INVALID_PARAMS;
   }
   // Attempting to set to mode not allowed by char properties
   else if ((notify && !(bleChar->properties & BLE_NOTIFIABLE))
         || (indicate && !(bleChar->properties & BLE_INDICATABLE)))
   {
+    logParam("Handle", bleChar->_handle);
+    logParam("CCCD not permitted", value);
     status = SNP_NOTIF_IND_NOT_ALLOWED;
   }
   else
   {
-    bleChar->_CCCD = (byte) value;
+    logParam("Handle", bleChar->_handle);
+    logParam("Setting to", value);
+    bleChar->_CCCD = (uint8_t) value;
   }
+  logRelease();
   return status;
 }
 
