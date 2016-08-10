@@ -11,7 +11,7 @@ Task_Handle apTask = NULL;
 
 /*
  * Prevents the NPI task from logging while the AP task is logging or has
- * locked logging (e.g. when the Energia user is able to use Serial calls.
+ * locked logging (e.g. when the Energia user is able to use Serial calls).
  * Prevents the AP task from logging while the NPI task is logging.
  */
 uint8_t apIsLogging = false;
@@ -169,6 +169,8 @@ void logRPC(const char msg[])
   }
 }
 
+/* TODO */
+/* The first half of this function is a workaround for the double async in NPI. */
 bool advDataCnfPendedWorkaround = false;
 void logAsync(const char name[], uint8_t cmd1)
 {
@@ -250,6 +252,11 @@ static void hexPrintLitEnd(const uint8_t buf[], uint16_t len)
   }
 }
 
+/*
+ * Set the log type of the most recent main logging function so that
+ * secondary functions can work with any logLevel.
+ * Check the logLevel bit mask to see if it should log.
+ */
 static bool logSetCheckMode(uint8_t mode)
 {
   if (Task_self() == apTask)
@@ -269,7 +276,6 @@ static bool logSetCheckMode(uint8_t mode)
 void logAcquire(void)
 {
   uint32_t startTime = millis();
-  /* If AP is already logging, don't try to acquire lock. */
   if (Task_self() == apTask)
   {
     /* Wait for NPI task to not be logging, or timeout. */
@@ -278,6 +284,7 @@ void logAcquire(void)
     {
       Task_yield();
     }
+    /* Acquire AP log lock. */
     apIsLogging++;
   }
   /* If NPI is already logging, don't try to acquire lock. */
@@ -285,15 +292,13 @@ void logAcquire(void)
   {
     /* Indicate to AP that the NPI task wants to log. */
     logLockReq = true;
-    /*
-     * Wait for AP task to not be in a code section where the user can make
-     * Serial calls, either in ble.handleEvents() or when it calls release.
-     */
+    /* Wait for AP task to not be have ownership of logging, or timeout. */
     while ((apIsLogging) &&
            (millis() - startTime < ACQUIRE_TIMEOUT))
     {
       Task_yield();
     }
+    /* Acquire NPI log lock. */
     npiIsLogging++;
   }
 }
@@ -302,10 +307,12 @@ void logRelease(void)
 {
   if (Task_self() == apTask)
   {
+    /* In case a logRelease is called without a matching logAcquire. */
     if (apIsLogging)
     {
       apIsLogging--;
     }
+    /* Continually yeild to NPI task if it wants to log. */
     if (logLockReq)
     {
       uint32_t startTime = millis();
@@ -320,10 +327,12 @@ void logRelease(void)
   }
   else
   {
+    /* In case a logRelease is called without a matching logAcquire. */
     if (npiIsLogging)
     {
       npiIsLogging--;
     }
+    /* Indicate to AP that the NPI task has finished logging. */
     logLockReq = false;
   }
 }

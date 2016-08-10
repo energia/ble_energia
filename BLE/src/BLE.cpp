@@ -967,6 +967,10 @@ size_t BLE::write(const uint8_t buffer[], size_t size)
 
 int BLE::handleEvents(void)
 {
+  /*
+   * This logRelease and the logAcquire at the end of this function ensure
+   * that the NPI task gets to log every main loop.
+   */
   logRelease();
   uint32_t events = AP_EVT_HANDLE_AUTH_EVT | AP_EVT_NUM_CMP_BTN;
   opcode = Event_pend(apEvent, AP_NONE, events, 1);
