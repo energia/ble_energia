@@ -277,7 +277,7 @@ void logAcquire(void)
     {
       Task_yield();
     }
-    apIsLogging = true;
+    apIsLogging++;
   }
   /* If NPI is already logging, don't try to acquire lock. */
   else
@@ -293,7 +293,7 @@ void logAcquire(void)
     {
       Task_yield();
     }
-    npiIsLogging = true;
+    npiIsLogging++;
   }
 }
 
@@ -301,7 +301,7 @@ void logRelease(void)
 {
   if (Task_self() == apTask)
   {
-    apIsLogging = false;
+    apIsLogging--;
     if (logLockReq)
     {
       uint32_t startTime = millis();
@@ -316,7 +316,7 @@ void logRelease(void)
   }
   else
   {
-    npiIsLogging = false;
+    npiIsLogging--;
     logLockReq = false;
   }
 }
