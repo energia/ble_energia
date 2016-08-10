@@ -35,6 +35,7 @@ int BLE_registerService(BLE_Service *bleService)
 {
   SAP_Service_t *service = (SAP_Service_t *) malloc(sizeof(*service));
   constructService(service, bleService);
+  logAcquire();
   logRPC("Register service");
   logUUID(bleService->UUID, bleService->_UUIDlen);
   int status = SAP_registerService(service);
@@ -63,6 +64,7 @@ int BLE_registerService(BLE_Service *bleService)
     }
     addServiceNode(bleService);
   }
+  logRelease();
   free(service->charTable);
   free(service->charAttrHandles);
   free(service);
@@ -256,6 +258,7 @@ static uint8_t serviceReadAttrCB(void *context,
   (void) context;
   (void) connectionHandle;
   uint8_t status = SNP_SUCCESS;
+  logAcquire();
   logChar("Client reading");
   BLE_Char *bleChar = getChar(charHdl);
   if (bleChar == NULL)
@@ -283,6 +286,7 @@ static uint8_t serviceReadAttrCB(void *context,
     logParam("Data", pData, *len, bleChar->_isBigEnd);
     memcpy(pData, src, *len);
   }
+  logRelease();
   return status;
 }
 
@@ -299,8 +303,10 @@ static uint8_t serviceWriteAttrCB(void *context,
   {
     status = SNP_UNKNOWN_ATTRIBUTE;
   }
+  logAcquire();
   logChar("Client writing");
   BLE_charWriteValue(bleChar, pData, len, bleChar->_isBigEnd);
+  logRelease();
   if (bleChar == &rxChar)
   {
     BLESerial_clientWrite(len, pData);

@@ -11,6 +11,7 @@ volatile bool apLogLock = false;
 
 /* Used to determine if caller is the Energia sketch task. */
 Task_Handle apTask = NULL;
+Task_Handle owner = NULL;
 
 /* Prevents simultaneous logging, but not other Serial calls. */
 volatile uint8_t logLock = 0;
@@ -28,8 +29,6 @@ static void hexPrint(int num);
 static void hexPrintBigEnd(const uint8_t buf[], uint16_t len);
 static void hexPrintLitEnd(const uint8_t buf[], uint16_t len);
 static bool logAllowed(uint8_t mode);
-static void logAcquire(void);
-static void logRelease(void);
 
 void logSetMainTask(Task_Handle mainTask)
 {
@@ -41,7 +40,6 @@ void logParam(const char name[], const uint8_t buf[],
 {
   if (SHOULD_LOG_PARAM)
   {
-    logAcquire();
     Serial.print("  ");
     Serial.print(name);
     Serial.print(":0x");
@@ -54,7 +52,6 @@ void logParam(const char name[], const uint8_t buf[],
       hexPrintLitEnd(buf, len);
     }
     Serial.println();
-    logRelease();
   }
 }
 
@@ -62,7 +59,6 @@ void logParam(const char name[], int value, int base)
 {
   if (SHOULD_LOG_PARAM)
   {
-    logAcquire();
     Serial.print("  ");
     Serial.print(name);
     Serial.print(":");
@@ -80,7 +76,6 @@ void logParam(const char name[], int value, int base)
     {
       Serial.println(value);
     }
-    logRelease();
   }
 }
 
@@ -88,12 +83,10 @@ void logParam(const char name[], const char value[])
 {
   if (SHOULD_LOG_PARAM)
   {
-    logAcquire();
     Serial.print("  ");
     Serial.print(name);
     Serial.print(":");
     Serial.println(value);
-    logRelease();
   }
 }
 
@@ -101,10 +94,8 @@ void logParam(const char value[])
 {
   if (SHOULD_LOG_PARAM)
   {
-    logAcquire();
     Serial.print("  ");
     Serial.println(value);
-    logRelease();
   }
 }
 
@@ -113,7 +104,6 @@ void logUUID(const uint8_t UUID[], uint8_t UUIDlen)
 {
   if (SHOULD_LOG_PARAM)
   {
-    logAcquire();
     Serial.print("  UUID:0x");
     if (UUIDlen == SNP_128BIT_UUID_SIZE)
     {
@@ -132,7 +122,6 @@ void logUUID(const uint8_t UUID[], uint8_t UUIDlen)
       hexPrintLitEnd(&UUID[0], 2);
     }
     Serial.println();
-    logRelease();
   }
 }
 
@@ -140,11 +129,9 @@ void logError(uint8_t status)
 {
   if (logAllowed(BLE_LOG_ERRORS))
   {
-    logAcquire();
     Serial.print("ERR ");
     hexPrint(status);
     Serial.println();
-    logRelease();
   }
 }
 
@@ -152,12 +139,10 @@ void logError(const char msg[], uint8_t status)
 {
   if (logAllowed(BLE_LOG_ERRORS))
   {
-    logAcquire();
     Serial.print("ERR ");
     hexPrint(status);
     Serial.print(":");
     Serial.println(msg);
-    logRelease();
   }
 }
 
@@ -165,10 +150,8 @@ void logRPC(const char msg[])
 {
   if (logAllowed(BLE_LOG_RPCS))
   {
-    logAcquire();
     Serial.print("RPC:");
     Serial.println(msg);
-    logRelease();
   }
 }
 
@@ -186,12 +169,10 @@ void logAsync(const char name[], uint8_t cmd1)
   }
   if (logAllowed(BLE_LOG_REC_MSGS))
   {
-    logAcquire();
     Serial.print("Rec msg ");
     hexPrint(cmd1);
     Serial.print(":");
     Serial.println(name);
-    logRelease();
   }
 }
 
@@ -199,10 +180,8 @@ void logChar(const char action[])
 {
   if (logAllowed(BLE_LOG_CHARACTERISTICS))
   {
-    logAcquire();
     Serial.print(action);
     Serial.println(" char value");
-    logRelease();
   }
 }
 
@@ -266,17 +245,21 @@ static bool logAllowed(uint8_t mode)
 }
 
 /*
- * Dijkstra is rolling in his grave. Not safe for real applications,
+ * Not safe for real applications,
  * but here we just need to prevent overlapping serial writes.
  * After ACQUIRE_TIMEOUT ms it just prints anyway. We increment and
  * decrement logLock instead of setting equal to 1 and 0 in case of a
  * timeout. This way logLock will track the number of tasks and won't
  * be set to 0 while a task is still logging.
  */
-static void logAcquire(void)
+void logAcquire(void)
 {
   uint32_t startTime = millis();
-  if (Task_self() == apTask)
+  if (Task_self() == owner)
+  {
+    // Task already owns. Nested log call.
+  }
+  else if (Task_self() == apTask)
   {
     while ((logLock) &&
            (millis() - startTime < ACQUIRE_TIMEOUT))
@@ -286,26 +269,37 @@ static void logAcquire(void)
   }
   else // NPI Task
   {
+    logLockReq = true;
     while ((apLogLock || logLock) &&
            (millis() - startTime < ACQUIRE_TIMEOUT))
     {
-      logLockReq = true;
       Task_yield();
-      logLockReq = false;
     }
   }
   logLock++;
+  owner = Task_self();
 }
 
-static void logRelease(void)
+void logRelease(void)
 {
   logLock--;
-  uint32_t startTime = millis();
-  while (logLockReq && (millis() - startTime < ACQUIRE_TIMEOUT))
+  if (Task_self() == owner)
   {
-    bool apLogLockSaved = apLogLock;
-    apLogLock = false;
-    Task_yield();
-    apLogLock = apLogLockSaved;
+    owner = NULL;
+  }
+  if (Task_self() == apTask)
+  {
+    uint32_t startTime = millis();
+    while (logLockReq && (millis() - startTime < ACQUIRE_TIMEOUT))
+    {
+      bool apLogLockSaved = apLogLock;
+      apLogLock = false;
+      Task_yield();
+      apLogLock = apLogLockSaved;
+    }
+  }
+  else // NPI Task
+  {
+    logLockReq = false;
   }
 }

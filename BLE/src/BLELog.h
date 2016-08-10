@@ -21,5 +21,7 @@ void logRPC(const char msg[]);
 void logAsync(const char name[], uint8_t cmd1);
 void logChar(const char action[]);
 void logReset(void);
+void logAcquire(void);
+void logRelease(void);
 
 #endif
