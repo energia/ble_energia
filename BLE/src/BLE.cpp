@@ -152,7 +152,6 @@ int BLE::begin(void)
   sapParams.port.remote.boardID = BLE_UART_ID;
   sapParams.port.remote.mrdyPinID = BLE_Board_MRDY;
   sapParams.port.remote.srdyPinID = BLE_Board_SRDY;
-  logAcquire();
   logRPC("Opening SAP");
   logRelease();
   if (isError(SAP_open(&sapParams)))
@@ -191,7 +190,6 @@ int BLE::begin(void)
    */
   if (!apEventPend(AP_EVT_PUI)) {
     // Assuming that at SAP start up that SNP is already running
-    logAcquire();
     logRPC("Reseting SNP");
     logRelease();
     if (isError(SAP_reset()))
@@ -244,7 +242,6 @@ int BLE::resetPublicMembers(void)
 
 int BLE::terminateConn(void)
 {
-  logAcquire();
   logRPC("Terminate connection");
   logRelease();
   if ((!connected && isError(BLE_NOT_CONNECTED)) ||
@@ -309,7 +306,6 @@ uint8_t BLE::advertDataInit(void)
 
 int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
 {
-  logAcquire();
   logRPC("Start adv");
   logRelease();
   if ((advertising && isError(BLE_ALREADY_ADVERTISING)) ||
@@ -349,7 +345,6 @@ int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
 int BLE::stopAdvert(void)
 {
   uint8_t disableAdv = SAP_ADV_STATE_DISABLE;
-  logAcquire();
   logRPC("End adv");
   logRelease();
   if ((!advertising && isError(BLE_NOT_ADVERTISING)) ||
@@ -363,7 +358,6 @@ int BLE::stopAdvert(void)
 
 int BLE::setAdvertData(uint8_t advertType, uint8_t len, uint8_t *advertData)
 {
-  logAcquire();
   logRPC("Set adv data");
   logParam("Type", advertType);
   logRelease();
@@ -412,7 +406,6 @@ int BLE::setAdvertName(uint8_t advertNameLen, const char advertName[])
   uint8_t *srcAfterStr = defScanRspData + 1 + defScanRspData[0];
   uint8_t afterStrLen = sizeof(defScanRspData) - 1 - defScanRspData[0];
   memcpy(destAfterStr, srcAfterStr, afterStrLen);
-  logAcquire();
   logRPC("Set adv name");
   logParam(advertName);
   logRelease();
@@ -433,7 +426,6 @@ int BLE::setAdvertName(String *advertName)
 int BLE::setGattParam(uint8_t serviceId, uint8_t charId,
                       uint16_t len, uint8_t *pData)
 {
-  logAcquire();
   logRPC("Set GATT param");
   logRelease();
   return SAP_setServiceParam(serviceId, charId, len, pData);
@@ -442,7 +434,6 @@ int BLE::setGattParam(uint8_t serviceId, uint8_t charId,
 int BLE::getGattParam(uint8_t serviceId, uint8_t charId,
                       uint16_t *len, uint8_t *pData)
 {
-  logAcquire();
   logRPC("Get GATT param");
   logRelease();
   return SAP_getServiceParam(serviceId, charId, len, pData);
@@ -450,7 +441,6 @@ int BLE::getGattParam(uint8_t serviceId, uint8_t charId,
 
 int BLE::setGapParam(uint16_t paramId, uint16_t value)
 {
-  logAcquire();
   logRPC("Set GAP param");
   logParam("Param ID", paramId);
   logParam("Value", value);
@@ -461,7 +451,6 @@ int BLE::setGapParam(uint16_t paramId, uint16_t value)
 
 int BLE::getGapParam(uint16_t paramId, uint16_t *value)
 {
-  logAcquire();
   logRPC("Get GAP param");
   logParam("Param ID", paramId);
   logRelease();
@@ -471,7 +460,6 @@ int BLE::getGapParam(uint16_t paramId, uint16_t *value)
 
 uint8_t *BLE::hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData)
 {
-  logAcquire();
   logRPC("HCI cmd");
   logParam("Opcode", opcode);
   logRelease();
@@ -491,7 +479,6 @@ uint8_t *BLE::hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData)
  */
 int BLE::setConnParams(BLE_Conn_Params_Update_Req *connParams)
 {
-  logAcquire();
   logRPC("Conn params req");
   logParam("intervalMin", connParams->intervalMin);
   logParam("intervalMax", connParams->intervalMax);
@@ -547,7 +534,6 @@ int BLE::setBleTimeout(uint16_t supervisionTimeout)
 int BLE::apCharWriteValue(BLE_Char *bleChar, void *pData,
                           size_t size, bool isBigEnd=true)
 {
-  logAcquire();
   logChar("App writing");
   BLE_charWriteValue(bleChar, pData, size, isBigEnd);
   logRelease();
@@ -563,7 +549,6 @@ uint8_t BLE::writeNotifInd(BLE_Char *bleChar)
     localReq.connHandle = _connHandle;
     localReq.attrHandle = bleChar->_handle;
     localReq.authenticate = 0;
-    logAcquire();
     if (bleChar->_CCCD & SNP_GATT_CLIENT_CFG_NOTIFY)
     {
       localReq.type = SNP_SEND_NOTIFICATION;
@@ -658,7 +643,6 @@ int BLE::writeValue(BLE_Char *bleChar, const uint8_t buf[], int len)
  */
 int BLE::writeValue(BLE_Char *bleChar, const char str[], int len)
 {
-  logAcquire();
   int ret = apCharWriteValue(bleChar, (uint8_t *) str, (len+1)*sizeof(*str), true);
   logParam("As string", str);
   logRelease();
@@ -679,7 +663,6 @@ int BLE::writeValue(BLE_Char *bleChar, String *str)
 uint8_t BLE::readValueValidateSize(BLE_Char *bleChar, size_t size)
 {
   uint8_t status = BLE_SUCCESS;
-  logAcquire();
   logChar("App reading");
   logParam("Handle", bleChar->_handle);
   if (bleChar->_valueLen != size)
@@ -792,7 +775,6 @@ double BLE::readValue_double(BLE_Char *bleChar)
 uint8_t* BLE::readValue_uint8_t(BLE_Char *bleChar, int *len)
 {
   *len = bleChar->_valueLen;
-  logAcquire();
   logChar("App reading");
   logParam("Handle", bleChar->_handle);
   logParam("Buffer length", *len);
@@ -804,7 +786,6 @@ uint8_t* BLE::readValue_uint8_t(BLE_Char *bleChar, int *len)
 char* BLE::readValue_charArr(BLE_Char *bleChar)
 {
   int len = bleChar->_valueLen;
-  logAcquire();
   logChar("App reading");
   logParam("Handle", bleChar->_handle);
   logParam("String length", len);
@@ -845,7 +826,6 @@ void BLE::setValueFormat(BLE_Char *bleChar, uint8_t valueFormat,
 
 int BLE::setSecurityParam(uint16_t paramId, uint16_t len, uint8_t *pData)
 {
-  logAcquire();
   logRPC("Set sec param");
   logParam("ParamId", paramId, len);
   logRelease();
@@ -883,7 +863,6 @@ int BLE::replaceLruBond(bool param)
 
 int BLE::sendSecurityRequest(void)
 {
-  logAcquire();
   logRPC("Send sec req");
   logRelease();
   return SAP_sendSecurityRequest();
@@ -891,7 +870,6 @@ int BLE::sendSecurityRequest(void)
 
 int BLE::useWhiteListPolicy(uint8_t policy)
 {
-  logAcquire();
   logRPC("Use whitelist policy");
   logParam("policy", policy);
   logRelease();
@@ -913,7 +891,6 @@ unsigned int BLE::getRand(void)
  */
 void BLE::getRevision(BLE_Get_Revision_Rsp *getRevisionRsp)
 {
-  logAcquire();
   logRPC("Get revision");
   logRelease();
   SAP_getRevision(getRevisionRsp);
@@ -921,7 +898,6 @@ void BLE::getRevision(BLE_Get_Revision_Rsp *getRevisionRsp)
 
 void BLE::getStatus(BLE_Get_Status_Rsp *getStatusRsp)
 {
-  logAcquire();
   logRPC("Get status");
   logRelease();
   SAP_getStatus(getStatusRsp);
@@ -929,7 +905,6 @@ void BLE::getStatus(BLE_Get_Status_Rsp *getStatusRsp)
 
 int BLE::testCommand(BLE_Test_Command_Rsp *testRsp)
 {
-  logAcquire();
   logRPC("Test cmd");
   logRelease();
   SAP_testCommand(); // void function
@@ -1014,7 +989,6 @@ int BLE::handleEvents(void)
   {
     detachInterrupt(PUSH1);
     detachInterrupt(PUSH2);
-    logAcquire();
     logRPC("Send num cmp rsp");
     logRelease();
     if (isError(SAP_setAuthenticationRsp(authKey)) ||
@@ -1043,7 +1017,6 @@ int BLE::handleAuthKey(snpAuthenticationEvt_t *evt)
   }
   if (evt->input)
   {
-    logAcquire();
     logRPC("Send auth key");
     logRelease();
     if (isError(SAP_setAuthenticationRsp(authKey)) ||
@@ -1106,7 +1079,6 @@ static void numCmpInterrupt2(void)
  */
 static void AP_asyncCB(uint8_t cmd1, void *pParams)
 {
-  logAcquire();
   switch (SNP_GET_OPCODE_HDR_CMD1(cmd1))
   {
     case SNP_DEVICE_GRP:
@@ -1246,7 +1218,6 @@ static void AP_asyncCB(uint8_t cmd1, void *pParams)
 
 static void processSNPEventCB(uint16_t cmd1, snpEventParam_t *param)
 {
-  logAcquire();
   switch (cmd1)
   {
     case SNP_CONN_EST_EVT:
@@ -1392,7 +1363,6 @@ static bool apEventPend(uint32_t event)
 
 static inline void apPostError(uint8_t status, const char errMsg[])
 {
-  logAcquire();
   logError(errMsg, status);
   logRelease();
   ble.error = status;
@@ -1414,7 +1384,6 @@ static bool isError(uint8_t status)
   }
   else if ((ble.error = status) != SNP_SUCCESS)
   {
-    logAcquire();
     logError(status);
     logRelease();
     return true;

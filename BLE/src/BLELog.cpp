@@ -17,9 +17,6 @@ Task_Handle apTask = NULL;
 uint8_t apIsLogging = false;
 uint8_t npiIsLogging = false;
 
-/* Prevents simultaneous logging, but not other Serial calls. */
-volatile uint8_t logLock = 0;
-
 /*
  * Indicates when the NPI task wants to log. If set when release is called,
  * yields to another task.
@@ -31,7 +28,7 @@ uint8_t apLogLast = 0x00;
 uint8_t npiLogLast = 0x00;
 
 /* Determines whether  secondary log call matches log level of  main call. */
-#define SHOULD_LOG_PARAM (logLevel & ((apTask == Task_self()) ? apLogLast : npiLogLast))
+#define LOG_CHECK_MODE (logLevel & ((apTask == Task_self()) ? apLogLast : npiLogLast))
 
 /*
  * Local Functions Declarations
@@ -39,7 +36,7 @@ uint8_t npiLogLast = 0x00;
 static void hexPrint(int num);
 static void hexPrintBigEnd(const uint8_t buf[], uint16_t len);
 static void hexPrintLitEnd(const uint8_t buf[], uint16_t len);
-static bool logAllowed(uint8_t mode);
+static bool logSetCheckMode(uint8_t mode);
 
 /*
  * Global Functions
@@ -52,7 +49,7 @@ void logSetAPTask(Task_Handle _apTask)
 void logParam(const char name[], const uint8_t buf[],
               uint16_t len, bool isBigEnd)
 {
-  if (SHOULD_LOG_PARAM)
+  if (LOG_CHECK_MODE)
   {
     Serial.print("  ");
     Serial.print(name);
@@ -71,7 +68,7 @@ void logParam(const char name[], const uint8_t buf[],
 
 void logParam(const char name[], int value, int base)
 {
-  if (SHOULD_LOG_PARAM)
+  if (LOG_CHECK_MODE)
   {
     Serial.print("  ");
     Serial.print(name);
@@ -95,7 +92,7 @@ void logParam(const char name[], int value, int base)
 
 void logParam(const char name[], const char value[])
 {
-  if (SHOULD_LOG_PARAM)
+  if (LOG_CHECK_MODE)
   {
     Serial.print("  ");
     Serial.print(name);
@@ -106,7 +103,7 @@ void logParam(const char name[], const char value[])
 
 void logParam(const char value[])
 {
-  if (SHOULD_LOG_PARAM)
+  if (LOG_CHECK_MODE)
   {
     Serial.print("  ");
     Serial.println(value);
@@ -116,7 +113,7 @@ void logParam(const char value[])
 /* Array guaranteed to have 16 bytes. */
 void logUUID(const uint8_t UUID[], uint8_t UUIDlen)
 {
-  if (SHOULD_LOG_PARAM)
+  if (LOG_CHECK_MODE)
   {
     Serial.print("  UUID:0x");
     if (UUIDlen == SNP_128BIT_UUID_SIZE)
@@ -141,8 +138,9 @@ void logUUID(const uint8_t UUID[], uint8_t UUIDlen)
 
 void logError(uint8_t status)
 {
-  if (logAllowed(BLE_LOG_ERRORS))
+  if (logSetCheckMode(BLE_LOG_ERRORS))
   {
+    logAcquire();
     Serial.print("ERR ");
     hexPrint(status);
     Serial.println();
@@ -151,8 +149,9 @@ void logError(uint8_t status)
 
 void logError(const char msg[], uint8_t status)
 {
-  if (logAllowed(BLE_LOG_ERRORS))
+  if (logSetCheckMode(BLE_LOG_ERRORS))
   {
+    logAcquire();
     Serial.print("ERR ");
     hexPrint(status);
     Serial.print(":");
@@ -162,8 +161,9 @@ void logError(const char msg[], uint8_t status)
 
 void logRPC(const char msg[])
 {
-  if (logAllowed(BLE_LOG_RPCS))
+  if (logSetCheckMode(BLE_LOG_RPCS))
   {
+    logAcquire();
     Serial.print("RPC:");
     Serial.println(msg);
   }
@@ -181,8 +181,9 @@ void logAsync(const char name[], uint8_t cmd1)
       return;
     }
   }
-  if (logAllowed(BLE_LOG_REC_MSGS))
+  if (logSetCheckMode(BLE_LOG_REC_MSGS))
   {
+    logAcquire();
     Serial.print("Rec msg ");
     hexPrint(cmd1);
     Serial.print(":");
@@ -192,8 +193,9 @@ void logAsync(const char name[], uint8_t cmd1)
 
 void logChar(const char action[])
 {
-  if (logAllowed(BLE_LOG_CHARACTERISTICS))
+  if (logSetCheckMode(BLE_LOG_CHARACTERISTICS))
   {
+    logAcquire();
     Serial.print(action);
     Serial.println(" char value");
   }
@@ -205,7 +207,6 @@ void logReset(void)
   apIsLogging = 0;
   npiIsLogging = 0;
   apTask = NULL;
-  logLock = 0;
   logLockReq = false;
   apLogLast = 0x00;
   npiLogLast = 0x00;
@@ -249,7 +250,7 @@ static void hexPrintLitEnd(const uint8_t buf[], uint16_t len)
   }
 }
 
-static bool logAllowed(uint8_t mode)
+static bool logSetCheckMode(uint8_t mode)
 {
   if (Task_self() == apTask)
   {
@@ -301,7 +302,10 @@ void logRelease(void)
 {
   if (Task_self() == apTask)
   {
-    apIsLogging--;
+    if (apIsLogging)
+    {
+      apIsLogging--;
+    }
     if (logLockReq)
     {
       uint32_t startTime = millis();
@@ -316,7 +320,10 @@ void logRelease(void)
   }
   else
   {
-    npiIsLogging--;
+    if (npiIsLogging)
+    {
+      npiIsLogging--;
+    }
     logLockReq = false;
   }
 }
