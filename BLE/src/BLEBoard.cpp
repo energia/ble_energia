@@ -1,5 +1,5 @@
 
-/* Conditionally include headers for MSP432 LP init_board */
+/* Conditionally include headers for MSP432 LP. */
 #ifdef __MSP432P401R__
 #include <gpio.h>
 #include <rom_map.h>

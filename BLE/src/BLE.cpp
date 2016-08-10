@@ -9,11 +9,6 @@
 #include "ti/sap/sap.h"
 #include "ti/sap/snp.h"
 #include "ti/sap/snp_rpc.h"
-/*
- * This is strictly to force the build system to compile npi into
- * its own object files for the linker to link. It isn't used here.
- */
-#include "ti/npi/npi_task.h"
 
 #include <BLE.h>
 #include "BLEBoard.h"
@@ -21,7 +16,6 @@
 #include "BLESerial.h"
 #include "BLEServiceList.h"
 #include "BLEServices.h"
-#include "Debug.h"
 
 /*
  * Event_pend timeout set in units of ticks. Tick period is microseconds,
@@ -50,31 +44,6 @@
 #define AP_EVT_NUM_CMP_BTN                   Event_Id_16     // Numeric Comparison Button Press
 #define AP_EVT_COPIED_ASYNC_DATA             Event_Id_30     // Copied Data From asyncRspData
 #define AP_ERROR                             Event_Id_31     // Error
-
-// From bcomdef.h in the BLE SDK
-#define B_ADDR_LEN 6
-
-
-/* Macro abuse for setting up many pins for debug */
-#define DEBUG_FXN(pin, pinNum) \
-int isOutput##pin = 0; \
-void ping##pin(void) \
-{ \
- if (!isOutput##pin) \
- { \
-   pinMode(pinNum, OUTPUT); \
-   isOutput##pin = 1; \
- } \
- ping(pinNum); \
-}
-static void ping(int pin)
-{
- digitalWrite(pin, HIGH);
- digitalWrite(pin, LOW);
-}
-DEBUG_PINS_LIST
-#undef DEBUG_FXN
-/* End abuse */
 
 Event_Handle apEvent = NULL;
 snp_msg_t *asyncRspData = NULL;

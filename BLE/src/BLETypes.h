@@ -2,10 +2,10 @@
 #ifndef BLE_TYPES_H
 #define BLE_TYPES_H
 
+#include <Energia.h>
+
 #include "ti/sap/sap.h"
 #include "ti/npi/hal_defs.h"
-
-#include <Energia.h>
 
 /* Energia BLE status codes */
 #define BLE_SUCCESS                    SNP_SUCCESS // 0x00
