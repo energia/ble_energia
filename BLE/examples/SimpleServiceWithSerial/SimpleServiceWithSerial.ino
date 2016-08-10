@@ -83,9 +83,9 @@ void loop() {
   while ((numBytes = Serial.available()))
   {
     Serial.readBytes(serialData, numBytes);
+    serialData[numBytes] = '\0';
     Serial.print("Sending via serial:");
     Serial.println(serialData);
-    serialData[numBytes] = '\0';
     ble.print(serialData);
   }
 
