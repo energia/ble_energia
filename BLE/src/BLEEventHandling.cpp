@@ -11,10 +11,15 @@ bool connected = false;
 bool advertising = false;
 snpEventParam_t eventHandlerData = {};
 
-static void numCmpInterrupt1(void);
-static void numCmpInterrupt2(void);
+static void numCmpInterruptEqual(void);
+static void numCmpInterruptDifferent(void);
 static void apPostError(uint8_t status, const char errMsg[]);
 
+/*
+ * Must be called in the main loop to poll for events that must be
+ * handled outside of the NPI task. Required for sending NPI messages
+ * or human interaction (e.g. button presses for security).
+ */
 int BLE::handleEvents(void)
 {
   /*
@@ -42,6 +47,7 @@ int BLE::handleEvents(void)
   }
   if (opcode & AP_EVT_NUM_CMP_BTN)
   {
+    /* User pressed a button for numeric comparison. */
     detachInterrupt(PUSH1);
     detachInterrupt(PUSH2);
     logRPC("Send num cmp rsp");
@@ -56,6 +62,10 @@ int BLE::handleEvents(void)
   return status;
 }
 
+/*
+ * Passkey security handling. Generates a random 6 digit passkey, displays it,
+ * and sends it to the SNP if necessary.
+ */
 int BLE::handleAuthKey(snpAuthenticationEvt_t *evt)
 {
   authKey = getRand() % 1000000;
@@ -70,6 +80,11 @@ int BLE::handleAuthKey(snpAuthenticationEvt_t *evt)
     Serial.print("Auth key:");
     Serial.println(authKey);
   }
+  /*
+   * evt->input is set when SNP requests the key is sent to it. Not sure of a
+   * case when this wouldn't always be needed unless a keyboard was somehow
+   * connected.
+   */
   if (evt->input)
   {
     logRPC("Send auth key");
@@ -83,6 +98,11 @@ int BLE::handleAuthKey(snpAuthenticationEvt_t *evt)
   return BLE_SUCCESS;
 }
 
+/*
+ * Numeric comparison security handling. Displays the number sent from the
+ * SNP. If requested, the user inputs with the buttons whether this number
+ * and the one displayed on the client are the same.
+ */
 void BLE::handleNumCmp(snpAuthenticationEvt_t *evt)
 {
   if (displayStringFxn && displayUIntFxn)
@@ -96,6 +116,10 @@ void BLE::handleNumCmp(snpAuthenticationEvt_t *evt)
     Serial.print("Check if equal:");
     Serial.println(evt->numCmp);
   }
+  /*
+   * If user feedback is requested, setup interrupts on buttons to respond to
+   * the user in the function handleEvents().
+   */
   if (evt->input)
   {
     if (displayStringFxn && displayUIntFxn)
@@ -108,20 +132,20 @@ void BLE::handleNumCmp(snpAuthenticationEvt_t *evt)
       Serial.println("Press button1 if equal, button2 if not.");
     }
     pinMode(PUSH1, INPUT_PULLUP);
-    attachInterrupt(PUSH1, numCmpInterrupt1, FALLING);
+    attachInterrupt(PUSH1, numCmpInterruptEqual, FALLING);
     pinMode(PUSH2, INPUT_PULLUP);
-    attachInterrupt(PUSH2, numCmpInterrupt2, FALLING);
+    attachInterrupt(PUSH2, numCmpInterruptDifferent, FALLING);
   }
 }
 
 /* Send true if numbers are equal, false if different */
-static void numCmpInterrupt1(void)
+static void numCmpInterruptEqual(void)
 {
   ble.authKey = 1;
   Event_post(apEvent, AP_EVT_NUM_CMP_BTN);
 }
 
-static void numCmpInterrupt2(void)
+static void numCmpInterruptDifferent(void)
 {
   ble.authKey = 0;
   Event_post(apEvent, AP_EVT_NUM_CMP_BTN);
@@ -299,8 +323,10 @@ void processSNPEventCB(uint16_t cmd1, snpEventParam_t *param)
     } break;
     case SNP_CONN_PARAM_UPDATED_EVT:
     {
+      /* Update parameters stored in ble.usedConnParams. */
       logAsync("SNP_CONN_PARAM_UPDATED_EVT", cmd1);
       snpUpdateConnParamEvt_t *evt = (snpUpdateConnParamEvt_t *) param;
+      /* Log only changed parameters. */
       if (ble.usedConnParams.connInterval != evt->connInterval)
       {
         logParam("connInterval", evt->connInterval);
