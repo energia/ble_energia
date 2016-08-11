@@ -20,6 +20,10 @@ void initBoard(void)
   pinMode(CC2650_RESET_PIN, OUTPUT);
   digitalWrite(CC2650_RESET_PIN, HIGH);
 
+/*
+ * Usually NPI's driver calls are enough to open the UART. Energia does pin
+ * configuration on its own though, so we have to override that.
+ */
 #ifdef __MSP432P401R__
   UART_init();
   MAP_GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P3,
