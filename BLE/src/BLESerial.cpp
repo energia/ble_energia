@@ -42,6 +42,7 @@ int BLE::available(void)
   return numChars;
 }
 
+/* If avaialable, return character at current read index. */
 int BLE::peek(void)
 {
   int iChar = -1;
@@ -52,6 +53,7 @@ int BLE::peek(void)
   return iChar;
 }
 
+/* peek() to check for character. If there is one, increment index and return. */
 int BLE::read(void)
 {
   int iChar = -1;
@@ -65,7 +67,7 @@ int BLE::read(void)
 
 /*
  * Serial.flush is supposed to wait for outgoing data to transmit, but since
- * a write call operates in the same task all the way throught the RPC, we
+ * a write call operates in the same task all the way through the RPC, we
  * don't need to worry.
  */
 void BLE::flush(void)
@@ -78,6 +80,7 @@ void BLE::flush(void)
   return;
 }
 
+/* Write a single byte or an arra of bytes with the appropriate writeValue(). */
 size_t BLE::write(uint8_t c)
 {
   if (writeValue(&txChar, c) == BLE_SUCCESS)
@@ -96,24 +99,29 @@ size_t BLE::write(const uint8_t buffer[], size_t size)
   return 0;
 }
 
-
-/* Called in the NPI task when the GATT client writes data. */
+/* Called in the NPI task when the BLE client writes data. */
 void BLESerial_clientWrite(uint16_t len, uint8_t *pData)
 {
-  /* If larger than buffer only write the last part. */
+  /*
+   * Can only write up to BLE_SERIAL_BUFFER_SIZE-1 because if the read and
+   * write indices are the same, available() returns 0.
+   */
   if (BLE_SERIAL_BUFFER_SIZE - 1 < len)
   {
     pData += len - BLE_SERIAL_BUFFER_SIZE - 1;
     len = BLE_SERIAL_BUFFER_SIZE - 1;
   }
 
+  /*
+   * Determine if this write will move the write index past the read index.
+   * If true then move the read index to one past the write index.
+   */
   bool overwritesReadIdx = false;
   /* Fits in buffer without wrapping. */
   if (len < BLE_SERIAL_BUFFER_SIZE - rxWriteIndex)
   {
     memcpy(&rxBuffer[rxWriteIndex], pData, len);
-    /* If the read index was overwritten, move past end of
-       write to earliest valid data. */
+    /* Indicate that read index was overwritten. */
     if (rxWriteIndex < rxReadIndex && rxReadIndex < rxWriteIndex + len)
     {
       overwritesReadIdx = true;
@@ -123,12 +131,13 @@ void BLESerial_clientWrite(uint16_t len, uint8_t *pData)
   /* Wraps end of buffer */
   else
   {
+    /* Amount written to reach end of buffer. */
     uint16_t firstLen = BLE_SERIAL_BUFFER_SIZE - rxWriteIndex;
+    /* Amount written from beginning of buffer. */
     uint16_t lastLen = len - firstLen;
     memcpy(&rxBuffer[rxWriteIndex], pData, firstLen);
     memcpy(&rxBuffer[0], pData + firstLen, lastLen);
-    /* If the read index was overwritten, move past end of
-       write to earliest valid data. */
+    /* Indicate that read index was overwritten. */
     if (rxReadIndex < lastLen || rxWriteIndex < rxReadIndex)
     {
       overwritesReadIdx = true;
