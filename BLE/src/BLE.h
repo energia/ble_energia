@@ -24,8 +24,8 @@ class BLE : public Stream
     uint8_t readValueValidateSize(BLE_Char *bleChar, size_t size);
     int writeValue(BLE_Char *bleChar, const char *str, int len);
     int setSecurityParam(uint16_t paramId, uint16_t len, uint8_t *pData);
-    int handleAuthKey(snpAuthenticationEvt_t *evt);
-    void handleNumCmp(snpAuthenticationEvt_t *evt);
+    int handleAuthKey(snpAuthenticationEvt_t *evt); // BLEEventHandling.cpp
+    void handleNumCmp(snpAuthenticationEvt_t *evt); // BLEEventHandling.cpp
 
   public:
     int error; // Set to BLE_SUCCESS before conditionally setting
@@ -54,7 +54,7 @@ class BLE : public Stream
     /* BLE state */
     int begin(void);
     void setLogLevel(uint8_t newLogLevel);
-    int handleEvents(void);
+    int handleEvents(void); // BLEEventHandling.cpp
     int terminateConn(void);
     void end(void);
     bool isConnected(void);

@@ -7,6 +7,12 @@
 #include "BLESerial.h"
 #include "BLEServiceList.h"
 
+typedef struct BLE_Service_Node
+{
+  BLE_Service_Node *next;
+  BLE_Service *service;
+} BLE_Service_Node;
+
 BLE_Service_Node *bleServiceListHead = NULL;
 BLE_Service_Node *bleServiceListTail = NULL;
 
