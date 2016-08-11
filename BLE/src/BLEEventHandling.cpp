@@ -4,15 +4,31 @@
 #include "BLELog.h"
 #include "BLEServiceList.h"
 
+/* Global event all event handling. */
 Event_Handle apEvent = NULL;
+
+/* Used to pass data from an async response back to a user call (HCI, test). */
 snp_msg_t *asyncRspData = NULL;
+
+/* Stores the connection handle. Should always be 0. */
 uint16_t _connHandle = -1;
+
+/* State variable for whether the device is connected. */
 bool connected = false;
+
+/* State variable for whether the device is advertising. */
 bool advertising = false;
+
+/* Used to pass event data to the handleEvents() function. */
 snpEventParam_t eventHandlerData = {};
 
+/* Interrupt for the button that indicates an equal numeric comparison. */
 static void numCmpInterruptEqual(void);
+
+/* Interrupt for the button that indicates a different numeric comparison. */
 static void numCmpInterruptDifferent(void);
+
+/* Helper function for posting AP_ERROR, setting error, and logging. */
 static void apPostError(uint8_t status, const char errMsg[]);
 
 /*
@@ -155,6 +171,7 @@ static void numCmpInterruptDifferent(void)
  * Even though many events and resposes are asynchronous, we still handle them
  * synchronously. Any request that generates an asynchronous response should
  * Event_pend on the corresponding Event_post here.
+ * There is one case for each cmd1 and only one case per call should run.
  */
 void AP_asyncCB(uint8_t cmd1, void *pParams)
 {
@@ -295,6 +312,7 @@ void AP_asyncCB(uint8_t cmd1, void *pParams)
   logRelease();
 }
 
+/* Handles events encapsulated by the SNP message with opcode 0x05. */
 void processSNPEventCB(uint16_t cmd1, snpEventParam_t *param)
 {
   switch (cmd1)
