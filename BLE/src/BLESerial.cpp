@@ -1,4 +1,5 @@
 
+#include <BLE.h>
 #include "BLESerial.h"
 
 uint8_t rxBuffer[BLE_SERIAL_BUFFER_SIZE] = {0};
@@ -32,7 +33,7 @@ BLE_Service serialService =
   2, serialServiceChars
 };
 
-int BLESerial_available(void)
+int BLE::available(void)
 {
   int numChars = 0;
   numChars = (rxWriteIndex >= rxReadIndex) ?
@@ -41,20 +42,20 @@ int BLESerial_available(void)
   return numChars;
 }
 
-int BLESerial_peek(void)
+int BLE::peek(void)
 {
   int iChar = -1;
-  if (BLESerial_available())
+  if (available())
   {
     iChar = (int) rxBuffer[rxReadIndex];
   }
   return iChar;
 }
 
-int BLESerial_read(void)
+int BLE::read(void)
 {
   int iChar = -1;
-  iChar = BLESerial_peek();
+  iChar = peek();
   if (0 <= iChar)
   {
     rxReadIndex = (rxReadIndex + 1) % BLE_SERIAL_BUFFER_SIZE;
@@ -67,7 +68,7 @@ int BLESerial_read(void)
  * a write call operates in the same task all the way throught the RPC, we
  * don't need to worry.
  */
-void BLESerial_flush(void)
+void BLE::flush(void)
 {
   /*
    * Essentially fast-forward the read index to the write index.
@@ -76,6 +77,25 @@ void BLESerial_flush(void)
   rxReadIndex = rxWriteIndex;
   return;
 }
+
+size_t BLE::write(uint8_t c)
+{
+  if (writeValue(&txChar, c) == BLE_SUCCESS)
+  {
+    return 1;
+  }
+  return 0;
+}
+
+size_t BLE::write(const uint8_t buffer[], size_t size)
+{
+  if (writeValue(&txChar, buffer, size) == BLE_SUCCESS)
+  {
+    return size;
+  }
+  return 0;
+}
+
 
 /* Called in the NPI task when the GATT client writes data. */
 void BLESerial_clientWrite(uint16_t len, uint8_t *pData)

@@ -883,44 +883,6 @@ int BLE::serial(void)
   return BLE_SUCCESS;
 }
 
-int BLE::available(void)
-{
-  return BLESerial_available();
-}
-
-int BLE::read(void)
-{
-  return BLESerial_read();
-}
-
-int BLE::peek(void)
-{
-  return BLESerial_peek();
-}
-
-void BLE::flush(void)
-{
-  return BLESerial_flush();
-}
-
-size_t BLE::write(uint8_t c)
-{
-  if (writeValue(&txChar, c) == BLE_SUCCESS)
-  {
-    return 1;
-  }
-  return 0;
-}
-
-size_t BLE::write(const uint8_t buffer[], size_t size)
-{
-  if (writeValue(&txChar, buffer, size) == BLE_SUCCESS)
-  {
-    return size;
-  }
-  return 0;
-}
-
 void BLE::setLogLevel(uint8_t newLogLevel)
 {
   logLevel = newLogLevel;
