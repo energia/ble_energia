@@ -193,7 +193,7 @@ static void constructChar(SAP_Char_t *sapChar, BLE_Char *bleChar)
   /* Initialize characteristic to have one byte with a value of 0.
      Override by calling writeValue in the main sketch. */
   bleChar->_value = calloc(1, 1);
-  bleChar->_isBigEnd = false;
+  bleChar->_isBigEnd = true;
   bleChar->_valueLen = 1;
 
   /* Default to no notifications or indications. */
