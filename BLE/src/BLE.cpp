@@ -880,6 +880,8 @@ int BLE::serial(void)
   {
     return BLE_CHECK_ERROR;
   }
+  rxChar._isBigEnd = true;
+  txChar._isBigEnd = true;
   return BLE_SUCCESS;
 }
 

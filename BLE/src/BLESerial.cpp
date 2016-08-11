@@ -101,10 +101,10 @@ size_t BLE::write(const uint8_t buffer[], size_t size)
 void BLESerial_clientWrite(uint16_t len, uint8_t *pData)
 {
   /* If larger than buffer only write the last part. */
-  if (BLE_SERIAL_BUFFER_SIZE < len)
+  if (BLE_SERIAL_BUFFER_SIZE - 1 < len)
   {
-    pData += len - BLE_SERIAL_BUFFER_SIZE;
-    len = BLE_SERIAL_BUFFER_SIZE;
+    pData += len - BLE_SERIAL_BUFFER_SIZE - 1;
+    len = BLE_SERIAL_BUFFER_SIZE - 1;
   }
 
   bool overwritesReadIdx = false;
@@ -124,7 +124,7 @@ void BLESerial_clientWrite(uint16_t len, uint8_t *pData)
   else
   {
     uint16_t firstLen = BLE_SERIAL_BUFFER_SIZE - rxWriteIndex;
-    uint16_t lastLen = (len - BLE_SERIAL_BUFFER_SIZE);
+    uint16_t lastLen = len - firstLen;
     memcpy(&rxBuffer[rxWriteIndex], pData, firstLen);
     memcpy(&rxBuffer[0], pData + firstLen, lastLen);
     /* If the read index was overwritten, move past end of
@@ -133,9 +133,10 @@ void BLESerial_clientWrite(uint16_t len, uint8_t *pData)
     {
       overwritesReadIdx = true;
     }
+    rxWriteIndex = lastLen;
   }
   if (overwritesReadIdx)
   {
-    rxReadIndex = (rxWriteIndex + len + 1) % BLE_SERIAL_BUFFER_SIZE;
+    rxReadIndex = (rxWriteIndex + 1) % BLE_SERIAL_BUFFER_SIZE;
   }
 }
