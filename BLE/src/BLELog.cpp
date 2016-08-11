@@ -46,6 +46,12 @@ void logSetAPTask(Task_Handle _apTask)
   apTask = _apTask;
 }
 
+/*
+ * Log hex data accounting for endianness.
+ * Example usages:
+ * Print int in byte order with  logParam(..., &val, sizeof(val), true)
+ * Print int with MSB first with logParam(..., &val, sizeof(val), false)
+ */
 void logParam(const char name[], const uint8_t buf[],
               uint16_t len, bool isBigEnd)
 {
@@ -66,6 +72,7 @@ void logParam(const char name[], const uint8_t buf[],
   }
 }
 
+/* Log a number in decimal, hex, or binary. */
 void logParam(const char name[], int value, int base)
 {
   if (LOG_CHECK_MODE)
@@ -90,6 +97,7 @@ void logParam(const char name[], int value, int base)
   }
 }
 
+/* Log two strings. Primary use is a fixed description and a variable string. */
 void logParam(const char name[], const char value[])
 {
   if (LOG_CHECK_MODE)
@@ -101,6 +109,7 @@ void logParam(const char name[], const char value[])
   }
 }
 
+/* Log a string. */
 void logParam(const char value[])
 {
   if (LOG_CHECK_MODE)
@@ -110,7 +119,10 @@ void logParam(const char value[])
   }
 }
 
-/* Array guaranteed to have 16 bytes. */
+/*
+ * Log a UUID in the standard format.
+ * Array must be guaranteed to have 16 bytes.
+ */
 void logUUID(const uint8_t UUID[], uint8_t UUIDlen)
 {
   if (LOG_CHECK_MODE)
@@ -136,6 +148,7 @@ void logUUID(const uint8_t UUID[], uint8_t UUIDlen)
   }
 }
 
+/* Log an error status code. */
 void logError(uint8_t status)
 {
   if (logSetCheckMode(BLE_LOG_ERRORS))
@@ -147,6 +160,7 @@ void logError(uint8_t status)
   }
 }
 
+/* Log an error message with a status code. */
 void logError(const char msg[], uint8_t status)
 {
   if (logSetCheckMode(BLE_LOG_ERRORS))
@@ -159,6 +173,7 @@ void logError(const char msg[], uint8_t status)
   }
 }
 
+/* Log a message to indicate a remote procedure call. */
 void logRPC(const char msg[])
 {
   if (logSetCheckMode(BLE_LOG_RPCS))
@@ -171,6 +186,7 @@ void logRPC(const char msg[])
 
 /* TODO */
 /* The first half of this function is a workaround for the double async in NPI. */
+/* Log a message to indicate that an asynchronous message was received. */
 bool advDataCnfPendedWorkaround = false;
 void logAsync(const char name[], uint8_t cmd1)
 {
@@ -193,6 +209,10 @@ void logAsync(const char name[], uint8_t cmd1)
   }
 }
 
+/*
+ * Log what action happened to a characteristic.
+ * e.g. "Client writing char value"
+ */
 void logChar(const char action[])
 {
   if (logSetCheckMode(BLE_LOG_CHARACTERISTICS))
@@ -203,6 +223,7 @@ void logChar(const char action[])
   }
 }
 
+/* Reset all the logging state variables. */
 void logReset(void)
 {
   logLevel = BLE_LOG_NONE;
@@ -216,7 +237,8 @@ void logReset(void)
 
 /*
  * Local Functions
-*/
+ */
+/* Log a hex number with zero padding to make it two digits. */
 static void hexPrint(int num)
 {
   Serial.print("0x");
@@ -227,6 +249,7 @@ static void hexPrint(int num)
   Serial.print(num, HEX);
 }
 
+/* Print bytes big endian by printing start to end. Pad first byte. */
 static void hexPrintBigEnd(const uint8_t buf[], uint16_t len)
 {
   for (uint16_t i = 0; i < len; i++)
@@ -239,10 +262,11 @@ static void hexPrintBigEnd(const uint8_t buf[], uint16_t len)
   }
 }
 
+/* Print bytes little endian by printing end to start. Pad first byte. */
 static void hexPrintLitEnd(const uint8_t buf[], uint16_t len)
 {
-  /* Overflows from 0 to 65535 */
-  for (uint16_t i = len-1; i < len; i--)
+  /* int16_t instead of uint16_t because overflow to 65535 screws up bounds. */
+  for (int16_t i = len-1; i >= 0; i--)
   {
     if (buf[i] < 0x10)
     {
@@ -287,7 +311,6 @@ void logAcquire(void)
     /* Acquire AP log lock. */
     apIsLogging++;
   }
-  /* If NPI is already logging, don't try to acquire lock. */
   else
   {
     /* Indicate to AP that the NPI task wants to log. */
