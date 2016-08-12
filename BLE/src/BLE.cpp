@@ -16,6 +16,7 @@
 #include "BLESerial.h"
 #include "BLEServiceList.h"
 
+/* So the user doesn't have to call the BLE constructor. */
 BLE ble = BLE();
 
 // GAP - Advertisement data (max size = 31 bytes, though this is
@@ -63,6 +64,10 @@ static uint8_t defScanRspData[] = {
   0       // 0dBm
 };
 
+/*
+ * These three arrays and advertIndex() are used to set default
+ * advertisement data.
+ */
 static uint8_t *defADArr[] =
 {
   defNotConnAD,
@@ -86,12 +91,11 @@ static uint8_t aDIdxToType[] =
 
 static uint8_t advertIndex(uint8_t advertType);
 
+/* Constructor. portType defaults to UART. */
 BLE::BLE(byte portType)
 {
   _portType = portType;
   for (uint8_t idx = 0; idx < MAX_ADVERT_IDX; idx++) {advertDataArr[idx] = NULL;}
-  displayStringFxn = NULL;
-  displayUIntFxn = NULL;
   resetPublicMembers();
 }
 
@@ -167,7 +171,6 @@ void BLE::end(void)
   /* Reset private members of BLE.h */
   for (uint8_t idx = 0; idx < MAX_ADVERT_IDX; idx++) {advertDataArr[idx] = NULL;}
 
-  /* Reset public members of BLE.h */
   resetPublicMembers();
 
   BLE_clearServices();
@@ -244,6 +247,7 @@ static uint8_t advertIndex(uint8_t advertType)
   return BLE_INVALID_PARAMETERS;
 }
 
+/* Initialize advertisement data not set by user to defaults. */
 uint8_t BLE::advertDataInit(void)
 {
   for (uint8_t idx = 0; idx < MAX_ADVERT_IDX; idx++)
@@ -260,6 +264,7 @@ uint8_t BLE::advertDataInit(void)
   return BLE_SUCCESS;
 }
 
+/* Initialize default advertisement data and start advertising. */
 int BLE::startAdvert(BLE_Advert_Settings *advertSettings)
 {
   logRPC("Start adv");
@@ -379,6 +384,7 @@ int BLE::setAdvertName(String *advertName)
   return setAdvertName(len, (*advertName).c_str());
 }
 
+/* Uses macros from sap.h and snp.h. */
 int BLE::setGattParam(uint8_t serviceId, uint8_t charId,
                       uint16_t len, uint8_t *pData)
 {
@@ -387,6 +393,7 @@ int BLE::setGattParam(uint8_t serviceId, uint8_t charId,
   return SAP_setServiceParam(serviceId, charId, len, pData);
 }
 
+/* Uses macros from sap.h and snp.h. */
 int BLE::getGattParam(uint8_t serviceId, uint8_t charId,
                       uint16_t *len, uint8_t *pData)
 {
@@ -395,6 +402,7 @@ int BLE::getGattParam(uint8_t serviceId, uint8_t charId,
   return SAP_getServiceParam(serviceId, charId, len, pData);
 }
 
+/* Uses macros from sap.h and snp.h. */
 int BLE::setGapParam(uint16_t paramId, uint16_t value)
 {
   logRPC("Set GAP param");
@@ -405,6 +413,7 @@ int BLE::setGapParam(uint16_t paramId, uint16_t value)
                       sizeof(value), (uint8_t *) &value);
 }
 
+/* Uses macros from sap.h and snp.h. */
 int BLE::getGapParam(uint16_t paramId, uint16_t *value)
 {
   logRPC("Get GAP param");
@@ -414,6 +423,7 @@ int BLE::getGapParam(uint16_t paramId, uint16_t *value)
                       sizeof(*value), (uint8_t *) value);
 }
 
+/* Uses macros from sap.h and snp.h. */
 uint8_t *BLE::hciCommand(uint16_t opcode, uint16_t len, uint8_t *pData)
 {
   logRPC("HCI cmd");
@@ -487,6 +497,7 @@ int BLE::setBleTimeout(uint16_t supervisionTimeout)
                             supervisionTimeout);
 }
 
+/* Helper function for AP characteristic writes. */
 int BLE::apCharWriteValue(BLE_Char *bleChar, void *pData,
                           size_t size, bool isBigEnd=true)
 {
@@ -496,6 +507,7 @@ int BLE::apCharWriteValue(BLE_Char *bleChar, void *pData,
   return writeNotifInd(bleChar);
 }
 
+/* Helper function to handle notifications and indications. */
 uint8_t BLE::writeNotifInd(BLE_Char *bleChar)
 {
   uint8_t status = BLE_SUCCESS;
@@ -617,6 +629,7 @@ int BLE::writeValue(BLE_Char *bleChar, String *str)
   return writeValue(bleChar, (*str).c_str(), len);
 }
 
+/* Helper function to validate the size of the read data. */
 uint8_t BLE::readValueValidateSize(BLE_Char *bleChar, size_t size)
 {
   uint8_t status = BLE_SUCCESS;
@@ -781,6 +794,7 @@ void BLE::setValueFormat(BLE_Char *bleChar, uint8_t valueFormat,
   bleChar->_valueExponent = valueExponent;
 }
 
+/* Uses macros from sap.h and snp.h. */
 int BLE::setSecurityParam(uint16_t paramId, uint16_t len, uint8_t *pData)
 {
   logRPC("Set sec param");
