@@ -120,7 +120,7 @@ class BLE : public Stream
     int eraseAllBonds(void);
     int replaceLruBond(bool param);
     int sendSecurityRequest(void);
-    int useWhiteListPolicy(uint8_t policy);
+    int useWhiteListPolicy(bool useWhiteList);
 
     /* Diagnostics */
     unsigned int getRand(void);

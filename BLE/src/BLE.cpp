@@ -825,7 +825,7 @@ int BLE::sendSecurityRequest(void)
   return SAP_sendSecurityRequest();
 }
 
-int BLE::useWhiteListPolicy(uint8_t policy)
+int BLE::useWhiteListPolicy(bool useWhiteList)
 {
   logRPC("Use whitelist policy");
   logParam("policy", policy);
