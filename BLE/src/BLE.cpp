@@ -842,9 +842,10 @@ int BLE::sendSecurityRequest(void)
 int BLE::useWhiteListPolicy(bool useWhiteList)
 {
   logRPC("Use whitelist policy");
-  logParam("policy", policy);
+  logParam("policy", useWhiteList);
+  uint8_t useWhiteListInt = (uint8_t)useWhiteList;
   logRelease();
-  if (isError(SAP_setParam(SAP_PARAM_WHITELIST, 0, 0, &policy)) ||
+  if (isError(SAP_setParam(SAP_PARAM_WHITELIST, 0, 0, &useWhiteListInt)) ||
       !apEventPend(AP_EVT_WHITE_LIST_RSP))
   {
     return BLE_CHECK_ERROR;
