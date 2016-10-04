@@ -45,6 +45,9 @@ extern "C"
 #include "npi_data.h"
 #include "hal_types.h"
 
+// Note that this is only included in energia builds
+#include "npi_defs.h"
+
 // ****************************************************************************
 // defines
 // ****************************************************************************

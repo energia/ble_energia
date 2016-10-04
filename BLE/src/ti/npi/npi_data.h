@@ -47,6 +47,9 @@ extern "C"
 #include <ti/drivers/UART.h>
 #include <ti/drivers/SPI.h>
 
+// Note that this is only included in energia builds
+#include "npi_defs.h"
+
 // ****************************************************************************
 // configuration
 // ****************************************************************************
