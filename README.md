@@ -21,15 +21,16 @@ Steps to setup
 
 1. Clone or download this repository
 2. Install MSP432 Board files
- * Tools -> Board -> Board Manager
+
+  * Tools -> Board -> Board Manager
 3. Symlink to this repo
- * Navigate to energia-1.6.10E18B6-\<platform\>/energia-1.6.10E18/libraries
-   * Note that platform above refers to your OS (i.e. windows)
+  * Navigate to energia-1.6.10E18B6-\<platform\>/energia-1.6.10E18/libraries
+    * Note that platform above refers to your OS (i.e. windows)
 
- **Windows**
-   * In `git bash` type `ln --symbolic "<PATH_TO_THIS_REPO>\BLE" BLE`
-   * If using `cmd` use `mklink /J BLE "<PATH_TO_THIS_REPO>\BLE"`
+   **Windows**
+     * In `git bash` type `ln --symbolic "<PATH_TO_THIS_REPO>\BLE" BLE`
+     * If using `cmd` use `mklink /J BLE "<PATH_TO_THIS_REPO>\BLE"`
 
 
- **Linux/Mac**
-   * In `terminal` type `ln -s "<PATH_TO_THIS_REPO>\BLE" BLE`
+   **Linux/Mac**
+     * In `terminal` type `ln -s "<PATH_TO_THIS_REPO>\BLE" BLE`
