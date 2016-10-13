@@ -61,18 +61,14 @@ var cc26xx_srcs = SRCS.concat(["npi_tl_cc26xx.c", "npi_tl_uart_m_cc26xx.c"]);
 var msp432_srcs = SRCS.concat(["npi_tl_msp432.c", "npi_tl_uart_m_msp432.c"]);
 
 var cc26xxInc = " -I$(CC26XXWARE_INSTALL_DIR)/driverlib " +
-        "-I$(CC26XXWARE_INSTALL_DIR)";
+        "-I$(CC26XXWARE_INSTALL_DIR) " +
+        "-I$(TIDRIVERSCC26XX_INSTALL_DIR)/packages";
 
-var msp432Inc = " -I$(MSP432_DRIVERLIB_INSTALL_DIR)/driverlib/MSP432P4xx/ " +
-        " -I$(MSP432_DRIVERLIB_INSTALL_DIR)/inc " +
-        " -I$(MSP432_DRIVERLIB_INSTALL_DIR)/inc/CMSIS/ " +
-        "-I$(MSP432_DRIVERLIB_INSTALL_DIR)";
+var msp432Inc = "-I$(MSP432SDK_INSTALL_DIR)/source " +
+        "-I$(MSP432SDK_INSTALL_DIR)/source/third_party/CMSIS/Include";
 
 for (var i = 0; i < Build.targets.length; i++) {
     var target = Build.targets[i];
-
-    /* TODO - need a better way to set this flag */
-    var cc26xxPkg = (target.suffix == "em3");
 
     for (var profile in target.profiles) {
         if (target.suffix == "em3") {

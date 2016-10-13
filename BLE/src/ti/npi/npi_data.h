@@ -47,12 +47,16 @@ extern "C"
 #include <ti/drivers/UART.h>
 #include <ti/drivers/SPI.h>
 
-// Note that this is only included in energia builds
-#include "npi_defs.h"
-
 // ****************************************************************************
 // configuration
 // ****************************************************************************
+
+// This allows us to easily throw NPI level defines in an Energia environment
+#ifdef ENERGIA
+#   define POWER_SAVING
+#   define NPI_USE_UART
+#   define NPI_MASTER
+#endif //ENERGIA
 
 #ifndef NPI_FLOW_CTRL
 #  ifdef POWER_SAVING

@@ -1,0 +1,183 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css,%2F%2A%20%20GitHub%20stylesheet%20for%20MarkdownPad%20%28http%3A%2F%2Fmarkdownpad%2Ecom%29%20%2A%2F%0A%0A%2F%2A%20RESET%0A%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%2A%2F%0A%0Ahtml%2C%20body%2C%20div%2C%20span%2C%20applet%2C%20object%2C%20iframe%2C%20h1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%2C%20h6%2C%20p%2C%20blockquote%2C%20pre%2C%20a%2C%20abbr%2C%20acronym%2C%20address%2C%20big%2C%20cite%2C%20code%2C%20del%2C%20dfn%2C%20em%2C%20img%2C%20ins%2C%20kbd%2C%20q%2C%20s%2C%20samp%2C%20small%2C%20strike%2C%20strong%2C%20sub%2C%20sup%2C%20tt%2C%20var%2C%20b%2C%20u%2C%20i%2C%20center%2C%20dl%2C%20dt%2C%20dd%2C%20ol%2C%20ul%2C%20li%2C%20fieldset%2C%20form%2C%20label%2C%20legend%2C%20table%2C%20caption%2C%20tbody%2C%20tfoot%2C%20thead%2C%20tr%2C%20th%2C%20td%2C%20article%2C%20aside%2C%20canvas%2C%20details%2C%20embed%2C%20figure%2C%20figcaption%2C%20footer%2C%20header%2C%20hgroup%2C%20menu%2C%20nav%2C%20output%2C%20ruby%2C%20section%2C%20summary%2C%20time%2C%20mark%2C%20audio%2C%20video%20%7B%0A%20%20margin%3A%200%3B%0A%20%20padding%3A%200%3B%0A%20%20border%3A%200%3B%0A%7D%0A%0A%2F%2A%20BODY%0A%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%2A%2F%0A%0Abody%20%7B%0A%20%20font%2Dfamily%3A%20Helvetica%2C%20arial%2C%20freesans%2C%20clean%2C%20sans%2Dserif%3B%0A%20%20font%2Dsize%3A%2014px%3B%0A%20%20line%2Dheight%3A%201%2E6%3B%0A%20%20color%3A%20%23333%3B%0A%20%20background%2Dcolor%3A%20%23fff%3B%0A%20%20padding%3A%2020px%3B%0A%20%20max%2Dwidth%3A%20960px%3B%0A%20%20margin%3A%200%20auto%3B%0A%7D%0A%0Abody%3E%2A%3Afirst%2Dchild%20%7B%0A%20%20margin%2Dtop%3A%200%20%21important%3B%0A%7D%0A%0Abody%3E%2A%3Alast%2Dchild%20%7B%0A%20%20margin%2Dbottom%3A%200%20%21important%3B%0A%7D%0A%0A%2F%2A%20BLOCKS%0A%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%2A%2F%0A%0Ap%2C%20blockquote%2C%20ul%2C%20ol%2C%20dl%2C%20table%2C%20pre%20%7B%0A%20%20margin%3A%2015px%200%3B%0A%7D%0A%0A%2F%2A%20HEADERS%0A%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%2A%2F%0A%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%2C%20h6%20%7B%0A%20%20margin%3A%2020px%200%2010px%3B%0A%20%20padding%3A%200%3B%0A%20%20font%2Dweight%3A%20bold%3B%0A%20%20%2Dwebkit%2Dfont%2Dsmoothing%3A%20antialiased%3B%0A%7D%0A%0Ah1%20tt%2C%20h1%20code%2C%20h2%20tt%2C%20h2%20code%2C%20h3%20tt%2C%20h3%20code%2C%20h4%20tt%2C%20h4%20code%2C%20h5%20tt%2C%20h5%20code%2C%20h6%20tt%2C%20h6%20code%20%7B%0A%20%20font%2Dsize%3A%20inherit%3B%0A%7D%0A%0Ah1%20%7B%0A%20%20font%2Dsize%3A%2028px%3B%0A%20%20color%3A%20%23000%3B%0A%7D%0A%0Ah2%20%7B%0A%20%20font%2Dsize%3A%2024px%3B%0A%20%20border%2Dbottom%3A%201px%20solid%20%23ccc%3B%0A%20%20color%3A%20%23000%3B%0A%7D%0A%0Ah3%20%7B%0A%20%20font%2Dsize%3A%2018px%3B%0A%7D%0A%0Ah4%20%7B%0A%20%20font%2Dsize%3A%2016px%3B%0A%7D%0A%0Ah5%20%7B%0A%20%20font%2Dsize%3A%2014px%3B%0A%7D%0A%0Ah6%20%7B%0A%20%20color%3A%20%23777%3B%0A%20%20font%2Dsize%3A%2014px%3B%0A%7D%0A%0Abody%3Eh2%3Afirst%2Dchild%2C%20body%3Eh1%3Afirst%2Dchild%2C%20body%3Eh1%3Afirst%2Dchild%2Bh2%2C%20body%3Eh3%3Afirst%2Dchild%2C%20body%3Eh4%3Afirst%2Dchild%2C%20body%3Eh5%3Afirst%2Dchild%2C%20body%3Eh6%3Afirst%2Dchild%20%7B%0A%20%20margin%2Dtop%3A%200%3B%0A%20%20padding%2Dtop%3A%200%3B%0A%7D%0A%0Aa%3Afirst%2Dchild%20h1%2C%20a%3Afirst%2Dchild%20h2%2C%20a%3Afirst%2Dchild%20h3%2C%20a%3Afirst%2Dchild%20h4%2C%20a%3Afirst%2Dchild%20h5%2C%20a%3Afirst%2Dchild%20h6%20%7B%0A%20%20margin%2Dtop%3A%200%3B%0A%20%20padding%2Dtop%3A%200%3B%0A%7D%0A%0Ah1%2Bp%2C%20h2%2Bp%2C%20h3%2Bp%2C%20h4%2Bp%2C%20h5%2Bp%2C%20h6%2Bp%20%7B%0A%20%20margin%2Dtop%3A%2010px%3B%0A%7D%0A%0A%2F%2A%20LINKS%0A%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%2A%2F%0A%0Aa%20%7B%0A%20%20color%3A%20%234183C4%3B%0A%20%20text%2Ddecoration%3A%20none%3B%0A%7D%0A%0Aa%3Ahover%20%7B%0A%20%20text%2Ddecoration%3A%20underline%3B%0A%7D%0A%0A%2F%2A%20LISTS%0A%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%2A%2F%0A%0Aul%2C%20ol%20%7B%0A%20%20padding%2Dleft%3A%2030px%3B%0A%7D%0A%0Aul%20li%20%3E%20%3Afirst%2Dchild%2C%0Aol%20li%20%3E%20%3Afirst%2Dchild%2C%0Aul%20li%20ul%3Afirst%2Dof%2Dtype%2C%0Aol%20li%20ol%3Afirst%2Dof%2Dtype%2C%0Aul%20li%20ol%3Afirst%2Dof%2Dtype%2C%0Aol%20li%20ul%3Afirst%2Dof%2Dtype%20%7B%0A%20%20margin%2Dtop%3A%200px%3B%0A%7D%0A%0Aul%20ul%2C%20ul%20ol%2C%20ol%20ol%2C%20ol%20ul%20%7B%0A%20%20margin%2Dbottom%3A%200%3B%0A%7D%0A%0Adl%20%7B%0A%20%20padding%3A%200%3B%0A%7D%0A%0Adl%20dt%20%7B%0A%20%20font%2Dsize%3A%2014px%3B%0A%20%20font%2Dweight%3A%20bold%3B%0A%20%20font%2Dstyle%3A%20italic%3B%0A%20%20padding%3A%200%3B%0A%20%20margin%3A%2015px%200%205px%3B%0A%7D%0A%0Adl%20dt%3Afirst%2Dchild%20%7B%0A%20%20padding%3A%200%3B%0A%7D%0A%0Adl%20dt%3E%3Afirst%2Dchild%20%7B%0A%20%20margin%2Dtop%3A%200px%3B%0A%7D%0A%0Adl%20dt%3E%3Alast%2Dchild%20%7B%0A%20%20margin%2Dbottom%3A%200px%3B%0A%7D%0A%0Adl%20dd%20%7B%0A%20%20margin%3A%200%200%2015px%3B%0A%20%20padding%3A%200%2015px%3B%0A%7D%0A%0Adl%20dd%3E%3Afirst%2Dchild%20%7B%0A%20%20margin%2Dtop%3A%200px%3B%0A%7D%0A%0Adl%20dd%3E%3Alast%2Dchild%20%7B%0A%20%20margin%2Dbottom%3A%200px%3B%0A%7D%0A%0A%2F%2A%20CODE%0A%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%2A%2F%0A%0Apre%2C%20code%2C%20tt%20%7B%0A%20%20font%2Dsize%3A%2012px%3B%0A%20%20font%2Dfamily%3A%20Consolas%2C%20%22Liberation%20Mono%22%2C%20Courier%2C%20monospace%3B%0A%7D%0A%0Acode%2C%20tt%20%7B%0A%20%20margin%3A%200%200px%3B%0A%20%20padding%3A%200px%200px%3B%0A%20%20white%2Dspace%3A%20nowrap%3B%0A%20%20border%3A%201px%20solid%20%23eaeaea%3B%0A%20%20background%2Dcolor%3A%20%23f8f8f8%3B%0A%20%20border%2Dradius%3A%203px%3B%0A%7D%0A%0Apre%3Ecode%20%7B%0A%20%20margin%3A%200%3B%0A%20%20padding%3A%200%3B%0A%20%20white%2Dspace%3A%20pre%3B%0A%20%20border%3A%20none%3B%0A%20%20background%3A%20transparent%3B%0A%7D%0A%0Apre%20%7B%0A%20%20background%2Dcolor%3A%20%23f8f8f8%3B%0A%20%20border%3A%201px%20solid%20%23ccc%3B%0A%20%20font%2Dsize%3A%2013px%3B%0A%20%20line%2Dheight%3A%2019px%3B%0A%20%20overflow%3A%20auto%3B%0A%20%20padding%3A%206px%2010px%3B%0A%20%20border%2Dradius%3A%203px%3B%0A%7D%0A%0Apre%20code%2C%20pre%20tt%20%7B%0A%20%20background%2Dcolor%3A%20transparent%3B%0A%20%20border%3A%20none%3B%0A%7D%0A%0Akbd%20%7B%0A%20%20%20%20%2Dmoz%2Dborder%2Dbottom%2Dcolors%3A%20none%3B%0A%20%20%20%20%2Dmoz%2Dborder%2Dleft%2Dcolors%3A%20none%3B%0A%20%20%20%20%2Dmoz%2Dborder%2Dright%2Dcolors%3A%20none%3B%0A%20%20%20%20%2Dmoz%2Dborder%2Dtop%2Dcolors%3A%20none%3B%0A%20%20%20%20background%2Dcolor%3A%20%23DDDDDD%3B%0A%20%20%20%20background%2Dimage%3A%20linear%2Dgradient%28%23F1F1F1%2C%20%23DDDDDD%29%3B%0A%20%20%20%20background%2Drepeat%3A%20repeat%2Dx%3B%0A%20%20%20%20border%2Dcolor%3A%20%23DDDDDD%20%23CCCCCC%20%23CCCCCC%20%23DDDDDD%3B%0A%20%20%20%20border%2Dimage%3A%20none%3B%0A%20%20%20%20border%2Dradius%3A%202px%202px%202px%202px%3B%0A%20%20%20%20border%2Dstyle%3A%20solid%3B%0A%20%20%20%20border%2Dwidth%3A%201px%3B%0A%20%20%20%20font%2Dfamily%3A%20%22Helvetica%20Neue%22%2CHelvetica%2CArial%2Csans%2Dserif%3B%0A%20%20%20%20line%2Dheight%3A%2010px%3B%0A%20%20%20%20padding%3A%201px%204px%3B%0A%7D%0A%0A%2F%2A%20QUOTES%0A%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%2A%2F%0A%0Ablockquote%20%7B%0A%20%20border%2Dleft%3A%204px%20solid%20%23DDD%3B%0A%20%20padding%3A%200%2015px%3B%0A%20%20color%3A%20%23777%3B%0A%7D%0A%0Ablockquote%3E%3Afirst%2Dchild%20%7B%0A%20%20margin%2Dtop%3A%200px%3B%0A%7D%0A%0Ablockquote%3E%3Alast%2Dchild%20%7B%0A%20%20margin%2Dbottom%3A%200px%3B%0A%7D%0A%0A%2F%2A%20HORIZONTAL%20RULES%0A%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%2A%2F%0A%0Ahr%20%7B%0A%20%20clear%3A%20both%3B%0A%20%20margin%3A%2015px%200%3B%0A%20%20height%3A%200px%3B%0A%20%20overflow%3A%20hidden%3B%0A%20%20border%3A%20none%3B%0A%20%20background%3A%20transparent%3B%0A%20%20border%2Dbottom%3A%204px%20solid%20%23ddd%3B%0A%20%20padding%3A%200%3B%0A%7D%0A%0A%2F%2A%20TABLES%0A%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%2A%2F%0A%0Atable%20th%20%7B%0A%20%20font%2Dweight%3A%20bold%3B%0A%7D%0A%0Atable%20th%2C%20table%20td%20%7B%0A%20%20border%3A%201px%20solid%20%23ccc%3B%0A%20%20padding%3A%206px%2013px%3B%0A%7D%0A%0Atable%20tr%20%7B%0A%20%20border%2Dtop%3A%201px%20solid%20%23ccc%3B%0A%20%20background%2Dcolor%3A%20%23fff%3B%0A%7D%0A%0Atable%20tr%3Anth%2Dchild%282n%29%20%7B%0A%20%20background%2Dcolor%3A%20%23f8f8f8%3B%0A%7D%0A%0A%2F%2A%20IMAGES%0A%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%2A%2F%0A%0Aimg%20%7B%0A%20%20max%2Dwidth%3A%20100%25%0A%7D%0A%0A%2Eplatform%20%7B%0A%20%20%20%20background%3A%20%23cc0000%3B%0A%20%20%20%20text%2Dalign%3A%20right%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div class="platform">
+  <img src="data:image/png;base64,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" />
+</div>
+<h1>SAP 3.10.00.07.eng  Release Notes</h1>
+<h2>Table of Contents</h2>
+<div id="TOC">
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#documentation">Documentation</a></li>
+<li><a href="#whats-new">What’s New</a></li>
+<li><a href="#upgrade-and-compatibility-information">Upgrade and Compatibility Information</a></li>
+<li><a href="#host-support">Host Support</a></li>
+<li><a href="#dependencies">Dependencies</a></li>
+<li><a href="#device-support">Device Support</a></li>
+<li><a href="#validation-information">Validation Information</a></li>
+<li><a href="#known-issues">Known Issues</a></li>
+<li><a href="#versioning">Versioning</a></li>
+<li><a href="#technical-support-and-product-updates">Technical Support and Product Updates</a></li>
+</ul>
+</div>
+<h2 id="introduction"><a href="#introduction">Introduction</a></h2>
+<p>The SAP Component enables applications to use the CC2650 as a Simple Network Processor.</p>
+<h2 id="documentation"><a href="#documentation">Documentation</a></h2>
+<p>The following documentation is provided with this release.</p>
+<ul>
+<li><a href="docs/CC2640%20Simple%20Network%20Processer%20API%20Guide.pdf">SAP User’s Guide</a></li>
+<li><a href="manifest___PRODUCT__.html">SAP Software Manifest</a> <!--
+* [License](license.txt)
+* [Software Manifest](manifest.html)
+* [Getting started guide](getting_started_guide.html)
+* [Users guide](users_guide.html)
+* [Previous release notes](previous_release_notes.html)
+--></li>
+</ul>
+<h2 id="whats-new"><a href="#whats-new">What’s New</a></h2>
+<h3 id="eng"><a href="#eng"><strong>3.10.00.07.eng</strong></a></h3>
+<h4 id="the-following-defects-were-resolved"><a href="#the-following-defects-were-resolved">The following Defects were resolved</a></h4>
+<table>
+<thead>
+<tr class="header">
+<th align="left">ID</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="https://jira.itg.ti.com/browse/SAP-36">SAP-36</a></td>
+<td align="left"><code>NPI Master can invoke async CB twice for one message</code></td>
+</tr>
+<tr class="even">
+<td align="left"><a href="https://jira.itg.ti.com/browse/SAP-35">SAP-35</a></td>
+<td align="left"><code>SAP events can fall out of scope before callback in BLE subsystem</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="https://jira.itg.ti.com/browse/SAP-32">SAP-32</a></td>
+<td align="left"><code>SBL External opens external flash instead of closing</code></td>
+</tr>
+<tr class="even">
+<td align="left"><a href="https://jira.itg.ti.com/browse/SAP-27">SAP-27</a></td>
+<td align="left"><code>Deadlocks seen with PM version of MSP432 Libraries</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="https://jira.itg.ti.com/browse/SAP-23">SAP-23</a></td>
+<td align="left"><code>snp.h uses protected keywords</code></td>
+</tr>
+<tr class="even">
+<td align="left"><a href="https://jira.itg.ti.com/browse/SAP-19">SAP-19</a></td>
+<td align="left"><code>MSP432 NPI MRDY goes high prematurely</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="https://jira.itg.ti.com/browse/SAP-18">SAP-18</a></td>
+<td align="left"><code>NPI UART master can drop received data on MSP432</code></td>
+</tr>
+<tr class="even">
+<td align="left"><a href="https://jira.itg.ti.com/browse/SAP-15">SAP-15</a></td>
+<td align="left"><code>SBL has data loss vulnerability</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="the-following-enhancements-were-resolved"><a href="#the-following-enhancements-were-resolved">The following Enhancements were resolved</a></h4>
+<table>
+<thead>
+<tr class="header">
+<th align="left">ID</th>
+<th align="left">Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><a href="https://jira.itg.ti.com/browse/SAP-33">SAP-33</a></td>
+<td align="left"><code>MSP432 should build upon MSP432 SDK (not TI-RTOS 2.20 SDK)</code></td>
+</tr>
+<tr class="even">
+<td align="left"><a href="https://jira.itg.ti.com/browse/SAP-25">SAP-25</a></td>
+<td align="left"><code>Ship SNP Hex Files (and generated C-arrays) with SAP release</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="https://jira.itg.ti.com/browse/SAP-21">SAP-21</a></td>
+<td align="left"><code>Update Doxygen</code></td>
+</tr>
+<tr class="even">
+<td align="left"><a href="https://jira.itg.ti.com/browse/SAP-17">SAP-17</a></td>
+<td align="left"><code>NPI Master implementations w/PM should open/close underlying driver</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="https://jira.itg.ti.com/browse/SAP-16">SAP-16</a></td>
+<td align="left"><code>Add MSP432 and MSP430 support</code></td>
+</tr>
+<tr class="even">
+<td align="left"><a href="https://jira.itg.ti.com/browse/SAP-14">SAP-14</a></td>
+<td align="left"><code>SBL files do not end with newline</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="https://jira.itg.ti.com/browse/SAP-13">SAP-13</a></td>
+<td align="left"><code>SBL relies on ext_flash_layout.h</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="upgrade-and-compatibility-information"><a href="#upgrade-and-compatibility-information">Upgrade and Compatibility Information</a></h2>
+<p>The SAP Modules are available in the “source/” subdirectory of the product. If you have a previous release , you can install this release next to it, and modify your build scripts and makefiles to use this newer release.</p>
+<!--
+Note, if you haven't upgraded in several releases, be sure to review the
+Upgrade section for each of the releases between your current release and
+this one. Previous release notes are available in the
+[relnotes_archive directory](relnotes_archive/).
+-->
+
+
+<h2 id="host-support"><a href="#host-support">Host Support</a></h2>
+<ul>
+<li>Windows</li>
+<li>Linux</li>
+<li>Mac</li>
+</ul>
+<h2 id="dependencies"><a href="#dependencies">Dependencies</a></h2>
+<p>This release requires the following software components and tools versions to successfully function:</p>
+<ul>
+<li>BLE-Stack 2.2 or compatible</li>
+<li>Compiler versions are noted in the next section</li>
+</ul>
+<h2 id="device-support"><a href="#device-support">Device Support</a></h2>
+<p>This release supports the following devices (as MCUs, driving a CC26xx):</p>
+<ul>
+<li>CC26xx</li>
+<li>MSP432</li>
+</ul>
+<h2 id="validation-information"><a href="#validation-information">Validation Information</a></h2>
+<p>This release was validated using the following software components. Please use the versions below, or compatible:</p>
+<ul>
+<li>BLE-Stack 2.2</li>
+<li><p>Pre-built binaries were built with the following toolchains:</p>
+<ul>
+<li>ti.targets.arm.elf.M3 - TI ARM 5.2.7</li>
+<li>ti.targets.arm.elf.M4F - TI ARM 15.12.3</li>
+</ul></li>
+</ul>
+<h2 id="known-issues"><a href="#known-issues">Known Issues</a></h2>
+<ul>
+<li>None</li>
+</ul>
+<h2 id="versioning"><a href="#versioning">Versioning</a></h2>
+<p>All releases have 4 digits (<strong>M.mm.pp.bb</strong>). This includes GA and pre-releases (engineering, alpha/EA, beta, etc.). Pre-releases are denoted with a suffix (e.g. 3.00.00.00<strong>_eng</strong> or 3.00.00.10<strong>_beta</strong>).</p>
+<p>This product’s version follows a version format, <strong>M.mm.pp.bb</strong>, where <strong>M</strong> is a single digit Major number, <strong>mm</strong> is 2 digit minor number, <strong>pp</strong> is a 2 digit patch number, and <strong>bb</strong> is an unrestricted set of digits used as an incrementing build counter.</p>
+<p>To support multiple side-by-side installations of the product, the product version is encoded in the top level directory.</p>
+<p>Subsequent releases of patch upgrades will be identified by the patch number. Typically, these patches only include critical bug fixes.</p>
+<h2 id="technical-support-and-product-updates"><a href="#technical-support-and-product-updates">Technical Support and Product Updates</a></h2>
+<ul>
+<li>For technical support pelase visit the <a href="http://www.ti.com/ble-forum">Texas Instruments Bluetooth Low Energy E2E Forum</a></li>
+<li>More information can be found at the <a href="http://processors.wiki.ti.com/index.php/SAP">SAP Wiki</a></li>
+</ul>
+</body>
+</html>

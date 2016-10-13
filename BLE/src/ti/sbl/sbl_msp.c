@@ -46,7 +46,7 @@
 #include <ti/drivers/GPIO.h>
 #include <ti/drivers/UART.h>
 
-#include "board.h"
+#include "Board.h"
 
 /*********************************************************************
  * CONSTANTS

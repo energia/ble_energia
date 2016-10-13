@@ -312,6 +312,3 @@ static uint8_t SBL_TL_CKS(uint8_t cmd, uint8_t *pData, uint16_t len)
 
   return checksum;
 }
-
-
-

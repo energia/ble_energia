@@ -642,8 +642,8 @@ PACKED_TYPEDEF_STRUCT
 //! This is a packed structure. see @ref TL_Parameter for more information.
 PACKED_TYPEDEF_STRUCT
 {
-  uint8_t paramId;  //!< GAP Parameter Id,
-  uint8_t value;    //!< Parameter Value to get or set.
+  uint16_t paramId;  //!< GAP Parameter Id,
+  uint16_t value;    //!< Parameter Value to get or set.
 } snpSetGapParamReq_t, snpGetGapParamReq_t, snpSetSecParamReq_t;
 
 //! @brief parameter structure for the Get GAP Parameter Value Response.

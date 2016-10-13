@@ -437,7 +437,7 @@ void NPISS_BLE_SNP_msgFromSNP(_npiFrame_t *pNPIMsg)
             }
             break;
 
-#ifndef SNP_LOCAL
+#ifdef SNP_LOCAL
           case SNP_SET_SECURITY_PARAM_RSP:
             if ( npiRetMsg.pMsg )
             {

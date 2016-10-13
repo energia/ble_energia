@@ -136,7 +136,7 @@ static void SNP_sendAsyncCmd(_npiFrame_t *pPkt)
  Allocate and build a basic NPI packet before adding command specific data.
  */
 static _npiFrame_t * SNP_buildNPIPacket(uint8_t msgType, uint8_t cmd,
-                                        int8_t paramLen)
+                                        uint16_t paramLen)
 {
   _npiFrame_t *pPkt;
 

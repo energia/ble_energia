@@ -33,8 +33,12 @@
 #ifndef _HAL_TYPES_H
 #define _HAL_TYPES_H
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <stdint.h>
-#include <stdbool.h>
 
 /* ------------------------------------------------------------------------------------------------
  *                                               Types
@@ -52,7 +56,10 @@ typedef unsigned long   uint32;
 //typedef unsigned char   bool;
 
 typedef uint32          halDataAlign_t;
-// #define bool            _Bool
+
+#ifndef __cplusplus
+#define bool            _Bool
+#endif //__cplusplus
 
 /* ------------------------------------------------------------------------------------------------
  *                                        Compiler Macros
@@ -137,4 +144,9 @@ typedef uint32          halDataAlign_t;
 
 /**************************************************************************************************
  */
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif
